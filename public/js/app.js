@@ -34,6 +34,7 @@ const router = {
             case 'explore': loadExplore(); break;
             case 'prompts': loadPromptsPage(); break;
             case 'camera': loadCameraPage(); break;
+            case 'tools': loadToolsPage(); break;
             case 'dashboard': loadDashboard(); break;
             case 'story': loadStoryDetail(data); break;
             case 'editor': loadEditor(data); break;
@@ -1393,6 +1394,600 @@ function copyText(btn) {
 
 function toggleMobileMenu() { document.getElementById('navLinks').classList.toggle('open'); }
 window.addEventListener('scroll', () => { document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10); });
+
+// ============================================
+// Tools Page
+// ============================================
+async function loadToolsPage() {
+    showToolTab('templates');
+}
+
+async function showToolTab(tab) {
+    const c = document.getElementById('toolContent');
+    if (!c) return;
+
+    switch (tab) {
+        case 'templates': {
+            try {
+                const data = await api('/tools/story-templates');
+                c.innerHTML = `
+                    <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:0.5rem;">📖 故事模板庫</h2>
+                    <p class="text-muted mb-3">選擇一個模板快速開始創作，每個模板都包含完整的故事結構、角色設定和寫作提示</p>
+                    <div class="grid grid-2">
+                    ${data.templates.map(t => `
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span style="font-size:2rem;">${t.icon}</span>
+                                    <div>
+                                        <span class="tag tag-${t.difficulty === 'beginner' ? 'success' : t.difficulty === 'intermediate' ? 'warning' : 'danger'}">${t.difficulty === 'beginner' ? '入門' : t.difficulty === 'intermediate' ? '進階' : '高級'}</span>
+                                        <span class="tag tag-primary">${t.category_name || t.genre}</span>
+                                    </div>
+                                </div>
+                                <h3 style="font-size:1.2rem;font-weight:700;margin-bottom:0.25rem;">${t.name}</h3>
+                                <p style="font-size:0.9rem;color:var(--dark-light);margin-bottom:1rem;">${t.description}</p>
+                                <div class="mb-2">
+                                    <div style="font-size:0.8rem;font-weight:700;color:var(--primary);margin-bottom:0.5rem;">📋 故事大綱</div>
+                                    <div style="font-size:0.85rem;background:var(--light);padding:1rem;border-radius:8px;white-space:pre-wrap;line-height:1.6;">${t.outline}</div>
+                                </div>
+                                ${t.opening ? `<div class="mb-2"><div style="font-size:0.8rem;font-weight:700;color:var(--primary);margin-bottom:0.5rem;">✍️ 開頭範例</div><p style="font-size:0.85rem;font-style:italic;color:var(--dark-light);">"${t.opening}"</p></div>` : ''}
+                                ${t.character_template ? `<div class="mb-2"><div style="font-size:0.8rem;font-weight:700;color:var(--primary);margin-bottom:0.5rem;">👥 角色模板</div><div style="font-size:0.85rem;background:var(--light);padding:1rem;border-radius:8px;">${Object.entries(JSON.parse(t.character_template)).map(([name, info]) => `<div class="mb-1"><strong>${name}：</strong>${info.role}（${info.traits}）</div>`).join('')}</div></div>` : ''}
+                                ${t.writing_tips ? `<div class="mb-2"><div style="font-size:0.8rem;font-weight:700;color:var(--primary);margin-bottom:0.5rem;">💡 寫作提示</div><div style="font-size:0.85rem;white-space:pre-wrap;line-height:1.6;">${t.writing_tips}</div></div>` : ''}
+                                <button class="btn btn-primary mt-1" onclick="useStoryTemplate(${t.id})">📝 使用此模板開始創作</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                    </div>
+                `;
+            } catch (err) { c.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>載入失敗</h3></div>`; }
+            break;
+        }
+
+        case 'prompts': {
+            try {
+                const data = await api('/tools/writing-prompts/random?count=10');
+                const typeIcons = { opening: '📝', character: '👤', conflict: '⚔️', world: '🌍', dialogue: '💬', twist: '🔄', ending: '🏁' };
+                const typeNames = { opening: '開頭', character: '角色', conflict: '衝突', world: '世界觀', dialogue: '對話', twist: '反轉', ending: '結局' };
+                c.innerHTML = `
+                    <div class="flex justify-between items-center mb-3">
+                        <div><h2 style="font-size:1.5rem;font-weight:800;">💡 每日靈感</h2><p class="text-muted">隨機寫作提示，激發你的創作靈感</p></div>
+                        <button class="btn btn-primary" onclick="showToolTab('prompts')">🔄 換一批</button>
+                    </div>
+                    <div class="grid grid-2">
+                    ${data.prompts.map(p => `
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="tag tag-primary">${typeIcons[p.prompt_type] || '💡'} ${typeNames[p.prompt_type] || p.prompt_type}</span>
+                                    ${p.genre && p.genre !== '通用' ? `<span class="tag tag-success">${p.genre}</span>` : ''}
+                                </div>
+                                <p style="font-size:1rem;line-height:1.7;margin-top:0.75rem;">${p.content}</p>
+                                <button class="btn btn-sm btn-ghost mt-1" onclick="copyToClipboard('${p.content.replace(/'/g, "\\'")}')">📋 複製提示</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                    </div>
+                    <div class="mt-3">
+                        <h3 style="font-weight:700;margin-bottom:1rem;">按類型篩選</h3>
+                        <div class="flex gap-1 flex-wrap">
+                            ${Object.entries(typeNames).map(([k, v]) => `<button class="btn btn-sm btn-ghost" onclick="filterWritingPrompts('${k}')">${typeIcons[k]} ${v}</button>`).join('')}
+                        </div>
+                    </div>
+                `;
+            } catch (err) { c.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>載入失敗</h3></div>`; }
+            break;
+        }
+
+        case 'names': {
+            c.innerHTML = `
+                <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:0.5rem;">🔤 名字生成器</h2>
+                <p class="text-muted mb-3">為角色、地點、組織和物品生成名字</p>
+                <div class="grid grid-2" style="gap:2rem;">
+                    <div class="card">
+                        <div class="card-header"><h3>⚙️ 生成設定</h3></div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="form-label">名字類型</label>
+                                <select class="form-select" id="nameType">
+                                    <option value="character">👤 角色名</option>
+                                    <option value="place">📍 地名</option>
+                                    <option value="organization">🏛️ 組織名</option>
+                                    <option value="item">⚔️ 物品名</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">風格/類型</label>
+                                <select class="form-select" id="nameGenre">
+                                    <option value="fantasy">⚔️ 奇幻</option>
+                                    <option value="sci-fi">🚀 科幻</option>
+                                    <option value="martial">🗡️ 武俠</option>
+                                    <option value="modern">🏙️ 現代</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="nameGenderGroup">
+                                <label class="form-label">性別（角色名）</label>
+                                <select class="form-select" id="nameGender">
+                                    <option value="male">男性</option>
+                                    <option value="female">女性</option>
+                                    <option value="neutral">中性</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">生成數量</label>
+                                <select class="form-select" id="nameCount">
+                                    <option value="5">5個</option>
+                                    <option value="8" selected>8個</option>
+                                    <option value="12">12個</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary btn-lg" style="width:100%;" onclick="generateNames()">✨ 生成名字</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><h3>📋 生成結果</h3><button class="btn btn-sm btn-ghost" onclick="document.getElementById('nameResults').innerHTML='<div class=\'empty-state\'><div class=\'empty-icon\'>🔤</div><h3>等待生成</h3></div>'">清除</button></div>
+                        <div class="card-body" id="nameResults">
+                            <div class="empty-state"><div class="empty-icon">🔤</div><h3>等待生成</h3><p>設定參數後點擊生成</p></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            break;
+        }
+
+        case 'continue': {
+            if (!requireAuth()) return;
+            try {
+                const data = await api('/stories/user/mine');
+                c.innerHTML = `
+                    <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:0.5rem;">🤖 AI續寫助手</h2>
+                    <p class="text-muted mb-3">選擇一個故事，AI將從結尾處繼續創作</p>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="form-label">選擇故事</label>
+                                <select class="form-select" id="continueStoryId">
+                                    <option value="">-- 選擇故事 --</option>
+                                    ${data.stories.map(s => `<option value="${s.id}">${esc(s.title)} (${s.word_count}字)</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">續寫方向</label>
+                                <select class="form-select" id="continueDirection">
+                                    <option value="auto">自動（根據故事類型）</option>
+                                    <option value="tension">增加緊張感</option>
+                                    <option value="romance">加入感情線</option>
+                                    <option value="mystery">加入懸念</option>
+                                    <option value="action">加入動作場景</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary btn-lg" style="width:100%;" onclick="aiContinueStory()">🤖 AI續寫</button>
+                        </div>
+                    </div>
+                    <div id="continueResult" class="mt-3"></div>
+                `;
+            } catch (err) { c.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>載入失敗</h3></div>`; }
+            break;
+        }
+
+        case 'reading-list': {
+            if (!requireAuth()) return;
+            try {
+                const data = await api('/tools/reading-lists');
+                c.innerHTML = `
+                    <div class="flex justify-between items-center mb-3">
+                        <div><h2 style="font-size:1.5rem;font-weight:800;">🔖 閱讀清單</h2><p class="text-muted">管理你收藏的故事</p></div>
+                        <button class="btn btn-primary" onclick="createReadingList()">+ 新建清單</button>
+                    </div>
+                    ${data.lists.length === 0 ? '<div class="empty-state"><div class="empty-icon">🔖</div><h3>暫無閱讀清單</h3><p>創建一個清單來收藏你喜歡的故事</p></div>' : 
+                    `<div class="grid grid-2">
+                    ${data.lists.map(l => `
+                        <div class="card" style="cursor:pointer;" onclick="loadReadingList(${l.id})">
+                            <div class="card-body">
+                                <h3 style="font-weight:700;">📚 ${esc(l.name)}</h3>
+                                ${l.description ? `<p style="font-size:0.85rem;color:var(--dark-light);">${esc(l.description)}</p>` : ''}
+                                <div class="flex justify-between items-center mt-1">
+                                    <span class="tag tag-primary">${l.item_count} 個故事</span>
+                                    <span style="font-size:0.8rem;color:var(--gray);">${timeAgo(l.created_at)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                    </div>`}
+                    <div id="readingListDetail" class="mt-3"></div>
+                `;
+            } catch (err) { c.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>載入失敗</h3></div>`; }
+            break;
+        }
+
+        case 'analytics': {
+            if (!requireAuth()) return;
+            try {
+                const data = await api('/stories/user/mine');
+                c.innerHTML = `
+                    <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:0.5rem;">📊 故事數據分析</h2>
+                    <p class="text-muted mb-3">查看你的故事的詳細數據</p>
+                    <div class="form-group">
+                        <label class="form-label">選擇故事</label>
+                        <select class="form-select" id="analyticsStoryId" onchange="loadStoryAnalytics()">
+                            <option value="">-- 選擇故事 --</option>
+                            ${data.stories.map(s => `<option value="${s.id}">${esc(s.title)}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div id="analyticsResult"></div>
+                `;
+            } catch (err) { c.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>載入失敗</h3></div>`; }
+            break;
+        }
+
+        case 'export': {
+            if (!requireAuth()) return;
+            try {
+                const data = await api('/stories/user/mine');
+                c.innerHTML = `
+                    <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:0.5rem;">📥 導出工具</h2>
+                    <p class="text-muted mb-3">將你的故事匯出為不同格式</p>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="form-label">選擇故事</label>
+                                <select class="form-select" id="exportStoryId">
+                                    <option value="">-- 選擇故事 --</option>
+                                    ${data.stories.map(s => `<option value="${s.id}">${esc(s.title)}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">匯出格式</label>
+                                <div class="grid grid-2">
+                                    <div class="card" style="cursor:pointer;" onclick="exportStory('txt')">
+                                        <div class="card-body text-center">
+                                            <div style="font-size:2rem;">📄</div>
+                                            <div style="font-weight:700;">TXT 純文字</div>
+                                            <div style="font-size:0.8rem;color:var(--gray);">適合閱讀和分享</div>
+                                        </div>
+                                    </div>
+                                    <div class="card" style="cursor:pointer;" onclick="exportStory('json')">
+                                        <div class="card-body text-center">
+                                            <div style="font-size:2rem;">📋</div>
+                                            <div style="font-weight:700;">JSON 數據</div>
+                                            <div style="font-size:0.8rem;color:var(--gray);">包含結構化數據</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (err) { c.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>載入失敗</h3></div>`; }
+            break;
+        }
+
+        case 'preferences': {
+            if (!requireAuth()) return;
+            try {
+                const data = await api('/tools/preferences');
+                const p = data.preferences;
+                c.innerHTML = `
+                    <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:0.5rem;">⚙️ 個人設定</h2>
+                    <p class="text-muted mb-3">自定義你的創作環境</p>
+                    <div class="grid grid-2">
+                        <div class="card">
+                            <div class="card-header"><h3>🎨 外觀設定</h3></div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label class="form-label">主題</label>
+                                    <select class="form-select" id="prefTheme">
+                                        <option value="light" ${p.theme==='light'?'selected':''}>☀️ 淺色模式</option>
+                                        <option value="dark" ${p.theme==='dark'?'selected':''}>🌙 暗黑模式</option>
+                                        <option value="auto" ${p.theme==='auto'?'selected':''}>🔄 跟隨系統</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">字體大小</label>
+                                    <select class="form-select" id="prefFontSize">
+                                        <option value="small" ${p.font_size==='small'?'selected':''}>小</option>
+                                        <option value="medium" ${p.font_size==='medium'?'selected':''}>中</option>
+                                        <option value="large" ${p.font_size==='large'?'selected':''}>大</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">編輯器字體</label>
+                                    <select class="form-select" id="prefEditorFont">
+                                        <option value="sans" ${p.editor_font==='sans'?'selected':''}>無襯線體</option>
+                                        <option value="serif" ${p.editor_font==='serif'?'selected':''}>襯線體</option>
+                                        <option value="mono" ${p.editor_font==='mono'?'selected':''}>等寬字體</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header"><h3>🔔 通知設定</h3></div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <input type="checkbox" id="prefEmailNotif" ${p.email_notifications?'checked':''}> 電子郵件通知
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <input type="checkbox" id="prefAutoSave" ${p.auto_save?'checked':''}> 自動儲存
+                                    </label>
+                                </div>
+                                <button class="btn btn-primary" onclick="savePreferences()">保存設定</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (err) { c.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>載入失敗</h3></div>`; }
+            break;
+        }
+    }
+}
+
+// Tool functions
+async function useStoryTemplate(id) {
+    if (!requireAuth()) return;
+    try {
+        const data = await api(`/tools/story-templates/${id}`);
+        const t = data.template;
+        router.navigate('dashboard');
+        setTimeout(() => {
+            showDashTab('create');
+            setTimeout(() => {
+                if (document.getElementById('newStoryTitle')) document.getElementById('newStoryTitle').value = '';
+                if (document.getElementById('newStoryGenre')) document.getElementById('newStoryGenre').value = t.genre || '';
+                if (document.getElementById('newStoryTone')) document.getElementById('newStoryTone').value = t.tone || '';
+                if (document.getElementById('newStoryAudience')) document.getElementById('newStoryAudience').value = t.target_audience || '';
+                if (document.getElementById('newStoryContent')) document.getElementById('newStoryContent').value = t.opening || '';
+                showToast(`已載入模板：${t.name}`, 'success');
+            }, 200);
+        }, 200);
+    } catch (err) { showToast(err.message, 'error'); }
+}
+
+async function filterWritingPrompts(type) {
+    try {
+        const data = await api(`/tools/writing-prompts?type=${type}&limit=10`);
+        const typeIcons = { opening: '📝', character: '👤', conflict: '⚔️', world: '🌍', dialogue: '💬', twist: '🔄', ending: '🏁' };
+        const typeNames = { opening: '開頭', character: '角色', conflict: '衝突', world: '世界觀', dialogue: '對話', twist: '反轉', ending: '結局' };
+        const container = document.querySelector('#toolContent .grid');
+        if (container) {
+            container.innerHTML = data.prompts.map(p => `
+                <div class="card">
+                    <div class="card-body">
+                        <span class="tag tag-primary">${typeIcons[p.prompt_type] || '💡'} ${typeNames[p.prompt_type] || p.prompt_type}</span>
+                        <p style="font-size:1rem;line-height:1.7;margin-top:0.75rem;">${p.content}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+    } catch (err) { showToast(err.message, 'error'); }
+}
+
+async function generateNames() {
+    const nameType = document.getElementById('nameType').value;
+    const genre = document.getElementById('nameGenre').value;
+    const gender = document.getElementById('nameGender')?.value;
+    const count = parseInt(document.getElementById('nameCount').value);
+
+    try {
+        const data = await api('/tools/generate-names', { method: 'POST', body: { name_type: nameType, genre, gender, count } });
+        const typeEmoji = { character: '👤', place: '📍', organization: '🏛️', item: '⚔️' };
+        document.getElementById('nameResults').innerHTML = `
+            <div class="mb-2">
+                <span class="tag tag-primary">${typeEmoji[nameType]} ${nameType}</span>
+                <span class="tag tag-success">${genre}</span>
+            </div>
+            <div class="grid grid-2" style="gap:0.5rem;">
+            ${data.names.map(n => `
+                <div class="flex items-center justify-between" style="padding:10px 14px;background:var(--light);border-radius:8px;">
+                    <span style="font-weight:600;">${n}</span>
+                    <button class="btn btn-sm btn-ghost" onclick="copyToClipboard('${n}')">📋</button>
+                </div>
+            `).join('')}
+            </div>
+            <button class="btn btn-sm btn-ghost mt-2" onclick="generateNames()">🔄 重新生成</button>
+        `;
+    } catch (err) { showToast(err.message, 'error'); }
+}
+
+async function aiContinueStory() {
+    const storyId = document.getElementById('continueStoryId').value;
+    if (!storyId) { showToast('請選擇一個故事', 'warning'); return; }
+
+    const resultDiv = document.getElementById('continueResult');
+    resultDiv.innerHTML = '<div class="card"><div class="card-body text-center"><div class="spinner" style="margin:0 auto;"></div><p class="mt-2">AI正在續寫...</p></div></div>';
+
+    try {
+        const data = await api(`/tools/stories/${storyId}/continue`, { method: 'POST', body: { direction: document.getElementById('continueDirection').value } });
+        resultDiv.innerHTML = `
+            <div class="card">
+                <div class="card-header"><h3>✨ 續寫結果</h3></div>
+                <div class="card-body">
+                    <div style="font-size:0.85rem;color:var(--gray);margin-bottom:0.75rem;">上下文（故事最後部分）：</div>
+                    <div style="font-size:0.9rem;color:var(--dark-light);font-style:italic;margin-bottom:1rem;padding:1rem;background:var(--light);border-radius:8px;">${esc(data.context)}...</div>
+                    <div style="font-size:0.85rem;color:var(--gray);margin-bottom:0.75rem;">AI續寫：</div>
+                    <div style="font-size:1rem;line-height:1.8;">${esc(data.continuation)}</div>
+                    <div class="flex gap-2 mt-2">
+                        <button class="btn btn-primary" onclick="appendContinuation(${storyId})">📝 添加到故事末尾</button>
+                        <button class="btn btn-ghost" onclick="copyToClipboard('${data.continuation.replace(/'/g, "\\'")}')">📋 複製</button>
+                        <button class="btn btn-ghost" onclick="aiContinueStory()">🔄 重新生成</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    } catch (err) { resultDiv.innerHTML = `<div class="card"><div class="card-body text-center" style="color:var(--danger);">❌ ${err.message}</div></div>`; }
+}
+
+async function appendContinuation(storyId) {
+    try {
+        const storyData = await api(`/stories/${storyId}`);
+        const continuation = document.querySelector('#continueResult .card-body > div:last-of-type')?.textContent || '';
+        const newContent = storyData.story.content + continuation;
+        await api(`/stories/${storyId}`, { method: 'PUT', body: { content: newContent } });
+        showToast('續寫已添加到故事末尾！', 'success');
+    } catch (err) { showToast(err.message, 'error'); }
+}
+
+async function loadReadingList(listId) {
+    try {
+        const data = await api(`/tools/reading-lists/${listId}`);
+        document.getElementById('readingListDetail').innerHTML = `
+            <div class="card">
+                <div class="card-header">
+                    <h3>📚 ${esc(data.list.name)}</h3>
+                    <button class="btn btn-sm btn-ghost" onclick="document.getElementById('readingListDetail').innerHTML=''">✕</button>
+                </div>
+                <div class="card-body">
+                    ${data.items.length === 0 ? '<p class="text-muted">清單中暫無故事</p>' :
+                    data.items.map(item => `
+                        <div class="flex items-center gap-2 mb-2" style="cursor:pointer;" onclick="router.navigate('story',${item.story_id})">
+                            <div style="font-size:1.5rem;">${item.category_icon || '📖'}</div>
+                            <div style="flex:1;">
+                                <div style="font-weight:700;">${esc(item.title)}</div>
+                                <div style="font-size:0.8rem;color:var(--gray);">${esc(item.display_name || item.username)} · ${item.word_count}字 · 👁${item.view_count} · ❤️${item.like_count}</div>
+                            </div>
+                            <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();removeFromReadingList(${listId},${item.story_id})" style="color:var(--danger);">🗑️</button>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    } catch (err) { showToast(err.message, 'error'); }
+}
+
+async function createReadingList() {
+    const name = prompt('輸入閱讀清單名稱：');
+    if (!name) return;
+    try {
+        await api('/tools/reading-lists', { method: 'POST', body: { name } });
+        showToast('閱讀清單已創建', 'success');
+        showToolTab('reading-list');
+    } catch (err) { showToast(err.message, 'error'); }
+}
+
+async function removeFromReadingList(listId, storyId) {
+    try {
+        await api(`/tools/reading-lists/${listId}/items/${storyId}`, { method: 'DELETE' });
+        showToast('已移除', 'success');
+        loadReadingList(listId);
+    } catch (err) { showToast(err.message, 'error'); }
+}
+
+async function loadStoryAnalytics() {
+    const storyId = document.getElementById('analyticsStoryId').value;
+    if (!storyId) return;
+    try {
+        const data = await api(`/tools/stories/${storyId}/analytics`);
+        const s = data.stats;
+        document.getElementById('analyticsResult').innerHTML = `
+            <div class="stat-cards">
+                <div class="stat-card"><div class="stat-card-icon purple">👁</div><div class="stat-card-info"><h3>${formatNum(s.views)}</h3><p>總瀏覽</p></div></div>
+                <div class="stat-card"><div class="stat-card-icon green">❤️</div><div class="stat-card-info"><h3>${formatNum(s.likes)}</h3><p>總讚數</p></div></div>
+                <div class="stat-card"><div class="stat-card-icon orange">💬</div><div class="stat-card-info"><h3>${s.comments}</h3><p>評論數</p></div></div>
+                <div class="stat-card"><div class="stat-card-icon blue">🔖</div><div class="stat-card-info"><h3>${s.bookmarks}</h3><p>收藏數</p></div></div>
+            </div>
+            <div class="grid grid-2 mt-3">
+                <div class="card">
+                    <div class="card-header"><h3>📈 互動指標</h3></div>
+                    <div class="card-body">
+                        <div class="flex justify-between mb-1"><span>互動率</span><strong style="color:${s.engagement_rate > 5 ? 'var(--success)' : 'var(--warning)'};">${s.engagement_rate}%</strong></div>
+                        <div class="flex justify-between mb-1"><span>點讚率</span><strong>${s.like_rate}%</strong></div>
+                        <div class="flex justify-between mb-1"><span>字數</span><strong>${s.word_count}</strong></div>
+                        <div class="flex justify-between mb-1"><span>章節數</span><strong>${s.chapter_count}</strong></div>
+                        <div class="flex justify-between mb-1"><span>角色數</span><strong>${s.character_count}</strong></div>
+                        <div class="flex justify-between mb-1"><span>狀態</span><span class="tag tag-success">${data.status}</span></div>
+                        <div class="flex justify-between mb-1"><span>AI生成</span><span>${data.is_ai_generated ? '🤖 是' : '✍️ 否'}</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>📑 章節字數分佈</h3></div>
+                    <div class="card-body">
+                        ${data.chapter_stats.length === 0 ? '<p class="text-muted">暫無章節數據</p>' :
+                        `<div class="bar-chart">
+                            ${data.chapter_stats.map(ch => {
+                                const maxWC = Math.max(...data.chapter_stats.map(c => c.word_count));
+                                const height = maxWC > 0 ? (ch.word_count / maxWC * 100) : 10;
+                                return `<div class="bar" style="height:${Math.max(5, height)}%;"><div class="bar-value">${ch.word_count}</div><div class="bar-label">Ch.${ch.chapter_number}</div></div>`;
+                            }).join('')}
+                        </div>`}
+                    </div>
+                </div>
+            </div>
+            <div class="card mt-3">
+                <div class="card-header"><h3>📋 版本歷史</h3><button class="btn btn-sm btn-primary" onclick="saveVersion(${storyId})">保存當前版本</button></div>
+                <div class="card-body" id="versionHistory"><p class="text-muted">載入中...</p></div>
+            </div>
+        `;
+        loadVersionHistory(storyId);
+    } catch (err) { document.getElementById('analyticsResult').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>載入失敗</h3></div>`; }
+}
+
+async function loadVersionHistory(storyId) {
+    try {
+        const data = await api(`/tools/stories/${storyId}/versions`);
+        const container = document.getElementById('versionHistory');
+        if (!container) return;
+        if (data.versions.length === 0) {
+            container.innerHTML = '<p class="text-muted">暫無版本記錄。點擊「保存當前版本」創建第一個版本。</p>';
+            return;
+        }
+        container.innerHTML = data.versions.map(v => `
+            <div class="flex items-center justify-between mb-1" style="padding:8px 0;border-bottom:1px solid var(--gray-light);">
+                <div>
+                    <strong>v${v.version_number}</strong>
+                    <span class="text-muted" style="margin-left:8px;">${esc(v.change_note || '')}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span style="font-size:0.8rem;color:var(--gray);">${timeAgo(v.created_at)}</span>
+                    <button class="btn btn-sm btn-ghost" onclick="restoreVersion(${storyId},${v.id})">恢復</button>
+                </div>
+            </div>
+        `).join('');
+    } catch (e) {}
+}
+
+async function saveVersion(storyId) {
+    const note = prompt('版本說明（可選）：');
+    try {
+        await api(`/tools/stories/${storyId}/versions`, { method: 'POST', body: { change_note: note || '' } });
+        showToast('版本已保存', 'success');
+        loadVersionHistory(storyId);
+    } catch (err) { showToast(err.message, 'error'); }
+}
+
+async function restoreVersion(storyId, versionId) {
+    if (!confirm('確定要恢復到此版本嗎？當前內容會先備份。')) return;
+    try {
+        await api(`/tools/stories/${storyId}/versions/${versionId}/restore`, { method: 'POST' });
+        showToast('版本已恢復', 'success');
+    } catch (err) { showToast(err.message, 'error'); }
+}
+
+function exportStory(format) {
+    const storyId = document.getElementById('exportStoryId').value;
+    if (!storyId) { showToast('請選擇一個故事', 'warning'); return; }
+    window.open(`/api/tools/stories/${storyId}/export?format=${format}`, '_blank');
+    showToast('正在導出...', 'info');
+}
+
+async function savePreferences() {
+    try {
+        await api('/tools/preferences', { method: 'PUT', body: {
+            theme: document.getElementById('prefTheme').value,
+            font_size: document.getElementById('prefFontSize').value,
+            editor_font: document.getElementById('prefEditorFont').value,
+            email_notifications: document.getElementById('prefEmailNotif').checked,
+            auto_save: document.getElementById('prefAutoSave').checked,
+        }});
+        showToast('設定已保存', 'success');
+    } catch (err) { showToast(err.message, 'error'); }
+}
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => showToast('已複製', 'success')).catch(() => {
+        const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); showToast('已複製', 'success');
+    });
+}
 
 // ============================================
 // Camera Language Page

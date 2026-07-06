@@ -20,6 +20,7 @@
             <li><a href="#" onclick="router.navigate('explore')" data-page="explore">探索故事</a></li>
             <li><a href="#" onclick="router.navigate('prompts')" data-page="prompts">影片提示詞</a></li>
             <li><a href="#" onclick="router.navigate('camera')" data-page="camera">🎬 鏡頭語言</a></li>
+            <li><a href="#" onclick="router.navigate('tools')" data-page="tools">🛠️ 工具箱</a></li>
             <li id="navDashboard" class="hidden"><a href="#" onclick="router.navigate('dashboard')" data-page="dashboard">我的工作台</a></li>
             <li id="navAdmin" class="hidden"><a href="#" onclick="router.navigate('admin')" data-page="admin">管理後台</a></li>
         </ul>
@@ -588,6 +589,86 @@
         <div id="page-editor" class="page">
             <div class="main-content">
                 <div class="container" style="padding-top:2rem;" id="editorContent"></div>
+            </div>
+        </div>
+
+        <!-- ==================== TOOLS PAGE ==================== -->
+        <div id="page-tools" class="page">
+            <div class="main-content">
+                <div class="container" style="padding-top:2rem;">
+                    <h1 style="font-size:2rem;font-weight:800;">🛠️ 創作工具箱</h1>
+                    <p class="text-muted mb-3">豐富的創作輔助工具，讓你的創作更輕鬆高效</p>
+
+                    <!-- Tool Cards Grid -->
+                    <div class="grid grid-3" style="gap:1.5rem;">
+                        <div class="card" style="cursor:pointer;" onclick="showToolTab('templates')">
+                            <div class="card-body text-center">
+                                <div style="font-size:3rem;margin-bottom:1rem;">📖</div>
+                                <h3 style="font-weight:700;margin-bottom:0.5rem;">故事模板庫</h3>
+                                <p style="color:var(--dark-light);font-size:0.9rem;">8種預設故事結構模板，快速開始創作</p>
+                            </div>
+                        </div>
+                        <div class="card" style="cursor:pointer;" onclick="showToolTab('prompts')">
+                            <div class="card-body text-center">
+                                <div style="font-size:3rem;margin-bottom:1rem;">💡</div>
+                                <h3 style="font-weight:700;margin-bottom:0.5rem;">每日靈感</h3>
+                                <p style="color:var(--dark-light);font-size:0.9rem;">23+寫作提示，涵蓋開頭、角色、衝突、世界觀等</p>
+                            </div>
+                        </div>
+                        <div class="card" style="cursor:pointer;" onclick="showToolTab('names')">
+                            <div class="card-body text-center">
+                                <div style="font-size:3rem;margin-bottom:1rem;">🔤</div>
+                                <h3 style="font-weight:700;margin-bottom:0.5rem;">名字生成器</h3>
+                                <p style="color:var(--dark-light);font-size:0.9rem;">角色名、地名、組織名、物品名一鍵生成</p>
+                            </div>
+                        </div>
+                        <div class="card" style="cursor:pointer;" onclick="showToolTab('continue')">
+                            <div class="card-body text-center">
+                                <div style="font-size:3rem;margin-bottom:1rem;">🤖</div>
+                                <h3 style="font-weight:700;margin-bottom:0.5rem;">AI續寫助手</h3>
+                                <p style="color:var(--dark-light);font-size:0.9rem;">從中斷處繼續創作，多種續寫方向可選</p>
+                            </div>
+                        </div>
+                        <div class="card" style="cursor:pointer;" onclick="showToolTab('reading-list')">
+                            <div class="card-body text-center">
+                                <div style="font-size:3rem;margin-bottom:1rem;">🔖</div>
+                                <h3 style="font-weight:700;margin-bottom:0.5rem;">閱讀清單</h3>
+                                <p style="color:var(--dark-light);font-size:0.9rem;">管理收藏的故事，建立個人閱讀庫</p>
+                            </div>
+                        </div>
+                        <div class="card" style="cursor:pointer;" onclick="showToolTab('analytics')">
+                            <div class="card-body text-center">
+                                <div style="font-size:3rem;margin-bottom:1rem;">📊</div>
+                                <h3 style="font-weight:700;margin-bottom:0.5rem;">數據分析</h3>
+                                <p style="color:var(--dark-light);font-size:0.9rem;">故事閱讀數據、互動統計、版本管理</p>
+                            </div>
+                        </div>
+                        <div class="card" style="cursor:pointer;" onclick="showToolTab('export')">
+                            <div class="card-body text-center">
+                                <div style="font-size:3rem;margin-bottom:1rem;">📥</div>
+                                <h3 style="font-weight:700;margin-bottom:0.5rem;">導出工具</h3>
+                                <p style="color:var(--dark-light);font-size:0.9rem;">將故事匯出為 TXT/JSON 格式</p>
+                            </div>
+                        </div>
+                        <div class="card" style="cursor:pointer;" onclick="showToolTab('preferences')">
+                            <div class="card-body text-center">
+                                <div style="font-size:3rem;margin-bottom:1rem;">⚙️</div>
+                                <h3 style="font-weight:700;margin-bottom:0.5rem;">個人設定</h3>
+                                <p style="color:var(--dark-light);font-size:0.9rem;">主題、字體、通知等偏好設定</p>
+                            </div>
+                        </div>
+                        <div class="card" style="cursor:pointer;background:var(--bg-gradient);color:white;" onclick="router.navigate('prompts')">
+                            <div class="card-body text-center">
+                                <div style="font-size:3rem;margin-bottom:1rem;">🎬</div>
+                                <h3 style="font-weight:700;margin-bottom:0.5rem;">影片提示詞生成</h3>
+                                <p style="opacity:0.8;font-size:0.9rem;">前往專業提示詞生成器 →</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tool Content Area -->
+                    <div id="toolContent" class="mt-3"></div>
+                </div>
             </div>
         </div>
 
