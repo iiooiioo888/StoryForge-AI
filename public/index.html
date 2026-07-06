@@ -137,14 +137,22 @@ body{font-family:var(--serif);background:var(--bg);color:var(--text);min-height:
 .story-card{
   background:var(--surface);
   border:1px solid var(--border);border-radius:var(--radius-lg);
-  padding:1.4rem;cursor:pointer;transition:var(--transition);
-  position:relative;
+  padding:1.4rem;cursor:pointer;position:relative;overflow:hidden;
+  transform-style:preserve-3d;
+  transition:transform .45s cubic-bezier(.22,1,.36,1),box-shadow .45s ease,border-color .45s ease;
 }
 .story-card:hover{
-  border-color:var(--border-hover);
-  box-shadow:var(--shadow);
-  transform:translateY(-1px);
+  transform:translateY(-6px) scale(1.01);
+  box-shadow:0 24px 64px var(--shadow-color),0 0 40px rgba(37,99,235,.08),inset 0 1px 0 rgba(37,99,235,.12);
+  border-color:var(--accent);
+  z-index:2;
 }
+.story-card .card-glow{
+  position:absolute;inset:0;border-radius:inherit;opacity:0;pointer-events:none;
+  background:radial-gradient(600px circle at var(--mx,50%) var(--my,50%),rgba(37,99,235,.06),transparent 40%);
+  transition:opacity .4s ease;z-index:0;
+}
+.story-card:hover .card-glow{opacity:1}
 .card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.8rem}
 .genre-tag{
   font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
@@ -623,23 +631,6 @@ body{font-family:var(--serif);background:var(--bg);color:var(--text);min-height:
 .reveal-stagger:nth-child(4){transition-delay:.3s}
 .reveal-stagger:nth-child(5){transition-delay:.38s}
 .reveal-stagger:nth-child(6){transition-delay:.46s}
-
-/* --- 3D Card Hover with Radial Glow --- */
-.story-card{
-  transform-style:preserve-3d;
-  transition:transform .45s cubic-bezier(.22,1,.36,1),box-shadow .45s ease,border-color .45s ease;
-}
-.story-card:hover{
-  transform:translateY(-8px) scale(1.015);
-  box-shadow:0 24px 64px var(--shadow-color),0 0 40px rgba(37,99,235,.08),inset 0 1px 0 rgba(37,99,235,.12);
-  border-color:var(--accent);
-}
-.story-card .card-glow{
-  position:absolute;inset:0;border-radius:inherit;opacity:0;pointer-events:none;
-  background:radial-gradient(600px circle at var(--mx,50%) var(--my,50%),rgba(37,99,235,.06),transparent 40%);
-  transition:opacity .4s ease;z-index:0;
-}
-.story-card:hover .card-glow{opacity:1}
 
 /* --- Button Shine Sweep Effect --- */
 .btn{position:relative;overflow:hidden}
@@ -2338,6 +2329,7 @@ function renderCameraGrid(items){
   document.getElementById('cam-count').textContent=`${data.length} 種運鏡`;
   grid.innerHTML=data.map(m=>`
     <div class="story-card">
+      <div class="card-glow"></div>
       <div class="card-top"><span class="genre-tag">${m.icon||'🎥'}</span><span class="card-badge">${m.category}</span></div>
       <h3>${m.nameZh}</h3>
       <p style="font-size:.8rem;color:var(--text-dim);font-family:var(--mono);margin-bottom:.5rem">${m.nameEn}</p>

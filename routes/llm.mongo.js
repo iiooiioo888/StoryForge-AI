@@ -533,5 +533,57 @@ module.exports = function (models) {
         }
     });
 
+    // ========== AI 全權生成所有欄位 ==========
+    router.post('/generate-all-fields', authMiddleware, async (req, res) => {
+        try {
+            const { provider, tier } = req.body;
+
+            const result = await llm.chat({
+                systemPrompt: PROMPTS.aiAutoFill.system,
+                prompt: PROMPTS.aiAutoFill.user(),
+                provider, tier,
+                temperature: 0.9,
+                maxTokens: 2048,
+            });
+
+            let fields;
+            try {
+                const jsonMatch = result.content.match(/\{[\s\S]*\}/);
+                fields = JSON.parse(jsonMatch ? jsonMatch[0] : result.content);
+            } catch (e) {
+                fields = {
+                    title: 'AI 生成的故事',
+                    genre: '奇幻',
+                    theme: '冒險與成長',
+                    setting: '一個神秘的世界',
+                    characters: '勇敢的主角',
+                    pov: '第三人稱',
+                    tone: '輕鬆愉快',
+                    length: 'medium',
+                    structure: '三幕式',
+                    era: '中世紀',
+                    elements: ['魔法', '友情'],
+                };
+            }
+
+            await logInteraction(req.user.id, 'ai_autofill',
+                { prompt: 'AI 全權生成所有欄位', parameters: {} },
+                { provider: result.provider, model: result.model, tier: tier || 'balanced', temperature: 0.9 },
+                { rawResponse: result.content, parsedData: fields, contentType: 'json' },
+                'completed', result.usage || {}
+            );
+
+            await models.User.updateOne({ _id: req.user.id }, { $inc: { credits: -5 } });
+            const user = await models.User.findById(req.user.id).select('credits');
+
+            res.json({ success: true, fields, model: result.model, provider: result.provider, credits: user.credits });
+        } catch (err) {
+            await logInteraction(req.user.id, 'ai_autofill',
+                { prompt: 'AI 全權生成所有欄位' }, {}, {}, 'failed', {}, err
+            );
+            res.status(500).json({ error: 'AI 全權生成失敗：' + err.message });
+        }
+    });
+
     return router;
 };
