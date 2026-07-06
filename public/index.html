@@ -165,7 +165,7 @@ body{font-family:var(--serif);background:var(--bg);color:var(--text);min-height:
   background:var(--surface-2);
 }
 .story-card h3{font-size:1.2rem;font-weight:600;margin-bottom:.6rem;color:var(--text)}
-.story-card>p{
+.card-desc{
   font-size:.92rem;color:var(--text-muted);line-height:1.65;
   display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
 }
@@ -1905,7 +1905,7 @@ function renderCard(story){
     <div class="card-glow"></div>
     <div class="card-top"><span class="genre-tag">${gn}</span>${story.version>1?`<span class="card-badge">v${story.version}</span>`:''}</div>
     <h3>${story.title||'未命名故事'}</h3>
-    <p>${preview}</p>
+    <p class="card-desc">${preview}</p>
     <div class="card-tags">${subg}${tags}</div>
     <div class="card-meta">
       <span>${d} · ${cc}角色 · ${story.sceneCount||0}場景</span>
@@ -2333,7 +2333,7 @@ function renderCameraGrid(items){
       <div class="card-top"><span class="genre-tag">${m.icon||'🎥'}</span><span class="card-badge">${m.category}</span></div>
       <h3>${m.nameZh}</h3>
       <p style="font-size:.8rem;color:var(--text-dim);font-family:var(--mono);margin-bottom:.5rem">${m.nameEn}</p>
-      <p>${m.description||''}</p>
+      <p class="card-desc">${m.description||''}</p>
       <div class="card-tags"><span class="mini-tag">難度 ${'⭐'.repeat(m.difficulty||1)}</span></div>
       <div class="card-meta">
         <span>${m.useCase||''}</span>
