@@ -605,9 +605,544 @@ body::after{
   .form-row,.form-row-3{grid-template-columns:1fr}
   .prompt-top-bar{flex-direction:column;align-items:stretch}
 }
+
+/* ============================
+   ENHANCED UI BEAUTIFICATION
+   ============================ */
+
+/* --- Scroll Reveal Animations --- */
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes fadeScale{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
+@keyframes fadeLeft{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:none}}
+@keyframes fadeRight{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes pulse-glow{0%,100%{box-shadow:0 0 20px rgba(201,165,78,.1)}50%{box-shadow:0 0 40px rgba(201,165,78,.2)}}
+@keyframes rotate-slow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes border-dance{0%,100%{border-color:rgba(201,165,78,.15)}50%{border-color:rgba(201,165,78,.35)}}
+
+.fade-up{opacity:0;animation:fadeUp .7s cubic-bezier(.22,1,.36,1) forwards}
+.stagger-1{animation-delay:.15s}.stagger-2{animation-delay:.3s}.stagger-3{animation-delay:.45s}.stagger-4{animation-delay:.6s}
+
+.reveal{opacity:0;transform:translateY(32px);transition:opacity .8s cubic-bezier(.22,1,.36,1),transform .8s cubic-bezier(.22,1,.36,1)}
+.reveal.visible{opacity:1;transform:none}
+.reveal-scale{opacity:0;transform:scale(.9);transition:opacity .7s ease,transform .7s ease}
+.reveal-scale.visible{opacity:1;transform:none}
+.reveal-left{opacity:0;transform:translateX(-32px);transition:opacity .7s ease,transform .7s ease}
+.reveal-left.visible{opacity:1;transform:none}
+.reveal-right{opacity:0;transform:translateX(32px);transition:opacity .7s ease,transform .7s ease}
+.reveal-right.visible{opacity:1;transform:none}
+.reveal-stagger{opacity:0;transform:translateY(20px);transition:opacity .55s ease,transform .55s ease}
+.reveal-stagger.visible{opacity:1;transform:none}
+.reveal-stagger:nth-child(1){transition-delay:.06s}
+.reveal-stagger:nth-child(2){transition-delay:.14s}
+.reveal-stagger:nth-child(3){transition-delay:.22s}
+.reveal-stagger:nth-child(4){transition-delay:.3s}
+.reveal-stagger:nth-child(5){transition-delay:.38s}
+.reveal-stagger:nth-child(6){transition-delay:.46s}
+
+/* --- Particle Canvas for Hero --- */
+.hero-particles{position:absolute;inset:0;z-index:0;pointer-events:none}
+
+/* --- Enhanced Hero Decorative Orbs --- */
+.hero-orb{
+  position:absolute;border-radius:50%;pointer-events:none;z-index:0;
+  filter:blur(60px);opacity:.04;animation:float 8s ease-in-out infinite;
+}
+.hero-orb-1{width:400px;height:400px;top:-10%;right:10%;background:var(--accent);animation-delay:0s}
+.hero-orb-2{width:300px;height:300px;bottom:10%;left:5%;background:var(--accent-bright);animation-delay:2s}
+.hero-orb-3{width:200px;height:200px;top:40%;left:60%;background:var(--accent);animation-delay:4s;opacity:.025}
+
+/* --- 3D Card Hover with Radial Glow --- */
+.story-card{
+  transform-style:preserve-3d;
+  transition:transform .45s cubic-bezier(.22,1,.36,1),box-shadow .45s ease,border-color .45s ease;
+}
+.story-card:hover{
+  transform:translateY(-8px) scale(1.015);
+  box-shadow:0 24px 64px rgba(0,0,0,.5),0 0 40px rgba(201,165,78,.08),inset 0 1px 0 rgba(201,165,78,.12);
+  border-color:rgba(201,165,78,.3);
+}
+.story-card .card-glow{
+  position:absolute;inset:0;border-radius:inherit;opacity:0;pointer-events:none;
+  background:radial-gradient(600px circle at var(--mx,50%) var(--my,50%),rgba(201,165,78,.07),transparent 40%);
+  transition:opacity .4s ease;z-index:0;
+}
+.story-card:hover .card-glow{opacity:1}
+
+/* --- Button Shine Sweep Effect --- */
+.btn{position:relative;overflow:hidden}
+.btn::after{
+  content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
+  background:linear-gradient(105deg,transparent 20%,rgba(255,255,255,.08) 40%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.08) 60%,transparent 80%);
+  pointer-events:none;z-index:1;
+}
+.btn:hover::after{animation:btnShine .65s ease forwards}
+@keyframes btnShine{from{left:-100%}to{left:100%}}
+
+.btn-primary{
+  background:linear-gradient(135deg,#a8841f 0%,#c9a54e 45%,#dbb95e 100%);
+  box-shadow:0 4px 20px rgba(201,165,78,.2),inset 0 1px 0 rgba(255,255,255,.15);
+}
+.btn-primary:hover{
+  background:linear-gradient(135deg,#c9a54e 0%,#dbb95e 50%,#e8c96a 100%);
+  box-shadow:0 8px 32px rgba(201,165,78,.35),inset 0 1px 0 rgba(255,255,255,.2);
+  transform:translateY(-1px);
+}
+.btn-primary:active{transform:translateY(0);box-shadow:0 2px 12px rgba(201,165,78,.2)}
+
+/* --- Glow Accent Line --- */
+.glow-line{
+  height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  margin:3rem auto;width:60%;opacity:.25;border:none;
+}
+
+/* --- Enhanced Modal with Glass Morphism --- */
+.modal-overlay{
+  background:rgba(2,2,2,.92);backdrop-filter:blur(16px) saturate(1.2);
+}
+.modal{
+  background:linear-gradient(180deg,rgba(20,20,20,.95) 0%,rgba(14,14,14,.98) 100%);
+  border:1px solid rgba(201,165,78,.1);
+  box-shadow:0 32px 80px rgba(0,0,0,.7),0 0 60px rgba(201,165,78,.04);
+  backdrop-filter:blur(20px);
+}
+.modal::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent 10%,var(--accent-dim),transparent 90%);
+  opacity:.4;z-index:1;
+}
+.modal-header{border-bottom-color:rgba(201,165,78,.08)}
+.modal-close{
+  background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);
+  transition:all .3s ease;
+}
+.modal-close:hover{
+  background:rgba(196,78,78,.1);border-color:rgba(196,78,78,.2);
+  color:var(--danger);transform:rotate(90deg);
+}
+
+/* --- Enhanced Toast --- */
+.toast{
+  background:linear-gradient(135deg,rgba(22,22,22,.95),rgba(30,30,30,.95));
+  border:1px solid rgba(255,255,255,.06);
+  box-shadow:0 8px 32px rgba(0,0,0,.5),0 0 20px rgba(0,0,0,.3);
+  backdrop-filter:blur(12px);
+  animation:toastSlideIn .4s cubic-bezier(.22,1,.36,1);
+}
+@keyframes toastSlideIn{
+  from{opacity:0;transform:translateX(40px) scale(.9);filter:blur(4px)}
+  to{opacity:1;transform:none;filter:blur(0)}
+}
+.toast.success{border-left:3px solid var(--accent);box-shadow:0 8px 32px rgba(0,0,0,.5),0 0 15px rgba(201,165,78,.06)}
+.toast.error{border-left:3px solid var(--danger);box-shadow:0 8px 32px rgba(0,0,0,.5),0 0 15px rgba(196,78,78,.06)}
+.toast.info{border-left:3px solid var(--info);box-shadow:0 8px 32px rgba(0,0,0,.5),0 0 15px rgba(78,142,196,.06)}
+.toast-icon{font-size:1rem;flex-shrink:0}
+
+/* --- Enhanced Search Box --- */
+.search-box input{
+  transition:all .4s cubic-bezier(.22,1,.36,1);
+}
+.search-box input:focus{
+  border-color:rgba(201,165,78,.5);
+  box-shadow:0 0 0 3px rgba(201,165,78,.08),0 0 20px rgba(201,165,78,.04);
+  background:rgba(14,14,14,.9);
+}
+
+/* --- Filter Tags Enhanced --- */
+.filter-tag{
+  transition:all .35s cubic-bezier(.22,1,.36,1);
+  position:relative;overflow:hidden;
+}
+.filter-tag::before{
+  content:'';position:absolute;inset:0;background:var(--accent);opacity:0;
+  transition:opacity .3s ease;border-radius:inherit;
+}
+.filter-tag:hover::before{opacity:.04}
+.filter-tag.active{
+  box-shadow:0 0 16px rgba(201,165,78,.1),inset 0 0 12px rgba(201,165,78,.03);
+  animation:border-dance 3s ease-in-out infinite;
+}
+
+/* --- Enhanced Workshop Tabs --- */
+.workshop-tab{
+  transition:all .35s cubic-bezier(.22,1,.36,1);
+  position:relative;
+}
+.workshop-tab.active::after{
+  content:'';position:absolute;bottom:-1px;left:20%;right:20%;height:2px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+}
+.workshop-tab:hover:not(.active){
+  color:var(--text-muted);background:rgba(201,165,78,.02);
+}
+
+/* --- Form Inputs Enhanced --- */
+.form-input,.form-textarea,.form-select{
+  transition:all .4s cubic-bezier(.22,1,.36,1);
+}
+.form-input:focus,.form-textarea:focus,.form-select:focus{
+  border-color:rgba(201,165,78,.4);
+  box-shadow:0 0 0 3px rgba(201,165,78,.06),0 0 16px rgba(201,165,78,.03);
+  background:rgba(10,10,10,.9);
+}
+
+/* --- Loading Bar Enhanced --- */
+.loading-bar .fill{
+  background:linear-gradient(90deg,transparent,rgba(201,165,78,.3),var(--accent),rgba(201,165,78,.3),transparent);
+  box-shadow:0 0 12px rgba(201,165,78,.3);
+}
+
+/* --- Empty State Enhanced --- */
+.empty-state .icon{
+  animation:float 4s ease-in-out infinite;
+  filter:drop-shadow(0 0 20px rgba(201,165,78,.1));
+}
+
+/* --- Story Output Area --- */
+.story-output{
+  position:relative;
+}
+.story-output::before{
+  content:'';position:absolute;top:0;left:0;bottom:0;width:2px;
+  background:linear-gradient(to bottom,transparent,var(--accent-dim),transparent);
+  opacity:.2;border-radius:2px;
+}
+
+/* --- Prompt Scene Cards --- */
+.prompt-scene{
+  transition:all .4s cubic-bezier(.22,1,.36,1);
+}
+.prompt-scene:hover{
+  transform:translateY(-4px);
+  box-shadow:0 16px 48px rgba(0,0,0,.4),0 0 24px rgba(201,165,78,.06);
+  border-color:rgba(201,165,78,.2);
+}
+
+/* --- Character Cards Enhanced --- */
+.char-card{
+  transition:all .4s cubic-bezier(.22,1,.36,1);
+}
+.char-card:hover{
+  transform:translateY(-4px);
+  border-color:rgba(201,165,78,.2);
+  box-shadow:0 12px 40px rgba(0,0,0,.4),0 0 20px rgba(201,165,78,.05);
+}
+.char-avatar{
+  background:linear-gradient(135deg,var(--accent),var(--accent-dim));
+  box-shadow:0 4px 16px rgba(201,165,78,.2);
+  transition:all .3s ease;
+}
+.char-card:hover .char-avatar{
+  box-shadow:0 6px 24px rgba(201,165,78,.3);
+  transform:scale(1.05);
+}
+
+/* --- Footer --- */
+.site-footer{
+  position:relative;z-index:1;
+  margin-top:4rem;padding:3rem 2.5rem 2rem;
+  border-top:1px solid var(--border);
+  background:linear-gradient(180deg,transparent,rgba(14,14,14,.5));
+}
+.site-footer::before{
+  content:'';position:absolute;top:0;left:10%;right:10%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent-dim),transparent);opacity:.3;
+}
+.footer-content{
+  max-width:1440px;margin:0 auto;display:flex;
+  justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1.5rem;
+}
+.footer-brand{
+  font-family:var(--display);font-size:1.1rem;font-weight:500;letter-spacing:.15em;
+  color:var(--accent-dim);
+}
+.footer-links{display:flex;gap:1.5rem}
+.footer-link{
+  font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--text-ghost);text-decoration:none;transition:var(--transition);
+  cursor:pointer;background:none;border:none;
+}
+.footer-link:hover{color:var(--accent)}
+.footer-copy{
+  font-family:var(--mono);font-size:.55rem;color:var(--text-ghost);
+  letter-spacing:.08em;margin-top:1.5rem;text-align:center;
+  padding-top:1rem;border-top:1px solid rgba(255,255,255,.02);
+}
+.footer-copy span{color:var(--accent-dim)}
+
+/* --- Nav Brand Enhanced --- */
+.nav-brand{
+  transition:all .3s ease;
+}
+.nav-brand:hover{
+  text-shadow:0 0 40px rgba(201,165,78,.3),0 0 80px rgba(201,165,78,.1);
+}
+
+/* --- Section Divider Glow --- */
+.section-title::after{
+  content:'';flex:1;height:1px;
+  background:linear-gradient(90deg,var(--border),transparent);
+  margin-left:1rem;
+}
+
+/* --- Outline Cards Enhanced --- */
+.outline-card{
+  transition:all .4s cubic-bezier(.22,1,.36,1);
+}
+.outline-card:hover{
+  transform:translateX(4px);
+  border-color:rgba(201,165,78,.15);
+}
+
+/* --- Timeline Enhanced --- */
+.timeline-item{
+  transition:all .4s cubic-bezier(.22,1,.36,1);
+}
+.timeline-item:hover{
+  transform:translateX(6px);
+  border-color:rgba(201,165,78,.2);
+  background:rgba(201,165,78,.02);
+}
+
+/* --- Global Glow Decorations --- */
+.glow-spot{
+  position:fixed;width:300px;height:300px;border-radius:50%;
+  pointer-events:none;z-index:0;filter:blur(80px);
+}
+.glow-spot-1{top:20%;left:5%;background:rgba(201,165,78,.02);animation:float 12s ease-in-out infinite}
+.glow-spot-2{bottom:30%;right:5%;background:rgba(201,165,78,.015);animation:float 15s ease-in-out infinite reverse}
+
+/* --- Selection Enhancement --- */
+::selection{background:rgba(201,165,78,.35);color:var(--text)}
+
+/* --- Smooth Page Transitions --- */
+.panel.active{animation:panelFadeIn .55s cubic-bezier(.22,1,.36,1)}
+@keyframes panelFadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* --- Auth Modal Extra --- */
+#auth-modal .modal{
+  border:1px solid rgba(201,165,78,.08);
+}
+#auth-modal .form-input:focus{
+  border-color:rgba(201,165,78,.4);
+  box-shadow:0 0 0 3px rgba(201,165,78,.06);
+}
+
+/* --- Scrollbar Enhancement --- */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:rgba(0,0,0,.2)}
+::-webkit-scrollbar-thumb{
+  background:linear-gradient(180deg,var(--border-light),var(--border));
+  border-radius:10px;
+}
+::-webkit-scrollbar-thumb:hover{
+  background:linear-gradient(180deg,var(--accent-dim),var(--border-light));
+}
+
+/* ===================================
+   🎬 DIRECTOR'S SET — 導演片場效果
+   =================================== */
+
+/* --- 色系優化：更溫暖的電影色調 --- */
+/*  主色: #c9a54e (金) → 搭配 #d4a84a (暖琥珀) + #b8860b (深金) + #2a1a0a (暗暖底)  */
+
+/* --- Letterbox Bars (寬銀幕黑條) --- */
+.letterbox-bar{
+  position:fixed;left:0;right:0;height:0;z-index:90;
+  background:linear-gradient(180deg,#000,#050302);
+  transition:height .8s cubic-bezier(.4,0,.2,1);
+}
+.letterbox-top{top:0}
+.letterbox-bottom{bottom:0}
+.letterbox-bar.active{height:48px}
+.letterbox-bar::after{
+  content:'';position:absolute;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent 5%,rgba(180,140,50,.12) 30%,rgba(201,165,78,.2) 50%,rgba(180,140,50,.12) 70%,transparent 95%);
+}
+.letterbox-top::after{bottom:0}
+.letterbox-bottom::after{top:0}
+
+/* --- Film Strip Decoration (電影膠片條) --- */
+.film-strip{
+  position:fixed;top:0;bottom:0;width:28px;z-index:2;pointer-events:none;
+  opacity:0;transition:opacity 1.2s .3s;
+}
+.film-strip.visible{opacity:.15}
+.film-strip-left{left:0}
+.film-strip-right{right:0}
+.film-strip-inner{
+  position:absolute;top:0;bottom:0;width:100%;
+  background:var(--bg-deep);
+  border-right:1px solid rgba(180,140,50,.08);
+}
+.film-strip-right .film-strip-inner{border-right:none;border-left:1px solid rgba(180,140,50,.08)}
+.film-perf{
+  position:absolute;width:10px;height:7px;
+  background:rgba(180,140,50,.12);border-radius:1px;
+  left:50%;transform:translateX(-50%);
+}
+
+/* --- Clapperboard (場記板) --- */
+.clapperboard{
+  position:relative;z-index:3;width:260px;margin:0 auto 2rem;
+  opacity:0;transform:scale(.8) rotateX(20deg);
+  animation:clapSlam .6s .3s cubic-bezier(.34,1.56,.64,1) forwards;
+  perspective:800px;
+}
+@keyframes clapSlam{
+  0%{opacity:0;transform:scale(.8) rotateX(20deg)}
+  60%{opacity:1;transform:scale(1.05) rotateX(-5deg)}
+  100%{opacity:1;transform:scale(1) rotateX(0)}
+}
+.clap-body{
+  background:linear-gradient(145deg,#14100a,#0a0806);
+  border:1px solid rgba(180,140,50,.12);border-radius:4px;
+  padding:10px 14px 12px;position:relative;
+  box-shadow:0 8px 32px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.02);
+}
+.clap-top{
+  background:linear-gradient(90deg,#d4a84a,#b8860b);
+  height:28px;border-radius:2px;margin:-10px -14px 10px;
+  display:flex;align-items:center;
+  position:relative;transform-origin:top left;
+  animation:clapTop .4s .7s cubic-bezier(.4,0,.2,1) forwards;
+  transform:rotate(-15deg);
+}
+@keyframes clapTop{
+  0%{transform:rotate(-15deg)}
+  40%{transform:rotate(2deg)}
+  70%{transform:rotate(-1deg)}
+  100%{transform:rotate(0)}
+}
+.clap-stripe{
+  position:absolute;top:0;bottom:0;width:18px;
+  background:repeating-linear-gradient(
+    -45deg,#0a0806,#0a0806 4px,#d4a84a 4px,#d4a84a 8px
+  );
+}
+.clap-stripe-left{left:0}
+.clap-stripe-right{right:0}
+.clap-info{
+  display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;
+  font-family:var(--mono);font-size:.5rem;letter-spacing:.1em;
+  color:rgba(212,168,74,.5);text-transform:uppercase;
+}
+.clap-info span:nth-child(odd){color:rgba(255,255,255,.2);font-size:.42rem;letter-spacing:.05em;text-transform:none}
+.clap-info span:nth-child(even){color:rgba(212,168,74,.65)}
+.clap-field-label{
+  grid-column:1/-1;font-size:.4rem;color:rgba(255,255,255,.12);
+  letter-spacing:.05em;margin-top:2px;
+}
+
+/* --- Spotlight (聚光燈) --- */
+.spotlight{
+  position:fixed;top:-30%;left:50%;width:500px;height:800px;
+  transform:translateX(-50%);z-index:0;pointer-events:none;
+  opacity:0;transition:opacity 1.5s .3s;
+}
+.spotlight.visible{opacity:1}
+.spotlight::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 40% 60% at 50% 0%,rgba(212,168,74,.05) 0%,rgba(180,140,50,.02) 40%,transparent 70%);
+  transition:transform .3s ease-out;
+}
+.spotlight::after{
+  content:'';position:absolute;top:15%;left:50%;transform:translateX(-50%);
+  width:2px;height:65%;
+  background:linear-gradient(to bottom,rgba(212,168,74,.06),transparent 80%);
+  filter:blur(2px);
+}
+
+/* --- Cinematic Grain (電影膠片顆粒) --- */
+.film-grain{
+  position:fixed;inset:0;z-index:1;pointer-events:none;
+  opacity:0;transition:opacity 2s .3s;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size:200px 200px;
+  mix-blend-mode:overlay;
+  animation:grainDrift .15s steps(3) infinite;
+}
+.film-grain.visible{opacity:.03}
+@keyframes grainDrift{
+  0%{transform:translate(0,0)}
+  33%{transform:translate(-1px,1px)}
+  66%{transform:translate(1px,-1px)}
+  100%{transform:translate(0,0)}
+}
+
+/* --- Director's Viewfinder (導演觀景窗) --- */
+.viewfinder{
+  position:absolute;top:50%;left:50%;
+  width:340px;height:200px;
+  transform:translate(-50%,-50%);
+  border:2px solid rgba(180,140,50,.1);
+  border-radius:4px;z-index:3;pointer-events:none;
+  opacity:0;animation:vfFadeIn 1s .8s forwards;
+}
+@keyframes vfFadeIn{to{opacity:1}}
+.vf-corner{
+  position:absolute;width:20px;height:20px;
+  border-color:rgba(212,168,74,.35);border-style:solid;border-width:0;
+}
+.vf-tl{top:-2px;left:-2px;border-top-width:2px;border-left-width:2px}
+.vf-tr{top:-2px;right:-2px;border-top-width:2px;border-right-width:2px}
+.vf-bl{bottom:-2px;left:-2px;border-bottom-width:2px;border-left-width:2px}
+.vf-br{bottom:-2px;right:-2px;border-bottom-width:2px;border-right-width:2px}
+.vf-cross-h{
+  position:absolute;top:50%;left:10%;right:10%;height:1px;
+  background:rgba(180,140,50,.12);
+}
+.vf-cross-v{
+  position:absolute;left:50%;top:10%;bottom:10%;width:1px;
+  background:rgba(180,140,50,.12);
+}
+.vf-info{
+  position:absolute;bottom:6px;right:8px;
+  font-family:var(--mono);font-size:.45rem;
+  color:rgba(212,168,74,.25);letter-spacing:.1em;
+  text-transform:uppercase;
+}
+.vf-rec{
+  position:absolute;top:6px;left:8px;
+  display:flex;align-items:center;gap:4px;
+  font-family:var(--mono);font-size:.45rem;
+  color:rgba(190,70,60,.55);letter-spacing:.1em;
+}
+.vf-rec-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:rgba(190,70,60,.6);
+  animation:recBlink 1s infinite;
+}
+@keyframes recBlink{0%,49%{opacity:1}50%,100%{opacity:0}}
+.vf-timecode{
+  position:absolute;top:6px;right:8px;
+  font-family:var(--mono);font-size:.45rem;
+  color:rgba(212,168,74,.25);letter-spacing:.05em;
+}
+
+/* --- Hero Enhancements for Director Theme --- */
+.hero{
+  padding-top:9rem;
+  padding-bottom:7rem;
+}
+.hero::before{
+  animation:lineGlow 2s ease-in-out infinite;
+}
+.hero-cta .btn-primary{
+  position:relative;
+}
 </style>
 </head>
 <body>
+  <!-- 🎬 Director's Set Overlays -->
+  <div class="letterbox-bar letterbox-top"></div>
+  <div class="letterbox-bar letterbox-bottom"></div>
+  <div class="film-strip film-strip-left" id="film-strip-l"></div>
+  <div class="film-strip film-strip-right" id="film-strip-r"></div>
+  <div class="spotlight" id="spotlight"></div>
+  <div class="film-grain" id="film-grain"></div>
 
 <nav class="nav">
   <div class="nav-brand" onclick="switchTab('home')">STORYFORGE <span>AI Story Platform</span></div>
@@ -626,6 +1161,27 @@ body::after{
   <!-- HOME -->
   <div id="panel-home" class="panel active">
     <div class="hero">
+      <canvas class="hero-particles" id="hero-particles"></canvas>
+      <div class="hero-orb hero-orb-1"></div>
+      <div class="hero-orb hero-orb-2"></div>
+      <div class="hero-orb hero-orb-3"></div>
+      <!-- 場記板 -->
+      <div class="clapperboard">
+        <div class="clap-body">
+          <div class="clap-top">
+            <div class="clap-stripe clap-stripe-left"></div>
+            <div class="clap-stripe clap-stripe-right"></div>
+          </div>
+          <div class="clap-info">
+            <span>prod</span><span>SF-2026</span>
+            <span>scene</span><span>HOME</span>
+            <span>take</span><span>01</span>
+            <span class="clap-field-label">director — StoryForge AI</span>
+            <span>date</span><span>2026.07</span>
+            <span>cam</span><span>A</span>
+          </div>
+        </div>
+      </div>
       <h1 class="fade-up">Craft Stories.<br><em>Generate Visions</em>.</h1>
       <p class="hero-sub fade-up stagger-1">結合 AI 創意寫作與影片提示詞生成<br>將你的故事構想轉化為可拍攝的視覺場景</p>
       <div class="hero-cta fade-up stagger-2">
@@ -638,7 +1194,20 @@ body::after{
         <div class="stat"><div class="stat-num" id="stat-prompts">0</div><div class="stat-label">影片提示詞</div></div>
         <div class="stat"><div class="stat-num" id="stat-chars">0</div><div class="stat-label">角色數量</div></div>
       </div>
+      <!-- 導演觀景窗 -->
+      <div class="viewfinder">
+        <div class="vf-corner vf-tl"></div>
+        <div class="vf-corner vf-tr"></div>
+        <div class="vf-corner vf-bl"></div>
+        <div class="vf-corner vf-br"></div>
+        <div class="vf-cross-h"></div>
+        <div class="vf-cross-v"></div>
+        <div class="vf-rec"><div class="vf-rec-dot"></div>REC</div>
+        <div class="vf-timecode" id="vf-timecode">00:00:00:00</div>
+        <div class="vf-info">16:9 · 4K · 24fps</div>
+      </div>
     </div>
+    <hr class="glow-line">
     <div class="container">
       <div class="section-title">近期創作</div>
       <div class="story-grid" id="recent-stories"></div>
@@ -853,6 +1422,20 @@ body::after{
     </div>
   </div>
 </main>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-content">
+    <div class="footer-brand">◆ StoryForge AI</div>
+    <div class="footer-links">
+      <button class="footer-link" onclick="switchTab('home')">首頁</button>
+      <button class="footer-link" onclick="switchTab('workshop')">工作坊</button>
+      <button class="footer-link" onclick="switchTab('library')">故事庫</button>
+      <button class="footer-link" onclick="switchTab('prompts')">提示詞庫</button>
+    </div>
+  </div>
+  <p class="footer-copy">© 2026 <span>StoryForge AI</span> — 以創意驅動敘事 · 以想像塑造畫面</p>
+</footer>
 
 <div class="modal-overlay" id="story-modal">
   <div class="modal">
@@ -1202,6 +1785,7 @@ function renderCard(story){
   const subg=story.subgenre?`<span class="mini-tag">${story.subgenre}</span>`:'';
   const tags=(story.elements||[]).slice(0,3).map(e=>`<span class="mini-tag">${e}</span>`).join('');
   return `<div class="story-card" onclick="viewStory('${story.id}')">
+    <div class="card-glow"></div>
     <div class="card-top"><span class="genre-tag">${gn}</span>${story.version>1?`<span class="card-badge">v${story.version}</span>`:''}</div>
     <h3>${story.title||'未命名故事'}</h3>
     <p>${preview}</p>
@@ -1734,6 +2318,141 @@ if(!DB.getAll().length){
   });
   refreshHome();
 }
+
+/* ---- Particle Background for Hero ---- */
+(function(){
+  const c=document.getElementById('hero-particles');
+  if(!c)return;
+  const ctx=c.getContext('2d');
+  let W,H,particles=[];
+  function resize(){W=c.width=c.offsetWidth;H=c.height=c.offsetHeight}
+  function createParticles(){
+    particles=[];
+    const count=Math.floor(W*H/18000);
+    for(let i=0;i<count;i++){
+      particles.push({
+        x:Math.random()*W,y:Math.random()*H,
+        r:Math.random()*1.2+.3,
+        dx:(Math.random()-.5)*.3,dy:(Math.random()-.5)*.15-.1,
+        o:Math.random()*.4+.1
+      });
+    }
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    particles.forEach(p=>{
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(201,165,78,${p.o})`;ctx.fill();
+      p.x+=p.dx;p.y+=p.dy;
+      if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+    });
+    requestAnimationFrame(draw);
+  }
+  resize();createParticles();draw();
+  window.addEventListener('resize',()=>{resize();createParticles()});
+})();
+
+/* ---- Scroll Reveal Observer ---- */
+(function(){
+  const io=new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target)}});
+  },{threshold:.12,rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.reveal,.reveal-scale,.reveal-left,.reveal-right,.reveal-stagger').forEach(el=>io.observe(el));
+})();
+
+/* ---- Story Card Radial Glow ---- */
+document.querySelectorAll('.story-card').forEach(card=>{
+  card.addEventListener('mousemove',e=>{
+    const r=card.getBoundingClientRect();
+    card.style.setProperty('--mx',((e.clientX-r.left)/r.width*100)+'%');
+    card.style.setProperty('--my',((e.clientY-r.top)/r.height*100)+'%');
+  });
+});
+
+/* ---- Nav Scroll Shrink ---- */
+(function(){
+  const nav=document.querySelector('.nav');
+  let ticking=false;
+  window.addEventListener('scroll',()=>{
+    if(!ticking){requestAnimationFrame(()=>{
+      nav.style.background=window.scrollY>60?'rgba(8,8,8,.95)':'rgba(8,8,8,.85)';
+      nav.style.backdropFilter=window.scrollY>60?'blur(24px)':'blur(16px)';
+      ticking=false});ticking=true}
+  });
+})();
+
+/* ---- Smooth Panel Switch ---- */
+function animatePanelIn(id){
+  const p=document.getElementById('panel-'+id);
+  if(p){p.style.opacity='0';p.style.transform='translateY(8px)';
+    requestAnimationFrame(()=>{p.style.transition='opacity .45s,transform .45s';
+      p.style.opacity='1';p.style.transform='none'})}
+}
+
+/* ---- 🎬 Director's Set Logic ---- */
+(function(){
+  // 生成膠片齒孔
+  function buildPerfs(){
+    ['film-strip-l','film-strip-r'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(!el)return;
+      el.innerHTML='<div class="film-strip-inner"></div>';
+      const h=window.innerHeight;
+      for(let y=20;y<h;y+=28){
+        const p=document.createElement('div');
+        p.className='film-perf';p.style.top=y+'px';
+        el.appendChild(p);
+      }
+    });
+  }
+  buildPerfs();
+  window.addEventListener('resize',buildPerfs);
+
+  // 立即啟用所有電影效果
+  document.querySelectorAll('.letterbox-bar').forEach(b=>b.classList.add('active'));
+  document.querySelectorAll('.film-strip').forEach(s=>s.classList.add('visible'));
+  const sp=document.getElementById('spotlight');
+  if(sp)sp.classList.add('visible');
+  const gr=document.getElementById('film-grain');
+  if(gr)gr.classList.add('visible');
+
+  // 觀景窗時間碼計數器
+  const tc=document.getElementById('vf-timecode');
+  if(tc){
+    let f=0;
+    setInterval(()=>{
+      f++;
+      const s=Math.floor(f/24)%60;
+      const m=Math.floor(f/1440)%60;
+      const h=Math.floor(f/86400);
+      const fr=f%24;
+      tc.textContent=
+        String(h).padStart(2,'0')+':'+
+        String(m).padStart(2,'0')+':'+
+        String(s).padStart(2,'0')+':'+
+        String(fr).padStart(2,'0');
+    },1000/24);
+  }
+
+  // 聚光燈跟隨滑鼠（僅 hero 區域）
+  const hero=document.querySelector('.hero');
+  const spotlight=document.getElementById('spotlight');
+  if(hero&&spotlight){
+    hero.addEventListener('mousemove',e=>{
+      const rect=hero.getBoundingClientRect();
+      const x=e.clientX-rect.left;
+      const y=e.clientY-rect.top;
+      const px=(x/rect.width)*100;
+      const py=(y/rect.height)*100;
+      spotlight.querySelector('::before')||null;
+      spotlight.style.setProperty('--mx',px+'%');
+      spotlight.style.setProperty('--my',py+'%');
+      const before=spotlight.style;
+      before.setProperty('left',(e.clientX-250)+'px');
+      before.setProperty('top',(e.clientY-400)+'px');
+    });
+  }
+})();
 </script>
 </body>
 </html>
