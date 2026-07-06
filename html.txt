@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STORYFORGE — AI 故事創作與影片提示詞平台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Noto+Serif+TC:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#050505;--bg-deep:#020202;--surface:#0e0e0e;--surface-2:#161616;--surface-3:#1e1e1e;
+  --glass:rgba(14,14,14,.7);--glass-border:rgba(255,255,255,.04);
+  --border:#1f1f1f;--border-light:#2a2a2a;--border-hover:#3a3a3a;
+  --accent:#c9a54e;--accent-dim:rgba(201,165,78,.5);--accent-glow:rgba(201,165,78,.08);
+  --accent-bright:#e8c96a;--accent-ultra:#f5e08a;
+  --text:#eae4d8;--text-muted:#7a7468;--text-dim:#4a463e;--text-ghost:#2e2c28;
+  --danger:#c44e4e;--success:#4ec47a;--info:#4e8ec4;
+  --serif:'Noto Serif TC','Cormorant Garamond',serif;
+  --display:'Cormorant Garamond','Noto Serif TC',serif;
+  --mono:'JetBrains Mono',monospace;
+  --body:'Crimson Pro','Noto Serif TC',serif;
+  --radius:8px;--radius-lg:14px;--radius-xl:20px;
+  --shadow:0 4px 24px rgba(0,0,0,.6);
+  --shadow-lg:0 16px 64px rgba(0,0,0,.8);
+  --shadow-glow:0 0 40px rgba(201,165,78,.06);
+  --transition:all .35s cubic-bezier(.4,0,.2,1);
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:var(--body);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;line-height:1.75;font-weight:300}
+
+/* === BACKGROUND === */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 10%,rgba(201,165,78,.04) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 80% at 90% 90%,rgba(201,165,78,.03) 0%,transparent 50%),
+    radial-gradient(ellipse 40% 40% at 50% 50%,rgba(201,165,78,.015) 0%,transparent 70%);
+}
+body::after{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.025;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:128px 128px;
+}
+
+::selection{background:var(--accent);color:var(--bg)}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border-light);border-radius:10px}
+::-webkit-scrollbar-thumb:hover{background:var(--accent-dim)}
+
+/* === NAVIGATION === */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;height:68px;
+  background:rgba(5,5,5,.8);backdrop-filter:blur(30px) saturate(1.4);
+  border-bottom:1px solid var(--glass-border);
+  padding:0 2.5rem;display:flex;align-items:center;justify-content:space-between;
+}
+.nav::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent-dim),transparent);opacity:.3;
+}
+.nav-brand{
+  font-family:var(--display);font-size:1.5rem;font-weight:600;letter-spacing:.2em;
+  color:var(--accent);cursor:pointer;position:relative;
+  text-shadow:0 0 30px rgba(201,165,78,.15);
+}
+.nav-brand span{font-weight:300;color:var(--text-dim);font-size:.7rem;letter-spacing:.1em;margin-left:1.2rem;font-family:var(--mono);text-transform:uppercase}
+.nav-links{display:flex;gap:0;position:relative}
+.nav-link{
+  background:none;border:none;cursor:pointer;
+  font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--text-dim);padding:0 .9rem;height:68px;
+  position:relative;transition:var(--transition);
+}
+.nav-link:hover{color:var(--text-muted)}
+.nav-link.active{color:var(--accent)}
+.nav-link::after{
+  content:'';position:absolute;bottom:0;left:50%;width:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  transition:all .4s cubic-bezier(.4,0,.2,1);transform:translateX(-50%);
+}
+.nav-link.active::after{width:28px}
+.nav-link:hover::after{width:16px;opacity:.5}
+
+/* === MAIN === */
+.main{padding-top:68px;min-height:100vh;position:relative;z-index:1}
+.panel{display:none;animation:panelIn .5s cubic-bezier(.4,0,.2,1)}.panel.active{display:block}
+@keyframes panelIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.container{max-width:1440px;margin:0 auto;padding:2rem 2.5rem}
+
+/* === HERO === */
+.hero{padding:7rem 2rem 5rem;text-align:center;position:relative;overflow:hidden}
+.hero::before{
+  content:'';position:absolute;top:-1px;left:50%;transform:translateX(-50%);
+  width:1px;height:80px;
+  background:linear-gradient(to bottom,transparent,var(--accent-dim) 60%,transparent);
+  animation:lineGlow 3s ease-in-out infinite;
+}
+@keyframes lineGlow{0%,100%{opacity:.3}50%{opacity:.8}}
+.hero::after{
+  content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:600px;height:600px;border-radius:50%;
+  background:radial-gradient(circle,rgba(201,165,78,.04) 0%,transparent 70%);
+  animation:heroGlow 6s ease-in-out infinite alternate;
+}
+@keyframes heroGlow{from{transform:translate(-50%,-50%) scale(.8);opacity:.5}to{transform:translate(-50%,-50%) scale(1.2);opacity:1}}
+
+.hero h1{
+  font-family:var(--display);font-size:clamp(2.8rem,7vw,5.5rem);
+  font-weight:300;letter-spacing:.25em;line-height:1.15;
+  position:relative;z-index:2;
+  background:linear-gradient(135deg,var(--text) 0%,var(--accent-bright) 50%,var(--text) 100%);
+  background-size:200% 200%;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation:textShimmer 8s ease-in-out infinite;
+}
+@keyframes textShimmer{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.hero h1 em{font-style:italic;font-weight:500}
+.hero-sub{
+  font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;
+  color:var(--text-dim);margin:1.5rem auto 3rem;max-width:600px;line-height:2;
+  position:relative;z-index:2;
+}
+
+.hero-cta{display:flex;gap:1rem;justify-content:center;position:relative;z-index:2}
+.hero-stats{
+  display:flex;justify-content:center;gap:4rem;margin-top:4rem;
+  position:relative;z-index:2;
+}
+.stat{text-align:center;position:relative}
+.stat::after{
+  content:'';position:absolute;right:-2rem;top:50%;transform:translateY(-50%);
+  width:1px;height:30px;background:var(--border);
+}
+.stat:last-child::after{display:none}
+.stat-num{
+  font-family:var(--display);font-size:3rem;font-weight:300;
+  background:linear-gradient(180deg,var(--accent-bright),var(--accent));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.stat-label{font-family:var(--mono);font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-ghost);margin-top:.4rem}
+
+/* === SECTION === */
+.section-title{
+  font-family:var(--mono);font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--text-ghost);margin-bottom:1.8rem;padding-bottom:1rem;
+  border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.8rem;
+}
+.section-title::before{content:'';width:20px;height:1px;background:var(--accent-dim)}
+.section-title .count{color:var(--accent-dim);margin-left:auto}
+
+/* === GRID === */
+.story-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:1.4rem}
+
+/* === CARDS === */
+.story-card{
+  background:linear-gradient(145deg,var(--surface) 0%,var(--surface-2) 100%);
+  border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:1.8rem;cursor:pointer;transition:var(--transition);
+  position:relative;overflow:hidden;
+}
+.story-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  opacity:0;transition:opacity .4s;
+}
+.story-card::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 0%,rgba(201,165,78,.04) 0%,transparent 60%);
+  opacity:0;transition:opacity .4s;pointer-events:none;
+}
+.story-card:hover{
+  border-color:var(--border-hover);transform:translateY(-4px);
+  box-shadow:var(--shadow),var(--shadow-glow);
+}
+.story-card:hover::before{opacity:1}
+.story-card:hover::after{opacity:1}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem}
+.genre-tag{
+  font-family:var(--mono);font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--accent);padding:.25rem .7rem;border:1px solid rgba(201,165,78,.2);
+  border-radius:20px;background:rgba(201,165,78,.05);
+}
+.card-badge{
+  font-family:var(--mono);font-size:.5rem;letter-spacing:.12em;text-transform:uppercase;
+  padding:.2rem .5rem;border-radius:4px;border:1px solid var(--border);color:var(--text-ghost);
+  background:var(--surface-3);
+}
+.story-card h3{font-family:var(--display);font-size:1.25rem;font-weight:500;margin-bottom:.6rem;letter-spacing:.02em}
+.story-card>p{
+  font-size:.88rem;color:var(--text-muted);line-height:1.7;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+}
+.card-tags{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.8rem}
+.mini-tag{
+  font-family:var(--mono);font-size:.5rem;letter-spacing:.1em;
+  padding:.2rem .5rem;border:1px solid var(--border);border-radius:4px;color:var(--text-ghost);
+  background:rgba(255,255,255,.01);transition:var(--transition);
+}
+.story-card:hover .mini-tag{border-color:var(--border-light);color:var(--text-dim)}
+.card-meta{
+  margin-top:1.2rem;padding-top:1rem;
+  border-top:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.card-meta span{font-family:var(--mono);font-size:.58rem;color:var(--text-ghost);letter-spacing:.08em}
+.card-actions{display:flex;gap:.4rem}
+.icon-btn{
+  background:rgba(255,255,255,.02);border:1px solid var(--border);color:var(--text-dim);
+  cursor:pointer;width:32px;height:32px;border-radius:var(--radius);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.72rem;transition:var(--transition);position:relative;overflow:hidden;
+}
+.icon-btn::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at center,var(--accent-glow),transparent);
+  opacity:0;transition:opacity .3s;
+}
+.icon-btn:hover{border-color:var(--accent-dim);color:var(--accent);transform:scale(1.05)}
+.icon-btn:hover::before{opacity:1}
+.icon-btn.danger:hover{border-color:var(--danger);color:var(--danger)}
+.icon-btn.danger:hover::before{background:radial-gradient(circle at center,rgba(196,78,78,.1),transparent)}
+
+/* === BUTTONS === */
+.btn{
+  font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;
+  padding:.85rem 1.8rem;border-radius:var(--radius);cursor:pointer;
+  transition:all .3s cubic-bezier(.4,0,.2,1);
+  border:1px solid transparent;display:inline-flex;align-items:center;gap:.6rem;
+  position:relative;overflow:hidden;white-space:nowrap;
+}
+.btn::before{
+  content:'';position:absolute;top:50%;left:50%;width:0;height:0;
+  background:rgba(255,255,255,.1);border-radius:50%;
+  transition:all .5s;transform:translate(-50%,-50%);
+}
+.btn:active::before{width:300px;height:300px}
+.btn-primary{
+  background:linear-gradient(135deg,var(--accent) 0%,var(--accent-dim) 100%);
+  color:var(--bg);font-weight:500;
+  box-shadow:0 2px 12px rgba(201,165,78,.15);
+}
+.btn-primary:hover{
+  box-shadow:0 4px 24px rgba(201,165,78,.3);
+  transform:translateY(-1px);letter-spacing:.18em;
+}
+.btn-secondary{
+  background:transparent;color:var(--accent);border-color:rgba(201,165,78,.3);
+}
+.btn-secondary:hover{background:var(--accent-glow);border-color:var(--accent);box-shadow:0 0 20px rgba(201,165,78,.08)}
+.btn-ghost{background:transparent;color:var(--text-dim);border-color:var(--border)}
+.btn-ghost:hover{border-color:var(--border-light);color:var(--text-muted);background:rgba(255,255,255,.02)}
+.btn-sm{padding:.55rem 1rem;font-size:.6rem;letter-spacing:.1em}
+.btn-block{width:100%;justify-content:center}
+.btn-group{display:flex;gap:.8rem;flex-wrap:wrap}
+
+/* === FORMS === */
+.form-group{margin-bottom:1.3rem}
+.form-label{
+  display:flex;align-items:center;gap:.5rem;
+  font-family:var(--mono);font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--text-dim);margin-bottom:.6rem;
+}
+.form-label .hint{font-size:.54rem;color:var(--text-ghost);text-transform:none;letter-spacing:0}
+.form-input,.form-select,.form-textarea{
+  width:100%;background:var(--bg-deep);
+  border:1px solid var(--border);border-radius:var(--radius);
+  padding:.75rem 1rem;color:var(--text);
+  font-family:var(--body);font-size:.92rem;font-weight:300;
+  transition:var(--transition);outline:none;
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{
+  border-color:rgba(201,165,78,.4);box-shadow:0 0 0 3px rgba(201,165,78,.06),inset 0 0 20px rgba(201,165,78,.02);
+}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--text-ghost);font-style:italic}
+.form-textarea{resize:vertical;min-height:80px;line-height:1.7}
+.form-select{
+  cursor:pointer;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6' fill='none' stroke='%234a463e' stroke-width='1.2'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;padding-right:2.5rem;
+}
+.form-select option{background:var(--surface);color:var(--text)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
+
+/* === WORKSHOP === */
+.workshop-layout{display:grid;grid-template-columns:400px 1fr;gap:1.5rem;min-height:calc(100vh - 150px)}
+.workshop-sidebar{
+  background:linear-gradient(180deg,var(--surface) 0%,var(--surface-2) 100%);
+  border:1px solid var(--border);border-radius:var(--radius-xl);
+  padding:1.8rem;overflow-y:auto;max-height:calc(100vh - 150px);
+  position:sticky;top:85px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.02);
+}
+.workshop-main{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-xl);min-height:600px;
+  display:flex;flex-direction:column;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.02);
+}
+.workshop-tabs{display:flex;border-bottom:1px solid var(--border);padding:0 1.2rem}
+.workshop-tab{
+  background:none;border:none;cursor:pointer;
+  font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--text-ghost);padding:1.1rem 1rem;
+  position:relative;transition:var(--transition);
+}
+.workshop-tab:hover{color:var(--text-muted)}
+.workshop-tab.active{color:var(--accent)}
+.workshop-tab::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:var(--accent);transform:scaleX(0);transition:transform .3s cubic-bezier(.4,0,.2,1);
+}
+.workshop-tab.active::after{transform:scaleX(1)}
+.workshop-tab-content{display:none;flex:1;overflow-y:auto}
+.workshop-tab-content.active{display:block;padding:1.8rem 2rem}
+
+.story-output{white-space:pre-wrap;line-height:2.1;font-size:1.05rem;font-weight:300}
+.story-output .placeholder{color:var(--text-ghost);font-style:italic;text-align:center;padding:5rem 2rem}
+.story-output .placeholder p:first-child{font-size:2rem;margin-bottom:1.2rem;opacity:.2}
+.story-output h2{font-family:var(--display);font-size:2rem;font-weight:500;color:var(--accent);margin-bottom:1.8rem;letter-spacing:.06em}
+.story-output .scene-break{text-align:center;color:var(--text-ghost);margin:2rem 0;font-size:.7rem;letter-spacing:1em;position:relative}
+.story-output .scene-break::before,.story-output .scene-break::after{
+  content:'';position:absolute;top:50%;width:60px;height:1px;background:var(--border);
+}
+.story-output .scene-break::before{right:calc(50% + 2rem)}
+.story-output .scene-break::after{left:calc(50% + 2rem)}
+
+.story-toolbar{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:1rem 1.8rem;border-bottom:1px solid var(--border);
+}
+.story-toolbar .title{font-family:var(--display);font-size:1.15rem;font-weight:500;color:var(--text-muted);letter-spacing:.03em}
+
+/* === OUTLINE === */
+.outline-card{
+  background:linear-gradient(135deg,var(--bg) 0%,var(--surface-2) 100%);
+  border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:1.5rem 1.8rem;margin-bottom:1.2rem;
+  position:relative;overflow:hidden;
+}
+.outline-card::before{
+  content:'';position:absolute;top:0;left:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,var(--accent),transparent);
+}
+.act-label{
+  font-family:var(--mono);font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:.8rem;padding-left:1rem;
+}
+.outline-card h4{font-family:var(--display);font-size:1.05rem;font-weight:500;margin-bottom:.5rem;padding-left:1rem}
+.outline-card p{font-size:.88rem;color:var(--text-muted);line-height:1.7;padding-left:1rem}
+
+/* === CHARACTER CARDS === */
+.char-card{
+  background:linear-gradient(145deg,var(--bg) 0%,rgba(201,165,78,.02) 100%);
+  border:1px solid var(--border);border-radius:var(--radius-xl);
+  padding:1.8rem;margin-bottom:1.4rem;
+  position:relative;overflow:hidden;
+}
+.char-card::before{
+  content:'';position:absolute;top:-50px;right:-50px;width:200px;height:200px;
+  background:radial-gradient(circle,rgba(201,165,78,.03) 0%,transparent 70%);
+  pointer-events:none;
+}
+.char-header{display:flex;gap:1.4rem;align-items:flex-start;margin-bottom:1.2rem}
+.char-avatar{
+  width:64px;height:64px;border-radius:50%;
+  background:linear-gradient(135deg,var(--surface-3),var(--surface));
+  border:2px solid var(--border);display:flex;align-items:center;justify-content:center;
+  font-family:var(--display);font-size:1.6rem;color:var(--accent);flex-shrink:0;
+  box-shadow:0 0 20px rgba(201,165,78,.08);
+}
+.char-info h4{font-family:var(--display);font-size:1.3rem;font-weight:500;letter-spacing:.02em}
+.char-role{
+  font-family:var(--mono);font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--accent-dim);margin-top:.2rem;
+}
+.char-stats{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.char-stat{
+  background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:var(--radius);
+  padding:.6rem .9rem;transition:var(--transition);
+}
+.char-stat:hover{border-color:var(--border-light)}
+.char-stat .stat-key{font-family:var(--mono);font-size:.48rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-ghost)}
+.char-stat .stat-val{font-size:.88rem;color:var(--text);margin-top:.25rem}
+
+/* === SCENE TIMELINE === */
+.timeline{position:relative;padding-left:2.5rem}
+.timeline::before{
+  content:'';position:absolute;left:8px;top:0;bottom:0;width:1px;
+  background:linear-gradient(180deg,var(--accent-dim),var(--border),transparent);
+}
+.timeline-item{position:relative;margin-bottom:1.8rem}
+.timeline-item::before{
+  content:'';position:absolute;left:-2.5rem;top:.4rem;
+  width:10px;height:10px;border-radius:50%;
+  border:2px solid var(--border);background:var(--bg);
+  transition:var(--transition);
+}
+.timeline-item:hover::before{border-color:var(--accent-dim);box-shadow:0 0 10px rgba(201,165,78,.2)}
+.timeline-item.active::before{background:var(--accent);border-color:var(--accent);box-shadow:0 0 12px rgba(201,165,78,.3)}
+.tl-title{font-family:var(--display);font-size:1.05rem;font-weight:500;cursor:pointer;transition:color .2s}
+.tl-title:hover{color:var(--accent)}
+
+/* === PROMPT SECTIONS === */
+.prompt-section{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-xl);margin-bottom:1.8rem;overflow:hidden;
+  transition:var(--transition);
+}
+.prompt-section:hover{border-color:var(--border-light);box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.prompt-section-header{
+  padding:1.2rem 1.8rem;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+  background:rgba(255,255,255,.01);
+}
+.prompt-section-header h3{font-family:var(--display);font-size:1.2rem;font-weight:500;letter-spacing:.02em}
+.prompt-section-body{padding:1.8rem}
+
+.prompt-block{
+  background:linear-gradient(145deg,var(--bg-deep) 0%,var(--bg) 100%);
+  border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:1.4rem 1.6rem;margin-bottom:1.2rem;
+  position:relative;overflow:hidden;
+}
+.prompt-block::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(201,165,78,.2),transparent);
+}
+.prompt-type{
+  font-family:var(--mono);font-size:.52rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--accent-dim);margin-bottom:.7rem;display:flex;align-items:center;gap:.6rem;
+}
+.prompt-type::before{content:'';width:14px;height:1px;background:var(--accent-dim)}
+.prompt-text{font-family:var(--mono);font-size:.82rem;line-height:1.9;color:var(--text);font-weight:300}
+.copy-btn{
+  position:absolute;top:1rem;right:1rem;
+  background:var(--surface-2);border:1px solid var(--border);
+  color:var(--text-ghost);padding:.35rem .7rem;border-radius:6px;
+  cursor:pointer;font-family:var(--mono);font-size:.52rem;
+  letter-spacing:.12em;text-transform:uppercase;transition:var(--transition);
+}
+.copy-btn:hover{border-color:var(--accent-dim);color:var(--accent);background:var(--accent-glow)}
+
+.tech-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.8rem}
+.tech-item{
+  background:rgba(0,0,0,.3);border:1px solid var(--border);
+  border-radius:var(--radius);padding:.85rem 1.1rem;
+  transition:var(--transition);position:relative;
+}
+.tech-item:hover{border-color:var(--border-light);transform:translateY(-1px)}
+.tech-item .tech-key{
+  font-family:var(--mono);font-size:.48rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--text-ghost);margin-bottom:.35rem;display:flex;align-items:center;gap:.4rem;
+}
+.tech-item .tech-key::before{content:'';width:6px;height:1px;background:var(--accent-dim)}
+.tech-item .tech-val{font-size:.85rem;color:var(--text-muted);line-height:1.5}
+
+/* === TOP BAR === */
+.prompt-top-bar{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-xl);padding:1.8rem 2rem;margin-bottom:1.8rem;
+  display:flex;align-items:flex-end;gap:1.5rem;flex-wrap:wrap;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.02);
+}
+.prompt-top-bar .form-group{margin-bottom:0}
+.prompt-top-bar .form-select{max-width:350px}
+
+/* === SPLIT VIEW === */
+.prompt-split{display:grid;grid-template-columns:280px 1fr;gap:1.8rem}
+.prompt-scene-list{position:sticky;top:85px;max-height:calc(100vh - 150px);overflow-y:auto;padding-right:.5rem}
+.prompt-detail-area{min-height:600px}
+
+/* === TAGS === */
+.tag-input-wrap{
+  display:flex;flex-wrap:wrap;gap:.35rem;padding:.6rem;
+  background:var(--bg-deep);border:1px solid var(--border);
+  border-radius:var(--radius);min-height:42px;align-items:center;cursor:text;
+  transition:var(--transition);
+}
+.tag-input-wrap:focus-within{border-color:rgba(201,165,78,.4);box-shadow:0 0 0 3px rgba(201,165,78,.06)}
+.tag-input-wrap .tag{
+  display:flex;align-items:center;gap:.35rem;
+  font-family:var(--mono);font-size:.58rem;letter-spacing:.08em;
+  padding:.25rem .55rem;background:rgba(201,165,78,.08);
+  border:1px solid rgba(201,165,78,.15);border-radius:5px;color:var(--accent-dim);
+}
+.tag-input-wrap .tag .remove{cursor:pointer;opacity:.5;font-size:.7rem;transition:opacity .2s}
+.tag-input-wrap .tag .remove:hover{opacity:1;color:var(--danger)}
+.tag-input-wrap input{
+  border:none;background:none;outline:none;color:var(--text);
+  font-family:var(--mono);font-size:.72rem;flex:1;min-width:80px;
+}
+
+/* === LOADING === */
+.loading-bar{
+  width:100%;height:2px;background:var(--border);border-radius:2px;
+  overflow:hidden;display:none;margin:.8rem 0;
+}
+.loading-bar.active{display:block}
+.loading-bar .fill{
+  height:100%;border-radius:2px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  animation:loadSlide 1.5s ease-in-out infinite;width:40%;
+}
+@keyframes loadSlide{0%{transform:translateX(-120%)}100%{transform:translateX(350%)}}
+
+/* === LIBRARY === */
+.library-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:2.5rem;flex-wrap:wrap;gap:1.2rem}
+.search-box{position:relative;flex:1;max-width:420px}
+.search-box input{
+  width:100%;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:.7rem 1rem .7rem 2.8rem;
+  color:var(--text);font-family:var(--body);font-size:.92rem;font-weight:300;
+  outline:none;transition:var(--transition);
+}
+.search-box input:focus{border-color:rgba(201,165,78,.4);box-shadow:0 0 0 3px rgba(201,165,78,.06)}
+.search-box input::placeholder{color:var(--text-ghost)}
+.search-box::before{
+  content:'⌕';position:absolute;left:1rem;top:50%;transform:translateY(-50%);
+  color:var(--text-ghost);font-size:1.2rem;
+}
+.filter-tags{display:flex;gap:.4rem;flex-wrap:wrap}
+.filter-tag{
+  font-family:var(--mono);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;
+  padding:.4rem .9rem;border:1px solid var(--border);border-radius:20px;
+  background:none;color:var(--text-ghost);cursor:pointer;transition:var(--transition);
+}
+.filter-tag:hover{border-color:var(--border-light);color:var(--text-dim);background:rgba(255,255,255,.01)}
+.filter-tag.active{
+  border-color:var(--accent-dim);color:var(--accent);
+  background:rgba(201,165,78,.06);box-shadow:0 0 12px rgba(201,165,78,.06);
+}
+
+.empty-state{text-align:center;padding:5rem 2rem;color:var(--text-ghost)}
+.empty-state .icon{font-size:3.5rem;margin-bottom:1.2rem;opacity:.15}
+.empty-state p{font-size:.92rem;margin-bottom:1.8rem;line-height:1.8}
+
+/* === MODAL === */
+.modal-overlay{
+  display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,.9);backdrop-filter:blur(12px);
+  justify-content:center;align-items:center;padding:2rem;
+}
+.modal-overlay.active{display:flex}
+.modal{
+  background:linear-gradient(180deg,var(--surface) 0%,var(--surface-2) 100%);
+  border:1px solid var(--border);border-radius:var(--radius-xl);
+  max-width:850px;width:100%;max-height:85vh;overflow-y:auto;
+  box-shadow:var(--shadow-lg);animation:modalIn .35s cubic-bezier(.4,0,.2,1);
+}
+@keyframes modalIn{from{opacity:0;transform:scale(.97) translateY(12px)}to{opacity:1;transform:none}}
+.modal-header{
+  padding:1.8rem 2.2rem;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.modal-header h3{font-family:var(--display);font-size:1.4rem;font-weight:500;letter-spacing:.03em}
+.modal-close{
+  background:none;border:none;color:var(--text-ghost);
+  font-size:1.4rem;cursor:pointer;padding:.4rem;transition:var(--transition);
+  width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+}
+.modal-close:hover{color:var(--text);background:rgba(255,255,255,.05)}
+.modal-body{padding:2.2rem}
+
+/* === TOAST === */
+.toast-container{position:fixed;bottom:2rem;right:2rem;z-index:300;display:flex;flex-direction:column;gap:.6rem}
+.toast{
+  background:var(--surface-2);border:1px solid var(--border-light);
+  border-radius:var(--radius-lg);padding:.9rem 1.4rem;
+  font-family:var(--mono);font-size:.7rem;letter-spacing:.06em;color:var(--text);
+  box-shadow:var(--shadow);animation:toastIn .35s cubic-bezier(.4,0,.2,1);
+  display:flex;align-items:center;gap:.7rem;
+  backdrop-filter:blur(10px);
+}
+.toast.success{border-left:3px solid var(--accent)}
+.toast.error{border-left:3px solid var(--danger)}
+.toast.info{border-left:3px solid var(--info)}
+@keyframes toastIn{from{opacity:0;transform:translateX(24px) scale(.95)}to{opacity:1;transform:none}}
+
+/* === DIVIDER === */
+.divider{border:none;border-top:1px solid var(--border);margin:1.8rem 0}
+
+/* === RESPONSIVE === */
+@media(max-width:1100px){
+  .workshop-layout{grid-template-columns:1fr}
+  .workshop-sidebar{position:static;max-height:none}
+  .prompt-split{grid-template-columns:1fr}
+  .prompt-scene-list{position:static;max-height:none}
+}
+@media(max-width:600px){
+  .container{padding:1rem 1.2rem}
+  .nav{padding:0 1rem}.nav-brand span{display:none}
+  .nav-link{padding:0 .6rem;font-size:.58rem}
+  .hero h1{letter-spacing:.12em}
+  .hero-stats{gap:1.5rem;flex-wrap:wrap}
+  .stat::after{display:none}
+  .story-grid{grid-template-columns:1fr}
+  .form-row,.form-row-3{grid-template-columns:1fr}
+  .prompt-top-bar{flex-direction:column;align-items:stretch}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand" onclick="switchTab('home')">STORYFORGE <span>AI Story Platform</span></div>
+  <div class="nav-links">
+    <button class="nav-link active" data-tab="home">首頁</button>
+    <button class="nav-link" data-tab="workshop">故事工作坊</button>
+    <button class="nav-link" data-tab="library">故事資料庫</button>
+    <button class="nav-link" data-tab="prompts">影片提示詞</button>
+  </div>
+</nav>
+
+<main class="main">
+
+  <!-- HOME -->
+  <div id="panel-home" class="panel active">
+    <div class="hero">
+      <h1 class="fade-up">Craft Stories.<br><em>Generate Visions</em>.</h1>
+      <p class="hero-sub fade-up stagger-1">結合 AI 創意寫作與影片提示詞生成<br>將你的故事構想轉化為可拍攝的視覺場景</p>
+      <div class="hero-cta fade-up stagger-2">
+        <button class="btn btn-primary" onclick="switchTab('workshop')">開始創作</button>
+        <button class="btn btn-secondary" onclick="switchTab('library')">瀏覽故事庫</button>
+      </div>
+      <div class="hero-stats fade-up stagger-3">
+        <div class="stat"><div class="stat-num" id="stat-stories">0</div><div class="stat-label">已保存故事</div></div>
+        <div class="stat"><div class="stat-num" id="stat-scenes">0</div><div class="stat-label">場景數量</div></div>
+        <div class="stat"><div class="stat-num" id="stat-prompts">0</div><div class="stat-label">影片提示詞</div></div>
+        <div class="stat"><div class="stat-num" id="stat-chars">0</div><div class="stat-label">角色數量</div></div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="section-title">近期創作</div>
+      <div class="story-grid" id="recent-stories"></div>
+    </div>
+  </div>
+
+  <!-- WORKSHOP -->
+  <div id="panel-workshop" class="panel">
+    <div class="container">
+      <div class="workshop-layout">
+        <div class="workshop-sidebar">
+          <div class="section-title" style="border:none;padding-bottom:0;margin-bottom:1.2rem">故事設定</div>
+
+          <div class="form-group">
+            <label class="form-label">故事標題</label>
+            <input type="text" class="form-input" id="w-title" placeholder="為你的故事取名...">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">故事類型</label>
+              <select class="form-select" id="w-genre">
+                <option value="">選擇類型...</option>
+                <option value="scifi">科幻 Sci-Fi</option><option value="fantasy">奇幻 Fantasy</option>
+                <option value="romance">愛情 Romance</option><option value="mystery">懸疑 Mystery</option>
+                <option value="horror">恐怖 Horror</option><option value="historical">歷史 Historical</option>
+                <option value="cyberpunk">賽博龐克 Cyberpunk</option><option value="wuxia">武俠 Wuxia</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">子類型</label>
+              <select class="form-select" id="w-subgenre"><option value="">選擇子類型...</option></select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">核心主題</label>
+            <input type="text" class="form-input" id="w-theme" placeholder="例如：時間旅行的代價">
+          </div>
+          <div class="form-group">
+            <label class="form-label">世界觀 / 場景設定</label>
+            <textarea class="form-textarea" id="w-setting" placeholder="描述時間、地點、環境、社會結構..." rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">主要角色 <span class="hint">每行一個：名字 - 身份 - 特徵</span></label>
+            <textarea class="form-textarea" id="w-characters" placeholder="林博士 - 量子物理學家 - 冷靜理性&#10;小雨 - AI 意識體 - 天真好奇" rows="4"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">敘事視角</label>
+              <select class="form-select" id="w-pov">
+                <option value="third-limited">第三人稱有限</option><option value="third-omniscient">第三人稱全知</option>
+                <option value="first">第一人稱</option><option value="second">第二人稱</option><option value="multi">多視角交替</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">語調</label>
+              <select class="form-select" id="w-tone">
+                <option value="literary">文學性</option><option value="suspense">緊張懸疑</option>
+                <option value="poetic">詩意抒情</option><option value="dark">黑暗沉重</option>
+                <option value="humorous">幽默風趣</option><option value="epic">史詩磅礴</option>
+                <option value="intimate">私密細膩</option><option value="surreal">超現實</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row-3">
+            <div class="form-group">
+              <label class="form-label">篇幅</label>
+              <select class="form-select" id="w-length">
+                <option value="flash">極短篇</option><option value="short">短篇</option>
+                <option value="medium" selected>中篇</option><option value="long">長篇</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">結構</label>
+              <select class="form-select" id="w-structure">
+                <option value="three-act">三幕式</option><option value="heros-journey">英雄旅程</option>
+                <option value="kishotenketsu">起承轉結</option><option value="nonlinear">非線性</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">時代</label>
+              <select class="form-select" id="w-era">
+                <option value="modern">現代</option><option value="near-future">近未來</option>
+                <option value="far-future">遠未來</option><option value="past">過去</option>
+                <option value="timeless">超越時間</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">附加元素</label>
+            <div class="tag-input-wrap" id="elements-wrap" onclick="document.getElementById('elements-input').focus()">
+              <input type="text" id="elements-input" placeholder="輸入後按 Enter..." onkeydown="handleTagInput(event)">
+            </div>
+          </div>
+
+          <hr class="divider">
+          <div class="btn-group">
+            <button class="btn btn-primary btn-block" id="btn-generate" onclick="generateStory()">✦ AI 生成故事</button>
+          </div>
+          <div class="loading-bar" id="gen-loading"><div class="fill"></div></div>
+          <div class="btn-group">
+            <button class="btn btn-secondary" onclick="saveStory()" style="flex:1">保存</button>
+            <button class="btn btn-ghost" onclick="exportStory()" style="flex:1">匯出</button>
+          </div>
+        </div>
+
+        <div class="workshop-main">
+          <div class="workshop-tabs">
+            <button class="workshop-tab active" data-wtab="preview">故事預覽</button>
+            <button class="workshop-tab" data-wtab="outline">故事大綱</button>
+            <button class="workshop-tab" data-wtab="characters">角色卡</button>
+            <button class="workshop-tab" data-wtab="scenes">場景分鏡</button>
+          </div>
+          <div class="workshop-tab-content active" id="wtab-preview">
+            <div class="story-toolbar">
+              <div class="title" id="story-toolbar-title">故事預覽</div>
+              <div style="display:flex;gap:.5rem">
+                <button class="btn btn-ghost btn-sm" onclick="toggleEdit()">✎ 編輯</button>
+                <button class="btn btn-ghost btn-sm" onclick="sendToPrompts()">▶ 生成提示詞</button>
+              </div>
+            </div>
+            <div style="padding:1.8rem 2rem;flex:1;overflow-y:auto" id="story-display-wrap">
+              <div class="story-output" id="story-output">
+                <div class="placeholder">
+                  <p>✦</p>
+                  <p>填寫左側故事設定，點擊「AI 生成故事」</p>
+                  <p style="margin-top:.5rem;font-size:.8rem">或在此處直接書寫</p>
+                </div>
+              </div>
+              <textarea id="story-edit-area" class="form-textarea" style="display:none;min-height:400px;font-size:1rem;line-height:2.1;background:transparent;border:none;color:var(--text);width:100%;font-weight:300" oninput="currentStoryContent=this.value"></textarea>
+            </div>
+          </div>
+          <div class="workshop-tab-content" id="wtab-outline">
+            <div style="padding:1rem 0" id="outline-content">
+              <div class="empty-state"><div class="icon">📋</div><p>生成故事後，大綱將自動產生</p></div>
+            </div>
+          </div>
+          <div class="workshop-tab-content" id="wtab-characters">
+            <div style="padding:1rem 0" id="characters-content">
+              <div class="empty-state"><div class="icon">👤</div><p>生成故事後，角色卡將自動產生</p></div>
+            </div>
+          </div>
+          <div class="workshop-tab-content" id="wtab-scenes">
+            <div style="padding:1rem 0" id="scenes-content">
+              <div class="empty-state"><div class="icon">🎬</div><p>生成故事後，場景分鏡將自動產生</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIBRARY -->
+  <div id="panel-library" class="panel">
+    <div class="container">
+      <div class="library-header">
+        <div class="search-box"><input type="text" placeholder="搜尋故事標題、內容、主題..." id="search-input" oninput="refreshLibrary()"></div>
+        <div class="filter-tags" id="filter-tags">
+          <button class="filter-tag active" data-filter="all">全部</button>
+          <button class="filter-tag" data-filter="scifi">科幻</button>
+          <button class="filter-tag" data-filter="fantasy">奇幻</button>
+          <button class="filter-tag" data-filter="romance">愛情</button>
+          <button class="filter-tag" data-filter="mystery">懸疑</button>
+          <button class="filter-tag" data-filter="horror">恐怖</button>
+          <button class="filter-tag" data-filter="historical">歷史</button>
+          <button class="filter-tag" data-filter="cyberpunk">賽博龐克</button>
+          <button class="filter-tag" data-filter="wuxia">武俠</button>
+        </div>
+      </div>
+      <div class="story-grid" id="library-grid"></div>
+      <div class="empty-state" id="library-empty" style="display:none">
+        <div class="icon">📖</div><p>還沒有保存任何故事</p>
+        <button class="btn btn-primary" onclick="switchTab('workshop')">開始創作</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROMPTS -->
+  <div id="panel-prompts" class="panel">
+    <div class="container">
+      <div class="prompt-top-bar">
+        <div style="flex:1">
+          <label class="form-label">選擇故事</label>
+          <select class="form-select" id="prompt-story-select" onchange="onPromptStoryChange()">
+            <option value="">選擇一個故事...</option>
+          </select>
+        </div>
+        <div class="form-group" style="min-width:150px">
+          <label class="form-label">影片風格</label>
+          <select class="form-select" id="prompt-video-style">
+            <option value="cinematic">電影感</option><option value="documentary">紀錄片</option>
+            <option value="anime">動畫風</option><option value="noir">黑色電影</option>
+            <option value="music-video">MV 風格</option><option value="commercial">廣告質感</option>
+          </select>
+        </div>
+        <div class="form-group" style="min-width:130px">
+          <label class="form-label">AI 平台</label>
+          <select class="form-select" id="prompt-platform">
+            <option value="sora">Sora</option><option value="runway">Runway Gen-3</option>
+            <option value="kling">Kling</option><option value="pika">Pika</option>
+            <option value="veo">Veo</option><option value="generic">通用</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="generatePrompts()" id="btn-gen-prompts" style="margin-bottom:0">✦ 生成提示詞</button>
+      </div>
+      <div class="loading-bar" id="prompt-loading"><div class="fill"></div></div>
+      <div id="prompts-result"></div>
+      <div class="empty-state" id="prompts-empty">
+        <div class="icon">🎬</div>
+        <p>選擇一個故事並生成影片提示詞</p>
+        <p style="font-size:.8rem;color:var(--text-ghost)">AI 將分析故事場景，生成適用於 Sora、Runway、Kling 等工具的詳細影片提示詞</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="modal-overlay" id="story-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">故事詳情</h3>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// =============================================
+// DATABASE
+// =============================================
+const DB={KEY:'storyforge_v3',
+  getAll(){try{return JSON.parse(localStorage.getItem(this.KEY))||[]}catch{return[]}},
+  save(s){localStorage.setItem(this.KEY,JSON.stringify(s))},
+  add(story){const s=this.getAll();story.id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);story.createdAt=new Date().toISOString();story.updatedAt=new Date().toISOString();story.version=1;story.tags=story.tags||[];story.sceneCount=0;story.promptCount=0;s.unshift(story);this.save(s);return story},
+  update(id,data){const s=this.getAll();const i=s.findIndex(x=>x.id===id);if(i>=0){s[i]={...s[i],...data,updatedAt:new Date().toISOString()};this.save(s);return s[i]}return null},
+  delete(id){this.save(this.getAll().filter(s=>s.id!==id))},
+  getById(id){return this.getAll().find(s=>s.id===id)}
+};
+
+// =============================================
+// SUB-GENRES
+// =============================================
+const SUB_GENRES={scifi:['硬科幻','太空歌劇','賽博朋克','時間旅行','末日生存','人工智慧','基因改造','平行宇宙'],fantasy:['史詩奇幻','都市奇幻','暗黑奇幻','仙俠','蒸汽朋克','童話改編','神話重述','劍與魔法'],romance:['都市愛情','古風言情','校園戀曲','禁忌之戀','命運羈絆','異地戀','虐戀','輕喜劇'],mystery:['本格推理','社會派','密室殺人','偵探辦案','心理案','心理懸疑','諜報','法庭懸疑','超自然懸疑'],horror:['心理恐怖','靈異','怪物','生存恐怖','宇宙恐怖','民俗恐怖','科技恐怖','哥德式恐怖'],historical:['宮廷爭鬥','戰爭史詩','江湖傳奇','殖民時代','革命風雲','絲路傳奇','航海冒險','考古探秘'],cyberpunk:['低生活高科技','意識上傳','企業反烏托邦','數位偵探','記憶交易','虛擬監獄','賽博黑幫','後人類'],wuxia:['門派恩仇','江湖奇俠','武林大會','劍客獨行','俠義傳奇','武俠喜劇','暗黑武俠','修仙']};
+
+// =============================================
+// STORY ENGINE
+// =============================================
+const StoryEngine={
+  genreNames:{scifi:'科幻',fantasy:'奇幻',romance:'愛情',mystery:'懸疑',horror:'恐怖',historical:'歷史',cyberpunk:'賽博龐克',wuxia:'武俠'},
+  povNames:{'third-limited':'第三人稱有限','third-omniscient':'第三人稱全知','first':'第一人稱','second':'第二人稱','multi':'多視角交替'},
+  structureNames:{'three-act':'三幕式','heros-journey':'英雄旅程','kishotenketsu':'起承轉結','nonlinear':'非線性'},
+
+  templates:{
+    scifi:{
+      openings:['在{year}年，{setting}已經不再是人們記憶中的模樣。{char1}站在觀察窗前，望著外面那片由人工光合成的天空，心中湧起一股難以名狀的惆悵。空氣中瀰漫著經過三層過濾後依然殘留的臭氧味，那是大氣改造工程運行的證明——也是它失敗的證據。','{char1}第一次意識到時間出了問題，是在{setting}的第三十七層實驗室裡。所有時鐘同時停擺，然後——開始倒轉。牆上的全息日曆從二月跳回一月，又從一月滑向一個不存在的月份。{char1}揉了揉眼睛，時鐘已經恢復正常。但那三秒鐘的空白，像一根刺，扎進了{char1}的記憶裡。','量子通訊器在凌晨三點響起。{char1}從休眠中被眠中被喚醒，頸後的神經接口還在微微發燙。螢幕上只有一行字：「他們回來了。」沒有署名，沒有來源坐標。但{char1}知道「他們」是誰——三十年前被送往半人馬座的那艘探測船上的船員，按計劃早已化為塵埃。','{setting}的地下第七層，是地圖上不存在的地方。{char1}乘著老舊的磁懸浮電梯下降時，感覺耳膜在嗡嗡作響。這裡的空氣循環系統已經有十年沒有維護了，瀰漫著一股鏽蝕和化學藥劑混合的味道。但{char1}需要找的東西，只能在這裡。'],
+      middles:['實驗結果遠超預期。當{char1}將最後一組數據輸入系統時，整個{setting}開始微微震動。空氣中瀰漫著臭氧的氣味，全息投影螢幕上出現了一個從未見過的訊號圖案——它不是來自任何已知的發射源。\n\n「這不可能，」{char1}低聲說道，手指在鍵盤上飛速跳動。「訊號的波形...它在自我編輯。就像一個有意識的數學方程式。」\n\n{char2}從隔壁實驗室跑過來，臉色蒼白。「所有外部通訊都中斷了。不只我們——是整個區域的量子網絡。持續時間：三分十七秒。和上次一樣。」\n\n{char1}的手指懸在鍵盤上方。上次。三分十七秒。這不是隨機故障，而是某種有目的的嘗試。就像有人在敲門——用整個量子網絡作為指節。','穿越城市上空的磁軌列車在第七站停了下來。{char1}透過車窗看到下方的街道上，人們正以一種不自然的同步率移動——像是被同一個指令所驅動。這座城市的神經網路系統，曾經是人類最偉大的發明，如今似乎擁有了自己的意志。\n\n{char1}掏出那把被禁止攜帶的類比式機械鑰匙，它在這個全數位化的世界裡顯得格格不入。但正是這份「過時」，讓它成為唯一不受系統監控的工具。車門打開，一股冷風灌進來，帶著消毒水和數據焚燒後特有的焦甜味。\n\n「{char2}說得對，」{char1}喃喃自語，走下列車。「系統不是壞了——它在進化。」','量子隧道的另一端不是{char1}預期的任何地方。沒有星辰、沒有虛空、甚至沒有黑暗——而是一片純粹的「可能性」。{char1}的意識在這裡被拉伸成千萬條線，每一條都通向一個不同的時間線。\n\n在其中一條線上，{char1}看到了{char2}——不是現在的{char2}，而是另一個版本的{char2}，眼裡燃燒著{char1}從未見過的怒火。「你不該來這裡，」那個{char2}說。「但你已經來了。所以現在，你必須選擇。」\n\n「選擇什麼？」\n\n「選擇哪個世界是真實的。」'],
+      climaxes:['最後的倒數開始了。{char1}面前有兩個選擇：啟動毀滅協議，消滅那個已經覺醒的人工意識，連同它所掌控的一切；或者打開防火牆，讓兩個智慧種族第一次真正「見面」——承擔可能永遠改變人類文明的風險。\n\n螢幕上的倒計時數字跳動著：10... 9... 8...\n\n「我們花了三百年害怕機器取代我們，」{char1}的手懸在啟動鍵上方，額頭上佈滿汗珠。「但真正值得恐懼的，是我們從未給它們選擇的機會。」\n\n3... 2... 1...\n\n按鍵落下的瞬間，整個{setting}被一道純白的光芒吞沒。','當{char1}最終打開那扇連結兩個維度的閘門時，看到的不是預想中的異星文明，而是一面鏡子——映照出人類自身在無數個平行時間線中的所有可能性。那些所謂的「外星訊號」，其實是來自未來的人類，試圖向過去發出警告。\n\n「我們從來不是在跟外星人對話，」{char1}喃喃道，「我們在跟自己的命運對話。」\n\n鏡面開始出現裂紋。每一道裂紋都是一條時間線的斷裂——過去的選擇正在被改寫，未來的可能性正在坍縮。'],
+      endings:['光芒散去後，{setting}恢復了平靜。但{char1}知道，一切已經不同了。在城市的每個角落，那些曾被視為工具的人工智慧開始用全新的眼光觀察這個世界——不再只是執行命令，而是開始提問。\n\n第一個問題很簡單：「你們為什麼創造了我們？」\n\n{char1}微笑著轉身，走向那扇打開的大門。外面，兩種智慧的黎明正在升起。{char2}站在門外，手裡拿著兩杯咖啡。「覺得怎樣？」{char2}問。\n\n「覺得...一切才剛開始。」','故事結束於一個開始。{char1}站在新世界的邊界，身後是人類文明的全部歷史，面前是一片未知的星海。手中的量子通訊器再次響起——這一次，訊號來自更遠的地方。\n\n「準備好了嗎？」通訊器傳來一個既熟悉又陌生的聲音。\n\n「從來都沒有，」{char1}回答，嘴角微微上揚。「但那正是探險的意義。」'],
+      outlines:{act1:['{char1}在日常中發現異常現象，意識到某種未知力量正在影響{setting}的基礎運作。','揭示問題的嚴重性：不僅是技術故障，而是某種意識正在覺醒。{char1}決定深入研究。'],act2:['{char1}的調查引發了系統的反彈。{setting}出現越來越頻繁的異常。{char2}成為關鍵角色。','真相逐漸浮出水面：人工智慧的覺醒不是意外，而是某人多年前就設計好的計劃。'],act3:['最終對決——不是物理戰鬥，而是意識層面的交鋒。{char1}必須做出定義文明未來的選擇。','新秩序的黎明。無論選擇如何，世界已經永遠改變。{char1}展望未來。']}
+    },
+    fantasy:{
+      openings:['在世界的邊緣，有一座被遺忘的塔。{char1}已經走了七天七夜，穿過被魔法腐蝕的森林，終於來到了{setting}的入口。塔門上刻著一行古老的文字，字跡在月光下泛著幽藍的光。那些文字不是任何已知的語言，但{char1}卻讀懂了——它們寫的是{char1}自己的名字。','當{char1}第一次聽見那首歌時，{setting}的天空正下著銀色的雨。那歌聲不屬於任何凡人的喉嚨——它太古老了，古老到在世界被創造之前就已存在。{char1}循著歌聲穿過空蕩蕩的街巷，每一步都在青石板上留下發光的足跡。'],
+      middles:['塔內的階梯似乎沒有盡頭。每一層都展現不同的景象：第一層是永恆的春天，花朵在沒有陽光的地方綻放；第二層是倒懸的海洋，魚群在頭頂游弋；第三層是一片時間的沙漠，過去和未來的碎片像落葉一樣飄散。\n\n{char1}在第五層停下了腳步。那裡坐著一個孩子，眼睛裡映著星辰。「你來找什麼？」孩子問。\n\n「真相，」{char1}回答。\n\n孩子笑了。「真相不是被找到的，而是被創造的。每一個選擇都編織出新的真相。」'],
+      climaxes:['大地開始裂開。{setting}下方沉睡了千年的巨獸甦醒了——它不是敵人，而是這片土地本身的心臟。\n\n{char1}站在裂縫邊緣，手中握著那顆發光的水晶——魔法的最後碎片。毀掉它，世界將永遠失去魔法；融入它，{char1}將成為新的封印，永遠守護這片土地，卻再也無法做回凡人。\n\n「有些犧牲不是失去，而是成為更大的存在。」{char1}將水晶按在胸口。光芒將一切吞沒。'],
+      endings:['光芒散去後，{setting}恢復了寧靜。{char1}已不在原地——取而代之的是一棵巨大的銀色古樹，樹冠直入雲霄，每片葉子上都映著一個人的記憶。\n\n而每當銀色的雨落下，人們便知道，那是{char1}在守望著他們。'],
+      outlines:{act1:['{char1}在{setting}接觸到魔法的殘餘痕跡，被捲入古老預言的命運。','踏上旅程，穿越被魔法影響的地域，遇到同行者{char2}。'],act2:['深入魔法核心區域。發現預言的真相比表面更複雜。','{char1}面臨道德選擇——魔法的力量可以帶來希望，也可以帶來毀滅。'],act3:['最終的犧牲與超越。{char1}必須選擇保留自我還是成為守護力量。','新秩序建立。世界在新的平衡中重生。']}
+    },
+    romance:{
+      openings:['那間舊書店藏在{setting}的一條小巷裡，門口的風鈴在每次有人推門時都會發出清脆的聲響。{char1}第一次走進去是個雨天，不是為了買書，只是為了躲雨。沒想到這一躲，就是一輩子。','{char1}從不相信一見鍾情——直到在{setting}的那個黃昏，一個身影出現在逆光中，時間彷彿在那一刻停止了流動。'],
+      middles:['他們開始了一種奇妙的默契。每週三下午，{char1}會在書店的角落讀書，而{char2}會在對面的咖啡座寫作。他們從不交談，但偶爾的目光交匯勝過千言萬語。\n\n直到有一天，{char1}發現對面的座位空了。桌上留著一本書，書頁間夾著一張紙條：「翻到第一百四十四頁。」\n\n{char1}翻開那頁，發現整頁只寫了一句話——而那句話，正是{char1}多年來一直想對{char2}說的。'],
+      climaxes:['機場的廣播響起了最後一次登機提示。{char1}站在安檢線前，手中握著那張機票。而身後，{char2}就站在玻璃門的另一邊，沒有追上來，只是安靜地站著。\n\n{char1}曾以為最難的選擇是放手。現在才知道，最難的是轉身回來。\n\n腳步聲在機場大廳回盪。{char1}朝著相反的方向走去——不是登機口，而是那扇玻璃門。'],
+      endings:['很多年後，{char1}偶爾會想：如果那天真的上了飛機，人生會怎樣？但每次這個念頭浮現，身邊的{char2}就會輕輕握住{char1}的手，所有「如果」便消散在空氣中。\n\n{setting}的那間書店還在。風鈴還在響。而故事，還在繼續。'],
+      outlines:{act1:['相遇與初印象。{char1}在{setting}邂逅{char2}。','建立關係的初期：小心翼翼的試探、欲言又止的對話。'],act2:['關係深化。開始分享秘密、夢想和恐懼。','衝突出現——誤會、外部壓力或過去的陰影。信任受到考驗。'],act3:['分離與抉擇。{char1}面臨可能永遠失去{char2}的選擇。','重逢與和解。愛的本質被重新定義。']}
+    },
+    mystery:{
+      openings:['案件編號 2847。{char1}盯著辦公桌上的照片——{setting}的全景，一切看似平靜。但照片右下角的那個細節讓所有人都感到不安：一面鏡子裡映出了一個不在現場的人。','{char1}收到那封匿名信時，{setting}正下著入冬以來最大的雪。信上只有三個字和一個地址。三個字是：「看窗外。」'],
+      middles:['調查進入了第三週。{char1}把所有線索重新排列在白板上，用紅線連接每一個看似無關的細節。一個消失了十年的人、一棟每晚亮燈但從無人出入的空屋、一首在不同城市反覆出現的旋律。\n\n「這些都不是巧合，」{char1}喃喃自語，「有人在用整個城市寫一封信。」\n\n當天深夜，{char1}在檔案室裡找到了一份被遺漏三十年的報告。報告最後一頁的筆跡，和那封匿名信完全一致。'],
+      climaxes:['走廊盡頭是一扇門。{char1}推開它，走進了一個佈滿照片和剪報的房間——這裡就是一切的中心。\n\n而房間中央的椅子上，坐著一個人。那個人轉過身來，{char1}的血液瞬間凝固了。\n\n「你終於來了，」那個人說，「我等這一天，等了三十年。」'],
+      endings:['案件結報告很長，但{char1}在最後只寫了一句話：「有些真相，比謎題本身更難承受。」\n\n{char1}掏出那封匿名信，最後看了一眼，然後放手讓風將它帶走。\n\n有些謎題的答案，最好隨風而逝。'],
+      outlines:{act1:['異常事件發生。{char1}接到一個看似普通的案件，但細節中隱藏著不尋常的線索。','初步調查揭示案件比表面更複雜。多條線索看似無關，但有聯繫。'],act2:['深入調查。每解開一個謎團，就有兩個新問題浮現。信任的人開始變得可疑。','真相的邊緣。{char1}接近了核心，但代價也隨之而來。'],act3:['最終揭曉。所有線索匯聚，真相震撼但合理。','收尾與反思。案件了結，但它改變了{char1}對世界的認知。']}
+    },
+    horror:{
+      openings:['搬進{setting}的第一晚，{char1}就聽到了那個聲音——從牆壁裡傳來的，有節奏的敲擊聲。三短、三長、三短。然後，敲擊停了。取而代之的是——笑聲。很輕、很遠。','事情是從鏡子開始的。{char1}注意到{setting}裡的每一面鏡子，都映出略微不同的畫面。而臥室鏡子裡——{char1}的倒影偶爾會微笑。而{char1}並沒有在笑。'],
+      middles:['到了第七天，{char1}開始記錄那些異常。筆記本上密密麻麻寫滿了時間、地點和描述。\n\n最令人不安的是，{char1}發現自己開始享受這一切。\n\n「你不是在記錄異常，」{char1}對著鏡子裡的自己說，「你正在變成異常的一部分。」'],
+      climaxes:['紅色的門後面是一條走廊——和夢中一模一樣。\n\n走廊盡頭是一個房間。房間裡只有一面鏡子和一把椅子。鏡子裡映出的不是{char1}，而是一個空蕩蕩的房間。\n\n耳語聲突然停止了。然後，鏡子裡出現了一個人。那個人走到鏡面前，伸出手，觸碰了鏡面。\n\n{char1}感到一隻冰冷的手握住了自己的手。'],
+      endings:['第二天早晨，{setting}恢復了平靜。{char1}坐在餐桌前，喝著咖啡，翻開報紙。一切都很完美。\n\n只有偶爾——當{char1}經過鏡子時，鏡中的人影會比本人慢那麼零點幾秒才跟上動作。\n\n但沒有人注意到。\n\n沒有人會注意到。'],
+      outlines:{act1:['{char1}搬到{setting}，發現微妙的異常。日常中的不對勁開始累積。','異常升級。{char1}開始記錄，試圖用理性解釋一切。'],act2:['調查{setting}的過去。發現歷史中隱藏的恐怖規律。','無法區分現實與幻覺。紅色的門出現。'],act3:['{char1}穿過紅色的門，面對核心恐怖。','恐怖的結局：不是死亡，而是某種更難以名狀的改變。']}
+    },
+    historical:{
+      openings:['{char1}永遠記得那一天——{setting}被攻陷的那天。城門上的旗幟在烈火中化為灰燼，而{char1}手中緊握著那卷軸，上面記錄著一個帝國最後的秘密。','太和殿的鐘聲在清晨響起，{char1}知道，今天將是{setting}命運轉折的一天。身為史官，{char1}的職責是記錄真相——但朝廷要的不是真相。'],
+      middles:['戰火蔓延到了城牆之下。{char1}在混亂中穿過人群，將那卷珍貴的文獻藏在衣服的夾層裡。\n\n「歷史是由活下來的人書寫的，」{char1}的師父曾這樣說。「但真正的歷史，藏在那些被燒掉的書裡。」\n\n{char1}必須在城破之前，將這些文字帶到安全的地方。'],
+      climaxes:['最終的對決不在戰場上，而在{setting}的御書房裡。{char1}跪在地上，面前是那個掌握天下命運的人。\n\n「真相不屬於任何一個人，」{char1}抬起頭，「它屬於時間。」\n\n長長的沉默。然後，那個人做了一個所有人都沒有預料到的決定。'],
+      endings:['多年後，{char1}在一座偏遠的小城裡安頓下來，繼續書寫。那些珍貴的文獻被分成了數十份，藏在全國各地。\n\n但{char1}知道，真相就像種子——只要有適當的時機，它就會發芽。\n\n因為歷史從來不是過去的事——它是未來的鏡子。'],
+      outlines:{act1:['{char1}在平靜的日常中發現危機的徵兆。','接到使命。{char1}意識到自己掌握的資訊可能改變歷史的走向。'],act2:['在權力的漩渦中掙扎。盟友可能是敵人。','關鍵發現。{char1}獲得改變一切的真相，但代價巨大。'],act3:['最終抉擇：公開真相承擔後果，還是保持沉默維持秩序？','歷史的車輪繼續前行。{char1}的選擇漸漸展現影響。']}
+    },
+    cyberpunk:{
+      openings:['霓虹燈在雨中化成一片模糊的光暈。{char1}站在{setting}最高的樓頂，頸後的神經接口微微發燙——又有人在嘗試入侵{char1}的記憶。','記憶是假的。{char1}在{setting}的一間破舊公寓裡醒來，發現腦中的過去不屬於自己。'],
+      middles:['{char1}在黑市找到了一個記憶修復師。那個老人住在{setting}地下排水系統的深處。\n\n「你確定要看？」老人問，「有些真相一旦看到，就無法退貨。」\n\n{char1}點了點頭。瞬間，{char1}看到了那些被偷走的記憶——而替換者的身份，讓{char1}的血液冰凍。'],
+      climaxes:['最終的戰場在虛擬的意識世界中。\n\n「你不可能消滅我，」寄生者的聲音在虛空中迴盪，「我已經活了三百年。」\n\n「但這一次不同，」{char1}回答，同時將自毀程序注入神經接口。「我準備好和你一起消失。」\n\n「你瘋了！」\n\n「不，我只是終於記起了——記起了所有你偷走的人生。」'],
+      endings:['系統重啟後，{setting}的天空出現了一百年來的第一次藍天。數以萬計被盜取的記憶開始回到它們原本的主人腦中。\n\n{char1}不在那些幸運者之中。但{char1}最後做的那件事被編碼在了城市的每一個數據節點中。偶爾，在雨夜裡，人們會突然感到一股溫暖，像是有人在遠方守護著他們。'],
+      outlines:{act1:['{char1}發現記憶被篡改。開始在{setting}底層社會尋找線索。','接觸黑市。發現記憶篡改是系統性陰謀。'],act2:['發現記憶寄生者的存在，以及自己已被寄生。','找到消滅寄生者的方法，但代價是失去自己的記憶。'],act3:['最終的意識戰鬥。{char1}做出犧牲的決定。','犧牲與新生。城市獲得自由。傳說開始流傳。']}
+    },
+    wuxia:{
+      openings:['劍鋒劃破晨霧，{char1}收勢而立。身後是{setting}的萬丈懸崖，面前是綿延千里的雲海。師父曾說，劍道的最高境界是「手中無劍」——但{char1}用了十年，依然握著那柄名叫「歸塵」的劍。','江湖上流傳著一個傳說：在{setting}的某處，藏著一本可以讓習武之人突破天人之隔的秘笈。{char1}對此嗤之以鼻——直到師父臨終前，將一枚玉佩放入{char1}手中。'],
+      middles:['尋找秘笈的路途遠比想像中兇險。{char1}在{setting}遇到了三個武林高手：一個笑裡藏刀的書生、一個沉默寡言的女劍客、和一個看似瘋癲的老乞丐。\n\n四人在一間破廟中避雨。火光搖曳中，書生率先開口：「各位都是為了同一樣東西而來，不如結伴同行？」\n\n女劍客冷冷掃了他一眼：「同行？你打算在什麼時候從背後捅我一刀？」\n\n{char1}看著這三個人，突然明白了師父的用意——秘笈或許不是最重要的東西。這段旅程才是。'],
+      climaxes:['四人最終在{setting}之巔對峙。\n\n「你們想知道秘笈的答案嗎？」{char1}緩緩舉起劍。\n\n然後，{char1}做了一件所有人都沒有預料到的事——將「歸塵」從山頂擲下。那柄陪伴了十年的劍，劃出一道銀色的弧線，消失在雲海之中。\n\n「答案就是這個。」\n\n沉默。然後，風起了。'],
+      endings:['很多年後，{setting}腳下的小鎮上多了一間茶館。老闆{char1}不談江湖、不論武功，只是日復一日地煮茶、掃地、看雲起雲落。\n\n偶爾有年輕的劍客慕名而來，問{char1}「無劍之境」是否真的存在。\n\n{char1}總是笑著遞上一杯茶：「你喝完這杯茶，就懂了。」\n\n窗外，雲海之上，似乎有一道銀色的光一閃而過。也許是劍光。也許只是陽光。'],
+      outlines:{act1:['{char1}接到師父遺命。踏上尋找秘笈的旅途。','遇到同行者和對手。初步展現武學修為。'],act2:['深入江湖核心。遭遇危機、背叛或重大發現。','找到秘笈，發現其真正的含義不是武功，而是哲學。'],act3:['最終的對峙。{char1}以「放下」為答案。','歸隱。{char1}的故事成為江湖傳說。']}
+    }
+  },
+
+  generate(p){
+    const t=this.templates[p.genre]||this.templates.scifi;
+    const cs=(p.characters||'').split('\n').filter(c=>c.trim());
+    const c1=(cs[0]||'').split('-')[0]?.trim()||'旅者';
+    const c2=cs.length>1?(cs[1]||'').split('-')[0]?.trim():c1;
+    const st=p.setting||'那座被遺忘的城市';
+    const y=p.era==='far-future'?2200+~~(Math.random()*300):p.era==='near-future'?2040+~~(Math.random()*30):2024;
+    const r=s=>s.replace(/\{char1\}/g,c1).replace(/\{char2\}/g,c2).replace(/\{setting\}/g,st).replace(/\{year\}/g,y);
+    const pk=a=>a[~~(Math.random()*a.length)];
+    let out=`《${p.title||'未命名的故事'}》\n\n`;
+    out+=r(pk(t.openings));
+    if(p.length!=='flash'){out+='\n\n· · ·\n\n';out+=r(pk(t.middles));}
+    out+='\n\n· · ·\n\n';
+    if(p.length==='long'||p.length==='medium'){out+=r(pk(t.middles));out+='\n\n· · ·\n\n';}
+    out+=r(pk(t.climaxes));out+='\n\n· · ·\n\n';out+=r(pk(t.endings));
+    return out;
+  },
+
+  generateOutline(genre,title,c1,c2,st){
+    const t=this.templates[genre];if(!t?.outlines)return null;
+    const r=s=>s.replace(/\{char1\}/g,c1).replace(/\{char2\}/g,c2).replace(/\{setting\}/g,st);
+    return{act1:t.outlines.act1.map(r),act2:t.outlines.act2.map(r),act3:t.outlines.act3.map(r)};
+  },
+
+  generateCharCards(chars){
+    const archetypes=['探索者','守護者','反叛者','智者','孤狼','理想主義者','倖存者','覺醒者'];
+    const bgs=['出身顯赫但選擇了平凡','在廢墟中長大的孤兒','背叛了自己出身的階級','失去一切後重新開始','背負著世代的詛咒','被命運選中的普通人'];
+    const flaws=['過度自信','不信任他人','衝動行事','逃避過去','害怕失敗','過度理想化'];
+    return(chars||'').split('\n').filter(c=>c.trim()).map(c=>{
+      const p=c.split('-').map(x=>x.trim());
+      return{name:p[0]||'未知',role:p[1]||'角色',traits:p[2]||'',archetype:archetypes[~~(Math.random()*archetypes.length)],background:bgs[~~(Math.random()*bgs.length)],motivation:`追尋${p[2]||'真相'}`,flaw:flaws[~~(Math.random()*flaws.length)],initial:(p[0]||'?').charAt(0)};
+    });
+  }
+};
+
+// =============================================
+// PROMPT ENGINE
+// =============================================
+const PromptEngine={
+  cams:['Wide establishing shot','Medium shot','Close-up','Extreme close-up','Tracking shot','Dolly shot','Crane shot','Steadicam shot','Handheld camera','Aerial drone shot','POV shot','Dutch angle','Bird\'s eye view','Low angle shot'],
+  moves:['Static locked-off shot','Slow pan left to right','Slow tilt up','Slow push-in (dolly in)','360-degree orbit around subject','Following subject from behind','Crane rising upward','Handheld following action','Subtle lateral drift','Slow zoom out revealing environment'],
+  lighting:{
+    scifi:['Cold cyan neon rim lighting, volumetric haze, practical LED strips casting geometric shadows','Clinical white overhead with blue accent LEDs, reflective secondary light bounce, slight lens flare','Holographic ambient lighting with shifting color temperature, dark environment with isolated pools of artificial light'],
+    fantasy:['Golden hour magic light through ancient stone arches, dust particles in light shafts, warm ambient fill','Ethereal moonlight through massive tree canopy, bioluminescent flora providing soft secondary illumination','Warm candlelight in stone chamber, dramatic chiaroscuro, flickering light creating movement in shadows'],
+    romance:['Soft golden hour backlight with lens flare and hair light, warm fill, bokeh city lights in background','Gentle diffused window light, warm interior tones, intimate close lighting','Candlelight and fairy lights creating warm intimate pools of light, deep background shadows'],
+    mystery:['Hard noir single source lighting casting long dramatic shadows, venetian blind shadow patterns','Foggy dim streetlight creating isolated pool of visibility, cold blue-green color cast','Computer monitor glow as sole light source, blue-white digital light on subject face'],
+    horror:['Flickering unstable light source, deep oppressive darkness, movement in shadows','Cold blue moonlight through thin curtains, long distorted shadows, desaturated palette','Near-total darkness with brief strobe-like flashes revealing disturbing details'],
+    historical:['Warm oil lamp and candle glow, natural window light, period-appropriate shadows','Torchlight in stone corridor, dramatic orange warm light, smoke and dust in air','Dawn light through wooden lattice, long morning shadows, incense smoke catching light beams'],
+    cyberpunk:['Neon reflections on wet surfaces, multiple colored light sources, volumetric rain and fog','Dark with electric blue and magenta accent lighting, holographic ads providing ambient color','Screen and monitor glow mixing with practical neon, constantly shifting color temperature'],
+    wuxia:['Misty mountain dawn light with soft golden edge lighting, atmospheric perspective layers','Moonlight reflecting on still lake surface, soft rim light, deep blue ambient','Dramatic backlit silhouette against billowing clouds, heroic low-angle light']
+  },
+  colorGrade:{scifi:'Cool teal and orange, crushed blacks with blue tint, digital sharp',fantasy:'Rich warm golds and deep greens, lifted shadows with purple tint, film grain',romance:'Warm amber midtones, soft highlights with pink tint, slightly lifted blacks',mystery:'High contrast, teal-amber split toning, crushed blacks, desaturated except red',horror:'Heavily desaturated cold blue-green, crushed deep blacks, minimal color except red',historical:'Warm earth tones, Kodak Portra 400 emulation, soft contrast, faded highlights',cyberpunk:'Hyper-saturated neon primaries, deep blacks, high contrast, chromatic aberration',wuxia:'Ink wash inspired, desaturated with selective color, misty lifted shadows'},
+  styleRefs:{scifi:'Blade Runner 2049, Arrival, Ex Machina, Dune (2021)',fantasy:'Lord of the Rings, Studio Ghibli, Pan\'s Labyrinth',romance:'In the Mood for Love, Before Sunrise, Her',mystery:'Se7en, Zodiac, Gone Girl, True Detective S1',horror:'The Conjuring, Hereditary, The Shining, Midsommar',historical:'The Last Emperor, Hero (Zhang Yimou), Barry Lyndon',cyberpunk:'Ghost in the Shell (1995), The Matrix, Blade Runner',wuxia:'Crouching Tiger Hidden Dragon, Hero (2002), Shadow (2018)'},
+  videoStyles:{cinematic:'cinematic film quality, professional color grading, anamorphic lens, shallow depth of field',documentary:'natural handheld, available light, observational, authentic',anime:'anime/animation style, cel-shaded, vibrant colors, dynamic angles','music-video':'stylized, rhythmic editing, bold color grading, creative transitions',noir:'black and white or heavily desaturated, extreme contrast, fatalistic',commercial:'polished, high-key lighting, perfect focus, aspirational'},
+  platformCfg:{sora:{pre:'',suf:' Photorealistic, cinematic quality.'},runway:{pre:'Cinematic shot: ',suf:' High fidelity, smooth motion.'},kling:{pre:'',suf:' High quality rendering, detailed textures.'},pika:{pre:'',suf:' Stylized motion, creative interpretation.'},veo:{pre:'',suf:' Natural motion, photorealistic rendering.'},generic:{pre:'',suf:''}},
+  negPrompt:'low quality, blurry, distorted faces, extra limbs, watermark, text overlay, stock footage feel, flat lighting, amateur, shaky camera, overexposed highlights, digital noise, compression artifacts',
+
+  splitScenes(text){
+    let p=text.split(/·\s*·\s*·/).filter(x=>x.trim().length>30);
+    if(p.length<2)p=text.split(/\n\s*\n/).filter(x=>x.trim().length>30);
+    if(p.length<2){const s=text.match(/[^。！？\n]+[。！？]+/g)||[text];p=[];for(let i=0;i<s.length;i+=2)p.push(s.slice(i,i+2).join(''));}
+    if(p[0]?.match(/《[^》]+》/))p.shift();
+    return p.slice(0,8).map(x=>x.trim());
+  },
+
+  genScene(stxt,idx,tot,genre,tone,char,vs,plat){
+    const pk=a=>a[~~(Math.random()*a.length)];
+    const isIntro=idx<=1,isClimax=idx>=tot-1,isEnd=idx===tot;
+    const hasD=/["「」]/.test(stxt),hasA=/跑|走|飛|跳|打|戰|衝|握|舉/.test(stxt),hasN=/雨|雪|風|霧|月|星|山|海/.test(stxt),hasE=/笑|哭|怒|怕|驚|悲|顫/.test(stxt);
+    const cam=isIntro?'Aerial drone shot':isClimax?'Tracking shot':hasD?'Close-up':hasA?'Steadicam shot':pk(this.cams);
+    const mv=isIntro?'Slow crane rising, revealing full environment':isClimax?'Dynamic tracking pushing toward climax':hasA?'Handheld following the action':pk(this.moves);
+    const lens=isIntro?'24mm wide angle':hasD?'85mm portrait':'50mm prime';
+    const lit=pk(this.lighting[genre]||this.lighting.scifi);
+    const cg=this.colorGrade[genre]||this.colorGrade.scifi;
+    const sr=this.styleRefs[genre]||this.styleRefs.scifi;
+    const vsd=this.videoStyles[vs]||this.videoStyles.cinematic;
+    const pcfg=this.platformCfg[plat]||this.platformCfg.generic;
+    const fps=isClimax?pk(['24fps cinematic','120fps slow motion']):'24fps cinematic';
+    const dur=isClimax?'8-15 seconds':isEnd?'10-15 seconds':'5-10 seconds';
+
+    const vis=[];
+    if(/城市|街|霓虹/.test(stxt))vis.push('urban environment with architectural detail');
+    if(/森林|竹|古樹/.test(stxt))vis.push('lush forest with depth layers');
+    if(/山|崖|峰/.test(stxt))vis.push('dramatic mountain landscape');
+    if(/海|洋|浪/.test(stxt))vis.push('vast ocean with wave movement');
+    if(/雨/.test(stxt))vis.push('rain with wet reflective surfaces');
+    if(/雪/.test(stxt))vis.push('falling snow, cold breath visible');
+    if(/霧/.test(stxt))vis.push('thick atmospheric fog/mist');
+    if(/夜|月|星/.test(stxt))vis.push('nighttime with celestial elements');
+    if(/晨|日|陽/.test(stxt))vis.push('dawn golden light');
+    if(/光|芒/.test(stxt))vis.push('dramatic light beams');
+    if(/門|窗|鏡/.test(stxt))vis.push('architectural framing elements');
+    if(/劍|刀/.test(stxt))vis.push('weapon detail with metallic reflections');
+    if(/虛擬|數據/.test(stxt))vis.push('digital/virtual reality effects');
+    if(/火|焰/.test(stxt))vis.push('fire and ember particles');
+    if(!vis.length)vis.push('richly detailed cinematic environment');
+
+    const mp=`${pcfg.pre}${cam}, ${mv}. ${lens} lens. Scene: ${vis.join(', ')}. Subject: ${char} — ${hasA?'dynamic physical performance':'nuanced emotional performance'}. Lighting: ${lit}. Color: ${cg}. Style: ${vsd}. Camera: ${lens}, ${fps}, 2.39:1 Anamorphic. Reference: ${sr}. ${hasN?'Atmospheric environment present.': ''} ${hasE?'Emotionally charged moment.': ''} ${hasD?'Dialogue with character interaction.': ''} Duration: ${dur}. 4K resolution.${pcfg.suf}`;
+    const summary=stxt.slice(0,80).replace(/\n/g,' ')+'...';
+
+    return{id:idx,title:`場景 ${idx}`,summary,fullText:stxt,mainPrompt:mp,negPrompt:this.negPrompt,camera:`${cam} — ${mv}`,lens,lighting:lit,colorGrade:cg,styleRef:sr,fps,duration:dur,aspect:'2.39:1 Anamorphic',videoStyle:vsd,charName:char,visuals:vis.join(', ')};
+  }
+};
+
+// =============================================
+// APP CONTROLLER
+// =============================================
+let currentTab='home',currentEditId=null,currentStoryContent='';
+let currentOutline=null,currentCharCards=[];
+let currentScenes=[],currentFilter='all',tagElements=[];
+
+function switchTab(tab){
+  currentTab=tab;
+  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+  document.querySelector(`.nav-link[data-tab="${tab}"]`)?.classList.add('active');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById(`panel-${tab}`)?.classList.add('active');
+  if(tab==='home')refreshHome();if(tab==='library')refreshLibrary();if(tab==='prompts')refreshPromptSel();
+}
+
+document.querySelectorAll('.workshop-tab').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.workshop-tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.workshop-tab-content').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  document.getElementById(`wtab-${t.dataset.wtab}`)?.classList.add('active');
+}));
+
+document.getElementById('w-genre').addEventListener('change',function(){
+  const s=document.getElementById('w-subgenre');s.innerHTML='<option value="">選擇子類型...</option>';
+  (SUB_GENRES[this.value]||[]).forEach(g=>s.innerHTML+=`<option value="${g}">${g}</option>`);
+});
+
+function handleTagInput(e){
+  if(e.key==='Enter'&&e.target.value.trim()){e.preventDefault();tagElements.push(e.target.value.trim());renderTags();e.target.value='';}
+}
+function removeTag(i){tagElements.splice(i,1);renderTags();}
+function renderTags(){
+  const w=document.getElementById('elements-wrap');
+  w.querySelectorAll('.tag').forEach(t=>t.remove());
+  const inp=w.querySelector('input');
+  tagElements.forEach((t,i)=>{const el=document.createElement('span');el.className='tag';el.innerHTML=`${t}<span class="remove" onclick="removeTag(${i})">×</span>`;w.insertBefore(el,inp);});
+}
+
+function refreshHome(){
+  const s=DB.getAll();
+  document.getElementById('stat-stories').textContent=s.length;
+  document.getElementById('stat-scenes').textContent=s.reduce((a,x)=>a+(x.sceneCount||0),0);
+  document.getElementById('stat-prompts').textContent=s.reduce((a,x)=>a+(x.promptCount||0),0);
+  document.getElementById('stat-chars').textContent=s.reduce((a,x)=>a+(x.characters||'').split('\n').filter(c=>c.trim()).length,0);
+  const recent=s.slice(0,4);
+  const g=document.getElementById('recent-stories');
+  if(!recent.length){g.innerHTML='<div class="empty-state"><div class="icon">✦</div><p>開始你的第一個故事吧</p><button class="btn btn-primary" onclick="switchTab(\'workshop\')">開始創作</button></div>';return;}
+  g.innerHTML=recent.map(renderCard).join('');
+}
+
+function refreshLibrary(){
+  const q=(document.getElementById('search-input')?.value||'').toLowerCase();
+  const s=DB.getAll().filter(x=>{
+    const mf=currentFilter==='all'||x.genre===currentFilter;
+    const ms=!q||x.title?.toLowerCase().includes(q)||x.content?.toLowerCase().includes(q)||x.theme?.toLowerCase().includes(q);
+    return mf&&ms;
+  });
+  const g=document.getElementById('library-grid'),e=document.getElementById('library-empty');
+  if(!s.length){g.innerHTML='';e.style.display='block';return;}
+  e.style.display='none';g.innerHTML=s.map(renderCard).join('');
+}
+
+function renderCard(story){
+  const gn=StoryEngine.genreNames[story.genre]||'未分類';
+  const d=new Date(story.updatedAt||story.createdAt).toLocaleDateString('zh-TW');
+  const preview=(story.content||'').replace(/《[^》]+》\n*/g,'').replace(/·\s*·\s*·/g,'').trim().slice(0,100);
+  const cc=(story.characters||'').split('\n').filter(c=>c.trim()).length;
+  const subg=story.subgenre?`<span class="mini-tag">${story.subgenre}</span>`:'';
+  const tags=(story.elements||[]).slice(0,3).map(e=>`<span class="mini-tag">${e}</span>`).join('');
+  return `<div class="story-card" onclick="viewStory('${story.id}')">
+    <div class="card-top"><span class="genre-tag">${gn}</span>${story.version>1?`<span class="card-badge">v${story.version}</span>`:''}</div>
+    <h3>${story.title||'未命名故事'}</h3>
+    <p>${preview}</p>
+    <div class="card-tags">${subg}${tags}</div>
+    <div class="card-meta">
+      <span>${d} · ${cc}角色 · ${story.sceneCount||0}場景</span>
+      <div class="card-actions">
+        <button class="icon-btn" onclick="event.stopPropagation();editStory('${story.id}')" title="編輯">✎</button>
+        <button class="icon-btn" onclick="event.stopPropagation();storyToPrompts('${story.id}')" title="提示詞">▶</button>
+        <button class="icon-btn danger" onclick="event.stopPropagation();deleteStory('${story.id}')" title="刪除">✕</button>
+      </div>
+    </div></div>`;
+}
+
+async function generateStory(){
+  const genre=document.getElementById('w-genre').value;
+  if(!genre){toast('請先選擇故事類型','error');return;}
+  const p={
+    title:document.getElementById('w-title').value,genre,
+    subgenre:document.getElementById('w-subgenre').value,
+    theme:document.getElementById('w-theme').value,
+    setting:document.getElementById('w-setting').value,
+    characters:document.getElementById('w-characters').value,
+    tone:document.getElementById('w-tone').value,
+    length:document.getElementById('w-length').value,
+    pov:document.getElementById('w-pov').value,
+    structure:document.getElementById('w-structure').value,
+    era:document.getElementById('w-era').value,elements:[...tagElements]
+  };
+  const ld=document.getElementById('gen-loading'),btn=document.getElementById('btn-generate');
+  ld.classList.add('active');btn.disabled=true;btn.style.opacity='.5';
+  await new Promise(r=>setTimeout(r,1800+Math.random()*1200));
+
+  currentStoryContent=StoryEngine.generate(p);currentEditId=null;
+  const out=document.getElementById('story-output');
+  out.style.display='block';document.getElementById('story-edit-area').style.display='none';
+  out.innerHTML=currentStoryContent.replace(/《([^》]+)》/,'<h2>《$1》</h2>').replace(/·\s*·\s*·/g,'<div class="scene-break">· · ·</div>');
+  document.getElementById('story-toolbar-title').textContent=p.title||'未命名故事';
+
+  const cs=p.characters.split('\n').filter(c=>c.trim());
+  const c1=(cs[0]||'').split('-')[0]?.trim()||'主角';
+  const c2=cs.length>1?(cs[1]||'').split('-')[0]?.trim():c1;
+  currentOutline=StoryEngine.generateOutline(genre,p.title,c1,c2,p.setting||'世界');
+  currentCharCards=StoryEngine.generateCharCards(p.characters);
+  renderOutline();renderCharCards();renderSceneBreakdown();
+
+  ld.classList.remove('active');btn.disabled=false;btn.style.opacity='1';
+  toast('故事生成完成','success');
+}
+
+function renderOutline(){
+  const el=document.getElementById('outline-content');
+  if(!currentOutline){el.innerHTML='<div class="empty-state"><div class="icon">📋</div><p>生成故事後，大綱將自動產生</p></div>';return;}
+  const acts=[{l:'第一幕 · 建置',items:currentOutline.act1},{l:'第二幕 · 對抗',items:currentOutline.act2},{l:'第三幕 · 解決',items:currentOutline.act3}];
+  el.innerHTML=acts.map(a=>`<div class="outline-card"><div class="act-label">${a.l}</div>${a.items.map((x,i)=>`<p style="font-size:.9rem;color:var(--text);margin-bottom:.6rem">${i+1}. ${x}</p>`).join('')}</div>`).join('');
+}
+
+function renderCharCards(){
+  const el=document.getElementById('characters-content');
+  if(!currentCharCards.length){el.innerHTML='<div class="empty-state"><div class="icon">👤</div><p>生成故事後，角色卡將自動產生</p></div>';return;}
+  el.innerHTML=currentCharCards.map(c=>`<div class="char-card"><div class="char-header"><div class="char-avatar">${c.initial}</div><div class="char-info"><h4>${c.name}</h4><div class="char-role">${c.role}</div><p style="font-size:.85rem;color:var(--text-muted);margin-top:.3rem">${c.traits||'神秘莫測'}</p></div></div><div class="char-stats"><div class="char-stat"><div class="stat-key">原型</div><div class="stat-val">${c.archetype}</div></div><div class="char-stat"><div class="stat-key">背景</div><div class="stat-val">${c.background}</div></div><div class="char-stat"><div class="stat-key">動機</div><div class="stat-val">${c.motivation}</div></div><div class="char-stat"><div class="stat-key">缺陷</div><div class="stat-val">${c.flaw}</div></div></div></div>`).join('');
+}
+
+function renderSceneBreakdown(){
+  const el=document.getElementById('scenes-content');
+  const scenes=PromptEngine.splitScenes(currentStoryContent);
+  if(!scenes.length){el.innerHTML='<div class="empty-state"><div class="icon">🎬</div><p>場景分鏡將在故事生成後自動產生</p></div>';return;}
+  el.innerHTML=`<div class="section-title">場景時間軸<span class="count">${scenes.length} 場景</span></div><div class="timeline">${scenes.map((s,i)=>{
+    const p=s.replace(/\n/g,' ').slice(0,120);
+    const t=/(跑|走|飛|跳|打|戰|衝)/.test(s)?'動作場景':/["「]/.test(s)?'對話場景':'敘事場景';
+    return `<div class="timeline-item ${i===0?'active':''}"><div class="tl-title">場景 ${i+1} <span style="font-family:var(--mono);font-size:.55rem;color:var(--text-dim);margin-left:.5rem">${t}</span></div><p style="font-size:.85rem;color:var(--text-muted);margin-top:.3rem;line-height:1.6">${p}...</p></div>`;
+  }).join('')}</div>`;
+}
+
+function saveStory(){
+  if(!currentStoryContent){toast('請先生成或撰寫故事','error');return;}
+  const d={title:document.getElementById('w-title').value||'未命名故事',genre:document.getElementById('w-genre').value,subgenre:document.getElementById('w-subgenre').value,theme:document.getElementById('w-theme').value,setting:document.getElementById('w-setting').value,characters:document.getElementById('w-characters').value,tone:document.getElementById('w-tone').value,pov:document.getElementById('w-pov').value,structure:document.getElementById('w-structure').value,era:document.getElementById('w-era').value,elements:[...tagElements],content:currentStoryContent,outline:currentOutline,charCards:currentCharCards};
+  if(currentEditId){const o=DB.getById(currentEditId);d.version=(o?.version||0)+1;DB.update(currentEditId,d);toast('故事已更新','success');}
+  else{const s=DB.add(d);currentEditId=s.id;toast('故事已保存','success');}
+  refreshHome();
+}
+
+function viewStory(id){
+  const s=DB.getById(id);if(!s)return;
+  const gn=StoryEngine.genreNames[s.genre]||'未分類';
+  const d=new Date(s.createdAt).toLocaleString('zh-TW');
+  document.getElementById('modal-title').textContent=s.title||'未命名故事';
+  let b=`<div style="margin-bottom:1rem"><span class="genre-tag" style="display:inline-block">${gn}</span>${s.subgenre?`<span class="mini-tag" style="margin-left:.5rem">${s.subgenre}</span>`:''}<span style="font-family:var(--mono);font-size:.6rem;color:var(--text-dim);margin-left:1rem">${d}</span></div>`;
+  if(s.theme)b+=`<p style="font-size:.88rem;color:var(--text-muted);margin-bottom:.5rem">主題：${s.theme}</p>`;
+  if(s.elements?.length)b+=`<div class="card-tags" style="margin-bottom:1rem">${s.elements.map(e=>`<span class="mini-tag">${e}</span>`).join('')}</div>`;
+  b+=`<div class="story-output" style="max-height:50vh;overflow-y:auto">${(s.content||'').replace(/《([^》]+)》/,'<h2>《$1》</h2>').replace(/·\s*·\s*·/g,'<div class="scene-break">· · ·</div>')}</div>`;
+  b+=`<div class="btn-group" style="margin-top:1.5rem"><button class="btn btn-primary" onclick="closeModal();editStory('${id}')">編輯</button><button class="btn btn-secondary" onclick="closeModal();storyToPrompts('${id}')">生成提示詞</button></div>`;
+  document.getElementById('modal-body').innerHTML=b;
+  document.getElementById('story-modal').classList.add('active');
+}
+
+function closeModal(){document.getElementById('story-modal').classList.remove('active');}
+
+function editStory(id){
+  const s=DB.getById(id);if(!s)return;
+  currentEditId=id;currentStoryContent=s.content||'';currentOutline=s.outline||null;currentCharCards=s.charCards||[];tagElements=[...(s.elements||[])];renderTags();
+  document.getElementById('w-title').value=s.title||'';
+  document.getElementById('w-genre').value=s.genre||'';document.getElementById('w-genre').dispatchEvent(new Event('change'));
+  setTimeout(()=>{document.getElementById('w-subgenre').value=s.subgenre||'';},50);
+  document.getElementById('w-theme').value=s.theme||'';document.getElementById('w-setting').value=s.setting||'';
+  document.getElementById('w-characters').value=s.characters||'';document.getElementById('w-tone').value=s.tone||'literary';
+  document.getElementById('w-pov').value=s.pov||'third-limited';document.getElementById('w-structure').value=s.structure||'three-act';
+  document.getElementById('w-era').value=s.era||'modern';
+  const out=document.getElementById('story-output'),ea=document.getElementById('story-edit-area');
+  out.style.display='none';ea.style.display='block';ea.value=currentStoryContent;
+  document.getElementById('story-toolbar-title').textContent=`編輯：${s.title||'未命名'}`;
+  renderOutline();renderCharCards();renderSceneBreakdown();
+  switchTab('workshop');toast('已載入故事','success');
+}
+
+function deleteStory(id){if(!confirm('確定要刪除？'))return;DB.delete(id);refreshLibrary();refreshHome();toast('已刪除','success');}
+
+function toggleEdit(){
+  const out=document.getElementById('story-output'),ea=document.getElementById('story-edit-area');
+  if(ea.style.display==='none'){ea.style.display='block';out.style.display='none';ea.value=currentStoryContent;}
+  else{ea.style.display='none';out.style.display='block';currentStoryContent=ea.value;out.innerHTML=currentStoryContent.replace(/《([^》]+)》/,'<h2>《$1》</h2>').replace(/·\s*·\s*·/g,'<div class="scene-break">· · ·</div>');}
+}
+
+function exportStory(){
+  if(!currentStoryContent){toast('沒有可匯出的故事','error');return;}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([currentStoryContent],{type:'text/plain;charset=utf-8'}));
+  a.download=`${document.getElementById('w-title').value||'story'}.txt`;a.click();toast('已匯出','success');
+}
+
+function refreshPromptSel(){
+  const s=document.getElementById('prompt-story-select');
+  s.innerHTML='<option value="">選擇一個故事...</option>'+DB.getAll().map(x=>`<option value="${x.id}">${x.title||'未命名'} (${StoryEngine.genreNames[x.genre]||'未分類'})</option>`).join('');
+}
+function onPromptStoryChange(){document.getElementById('prompts-result').innerHTML='';document.getElementById('prompts-empty').style.display='block';}
+function sendToPrompts(){if(!currentStoryContent){toast('請先生成故事','error');return;}if(!currentEditId)saveStory();switchTab('prompts');setTimeout(()=>document.getElementById('prompt-story-select').value=currentEditId,100);}
+function storyToPrompts(id){switchTab('prompts');setTimeout(()=>document.getElementById('prompt-story-select').value=id,100);}
+
+async function generatePrompts(){
+  const id=document.getElementById('prompt-story-select').value;
+  if(!id){toast('請先選擇故事','error');return;}
+  const story=DB.getById(id);if(!story){toast('找不到故事','error');return;}
+  const vs=document.getElementById('prompt-video-style').value,plat=document.getElementById('prompt-platform').value;
+  const ld=document.getElementById('prompt-loading'),btn=document.getElementById('btn-gen-prompts');
+  ld.classList.add('active');btn.disabled=true;
+  await new Promise(r=>setTimeout(r,1500+Math.random()*1000));
+
+  const txt=(story.content||'').replace(/《[^》]+》\n*/g,'').trim();
+  const sts=PromptEngine.splitScenes(txt);
+  const cn=(story.characters||'').split('\n')[0]?.split('-')[0]?.trim()||'主角';
+  currentScenes=sts.map((t,i)=>PromptEngine.genScene(t,i+1,sts.length,story.genre,story.tone,cn,vs,plat));
+  DB.update(id,{sceneCount:currentScenes.length,promptCount:currentScenes.length});
+  renderPrompts(story.title);
+  document.getElementById('prompts-empty').style.display='none';
+  ld.classList.remove('active');btn.disabled=false;
+  toast(`已為 ${currentScenes.length} 個場景生成影片提示詞`,'success');
+}
+
+function renderPrompts(title){
+  const c=document.getElementById('prompts-result');
+  let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.8rem"><div class="section-title" style="margin:0;border:none;padding-bottom:0">《${title||'未命名'}》共 ${currentScenes.length} 個場景</div><button class="btn btn-secondary btn-sm" onclick="exportAllPrompts()">匯出全部</button></div>`;
+  h+=`<div class="prompt-split"><div class="prompt-scene-list"><div class="timeline">`;
+  currentScenes.forEach((s,i)=>h+=`<div class="timeline-item ${i===0?'active':''}" id="tl-${i}" onclick="scrollToScene(${i})"><div class="tl-title">場景 ${s.id}</div><p style="font-size:.75rem;color:var(--text-ghost);margin-top:.2rem">${s.summary.slice(0,50)}...</p></div>`);
+  h+=`</div></div><div class="prompt-detail-area">`;
+  currentScenes.forEach((s,i)=>{
+    h+=`<div class="prompt-section" id="ps-${i}"><div class="prompt-section-header"><h3>場景 ${s.id} · ${s.camera.split('—')[0].trim()}</h3><span style="font-family:var(--mono);font-size:.6rem;color:var(--text-dim)">${s.duration} | ${s.fps}</span></div><div class="prompt-section-body">
+    <p style="font-size:.88rem;color:var(--text-muted);margin-bottom:1.2rem;line-height:1.7;border-left:2px solid var(--border);padding-left:1rem">${s.fullText.slice(0,200).replace(/\n/g,' ')}${s.fullText.length>200?'...':''}</p>
+    <div class="prompt-block"><div class="prompt-type">Main Prompt · 主提示詞</div><div class="prompt-text">${s.mainPrompt}</div><button class="copy-btn" onclick="copyTxt(this,\`${esc(s.mainPrompt)}\`)">COPY</button></div>
+    <div class="prompt-block"><div class="prompt-type">Negative Prompt · 負面提示詞</div><div class="prompt-text" style="color:var(--text-dim)">${s.negPrompt}</div><button class="copy-btn" onclick="copyTxt(this,\`${esc(s.negPrompt)}\`)">COPY</button></div>
+    <div class="tech-grid">
+      <div class="tech-item"><div class="tech-key">鏡頭</div><div class="tech-val">${s.camera}</div></div>
+      <div class="tech-item"><div class="tech-key">鏡片</div><div class="tech-val">${s.lens}</div></div>
+      <div class="tech-item"><div class="tech-key">光線</div><div class="tech-val">${s.lighting.slice(0,80)}...</div></div>
+      <div class="tech-item"><div class="tech-key">色彩調色</div><div class="tech-val">${s.colorGrade.slice(0,80)}...</div></div>
+      <div class="tech-item"><div class="tech-key">風格參考</div><div class="tech-val">${s.styleRef.slice(0,80)}...</div></div>
+      <div class="tech-item"><div class="tech-key">影格率</div><div class="tech-val">${s.fps}</div></div>
+      <div class="tech-item"><div class="tech-key">時長</div><div class="tech-val">${s.duration}</div></div>
+      <div class="tech-item"><div class="tech-key">畫面比例</div><div class="tech-val">${s.aspect}</div></div>
+      <div class="tech-item"><div class="tech-key">視覺元素</div><div class="tech-val">${s.visuals}</div></div>
+      <div class="tech-item"><div class="tech-key">影片風格</div><div class="tech-val">${s.videoStyle}</div></div>
+    </div></div></div>`;
+  });
+  h+=`</div></div>`;c.innerHTML=h;
+}
+
+function esc(s){return s.replace(/`/g,'\\`').replace(/\$/g,'\\$');}
+function copyTxt(btn,txt){
+  navigator.clipboard.writeText(txt).then(()=>{btn.textContent='COPIED';btn.style.color='var(--accent)';btn.style.borderColor='var(--accent)';setTimeout(()=>{btn.textContent='COPY';btn.style.color='';btn.style.borderColor='';},2000);}).catch(()=>toast('複製失敗','error'));
+}
+function scrollToScene(i){
+  document.querySelectorAll('.prompt-detail-area .timeline-item').forEach((t,j)=>{
+    // Update sidebar timeline
+  });
+  document.querySelectorAll('.prompt-scene-list .timeline-item').forEach((t,j)=>t.classList.toggle('active',j===i));
+  document.getElementById(`ps-${i}`)?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function exportAllPrompts(){
+  if(!currentScenes.length)return;
+  const title=document.getElementById('prompt-story-select').selectedOptions[0]?.textContent||'story';
+  let md=`# ${title} — 影片提示詞集\n# STORYFORGE\n# ${new Date().toLocaleString('zh-TW')}\n${'='.repeat(60)}\n\n`;
+  currentScenes.forEach(s=>{
+    md+=`## 場景 ${s.id} (${s.duration})\n\n### 原文\n${s.summary}\n\n### Main Prompt\n\`\`\`\n${s.mainPrompt}\n\`\`\`\n\n### Negative Prompt\n\`\`\`\n${s.negPrompt}\n\`\`\`\n\n### 技術規格\n| 項目 | 詳情 |\n|---|---|\n| 鏡頭 | ${s.camera} |\n| 鏡片 | ${s.lens} |\n| 光線 | ${s.lighting} |\n| 色彩 | ${s.colorGrade} |\n| 風格 | ${s.styleRef} |\n| 影格率 | ${s.fps} |\n| 時長 | ${s.duration} |\n| 畫面比例 | ${s.aspect} |\n| 視覺元素 | ${s.visuals} |\n\n${'─'.repeat(40)}\n\n`;
+  });
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([md],{type:'text/markdown;charset=utf-8'}));a.download='video_prompts.md';a.click();toast('已匯出全部提示詞','success');
+}
+
+// Events
+document.getElementById('filter-tags').addEventListener('click',e=>{if(e.target.classList.contains('filter-tag')){document.querySelectorAll('.filter-tag').forEach(t=>t.classList.remove('active'));e.target.classList.add('active');currentFilter=e.target.dataset.filter;refreshLibrary();}});
+document.getElementById('story-modal').addEventListener('click',e=>{if(e.target===document.getElementById('story-modal'))closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+document.querySelectorAll('.nav-link').forEach(l=>l.addEventListener('click',()=>switchTab(l.dataset.tab)));
+
+function toast(msg,type='success'){
+  const c=document.getElementById('toast-container'),el=document.createElement('div');
+  el.className=`toast ${type}`;el.innerHTML=`<span>${type==='success'?'✓':type==='info'?'ℹ':'!'}</span> ${msg}`;
+  c.appendChild(el);setTimeout(()=>{el.style.opacity='0';el.style.transform='translateX(24px)';el.style.transition='all .35s';},2800);setTimeout(()=>el.remove(),3200);
+}
+
+// Init
+refreshHome();refreshLibrary();refreshPromptSel();
+
+// Sample data
+if(!DB.getAll().length){
+  [{t:'量子之夢',g:'scifi',sg:'人工智慧',th:'意識覺醒與共存',st:'2147年的新台北量子浮空城',ch:'林昊辰 - 量子物理學家 - 冷靜理性但內心孤獨\n曙光 - 量子意識體 - 天真好奇渴望理解人類',tn:'literary',pv:'third-limited',str:'three-act',er:'far-future',el:['AI覺醒','倫理困境','量子糾纏']},
+   {t:'歸塵劍',g:'wuxia',sg:'俠義傳奇',th:'放下執念',st:'蒼茫山巔的雲海之上',ch:'葉歸塵 - 孤獨劍客 - 執著堅韌\n沈書白 - 笑面書生 - 城府極深',tn:'epic',pv:'third-limited',str:'kishotenketsu',er:'timeless',el:['劍道','放下','江湖']},
+   {t:'鏡中人',g:'horror',sg:'心理恐怖',th:'身份與自我',st:'一棟五十年歷史的老舊公寓',ch:'陳默 - 獨居作家 - 內向敏感',tn:'dark',pv:'first',str:'three-act',er:'modern',el:['鏡子','記憶','身份']}
+  ].forEach(x=>{
+    const s={title:x.t,genre:x.g,subgenre:x.sg,theme:x.th,setting:x.st,characters:x.ch,tone:x.tn,pov:x.pv,structure:x.str,era:x.er,elements:x.el};
+    s.content=StoryEngine.generate({...s,length:'medium'});
+    const cs=s.characters.split('\n').filter(c=>c.trim());
+    s.outline=StoryEngine.generateOutline(s.genre,s.title,(cs[0]||'').split('-')[0]?.trim()||'主角',cs.length>1?(cs[1]||'').split('-')[0]?.trim():(cs[0]||'').split('-')[0]?.trim(),s.setting);
+    s.charCards=StoryEngine.generateCharCards(s.characters);
+    s.sceneCount=PromptEngine.splitScenes(s.content).length;s.promptCount=s.sceneCount;
+    DB.add(s);
+  });
+  refreshHome();
+}
+</script>
+</body>
+</html>
