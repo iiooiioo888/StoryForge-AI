@@ -182,6 +182,48 @@ module.exports = function(db) {
     });
 
     // ==========================================
+    // LLM 全權生成所有表單欄位
+    // ==========================================
+    router.post('/generate-all-fields', authMiddleware, async (req, res) => {
+        try {
+            const { provider, tier } = req.body;
+
+            const result = await llm.chat({
+                systemPrompt: PROMPTS.aiAutoFill.system,
+                prompt: PROMPTS.aiAutoFill.user(),
+                provider, tier,
+                temperature: 0.9,
+                maxTokens: 2048,
+            });
+
+            let fields;
+            try {
+                const jsonMatch = result.content.match(/\{[\s\S]*\}/);
+                fields = JSON.parse(jsonMatch ? jsonMatch[0] : result.content);
+            } catch (e) {
+                return res.status(500).json({ error: 'AI 回應格式異常，請重試' });
+            }
+
+            const totalCost = 5;
+            db.prepare(`INSERT INTO ai_generation_logs (user_id, generation_type, input_data, output_data, model_used, credits_cost, status) VALUES (?, 'autofill', '{}', ?, ?, ?, 'success')`)
+                .run(req.user.id, JSON.stringify(fields).substring(0, 1000), result.model, totalCost);
+
+            db.prepare('UPDATE users SET credits = credits - ? WHERE id = ?').run(totalCost, req.user.id);
+            const user = db.prepare('SELECT credits FROM users WHERE id = ?').get(req.user.id);
+
+            res.json({
+                success: true,
+                fields,
+                model: result.model,
+                provider: result.provider,
+                credits_remaining: user.credits,
+            });
+        } catch (err) {
+            res.status(500).json({ error: '生成失敗：' + err.message });
+        }
+    });
+
+    // ==========================================
     // LLM 影片提示詞生成（從故事）
     // ==========================================
     router.post('/generate-video-prompts', authMiddleware, async (req, res) => {

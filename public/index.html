@@ -210,6 +210,31 @@ body{font-family:var(--serif);background:var(--bg);color:var(--text);min-height:
 .btn-sm{padding:.4rem .9rem;font-size:.78rem}
 .btn-block{width:100%;justify-content:center}
 .btn-group{display:flex;gap:.6rem;flex-wrap:wrap}
+.btn-ai-autofill{
+  width:100%;display:flex;align-items:center;gap:.6rem;justify-content:center;
+  padding:.75rem 1.2rem;border-radius:var(--radius);border:none;cursor:pointer;
+  font-size:.88rem;font-weight:600;color:#fff;
+  background:linear-gradient(135deg,#7c3aed,#2563eb,#06b6d4);
+  background-size:200% 200%;animation:ai-shimmer 3s ease infinite;
+  box-shadow:0 2px 12px rgba(124,58,237,.3);
+  transition:all .2s ease;margin-bottom:.8rem;
+}
+.btn-ai-autofill:hover{
+  box-shadow:0 4px 20px rgba(124,58,237,.45);transform:translateY(-1px);
+  background-position:100% 0;
+}
+.btn-ai-autofill:active{transform:scale(.97)}
+.btn-ai-autofill:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.btn-ai-autofill .ai-icon{font-size:1.1rem;filter:drop-shadow(0 0 4px rgba(255,255,255,.5))}
+.btn-ai-autofill .ai-badge{
+  font-size:.68rem;font-weight:500;padding:.15rem .5rem;border-radius:99px;
+  background:rgba(255,255,255,.18);backdrop-filter:blur(4px);margin-left:auto;
+}
+@keyframes ai-shimmer{
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
 
 /* === FORMS === */
 .form-group{margin-bottom:1rem}
@@ -1261,6 +1286,13 @@ button:focus-visible,.btn:focus-visible,.nav-link:focus-visible{
       <div class="workshop-layout">
         <div class="workshop-sidebar">
           <div class="section-title" style="border:none;padding-bottom:0;margin-bottom:1.2rem">故事設定</div>
+
+          <!-- AI 全權生成 -->
+          <button class="btn btn-ai-autofill" id="btn-ai-autofill" onclick="aiAutoFill()">
+            <span class="ai-icon">✦</span> AI 全權生成
+            <span class="ai-badge">🎲 隨機創意</span>
+          </button>
+          <div class="loading-bar" id="autofill-loading"><div class="fill"></div></div>
 
           <!-- Stepper: 3-step progress -->
           <div class="stepper" id="form-stepper">
@@ -2389,6 +2421,54 @@ function doCompose(){
       <button class="copy-btn" onclick="copyTxt(this,'${prompt.replace(/'/g,"\\'")}')">COPY</button>
     </div>
   `;
+}
+
+// =============================================
+// AI 全權生成
+// =============================================
+async function aiAutoFill(){
+  const ld=document.getElementById('autofill-loading'),btn=document.getElementById('btn-ai-autofill');
+  ld.classList.add('active');btn.disabled=true;
+
+  if(currentUser){
+    try{
+      const d=await api('/llm/generate-all-fields',{method:'POST',body:{}});
+      const f=d.fields;
+      if(f.title)document.getElementById('w-title').value=f.title;
+      if(f.genre){
+        const sel=document.getElementById('w-genre');
+        const opt=[...sel.options].find(o=>o.value===f.genre);
+        if(opt){sel.value=f.genre;sel.dispatchEvent(new Event('change'));}
+      }
+      if(f.subgenre){
+        await new Promise(r=>setTimeout(r,200));
+        const sub=document.getElementById('w-subgenre');
+        const subOpt=[...sub.options].find(o=>o.value===f.subgenre||o.text.toLowerCase().includes(f.subgenre.toLowerCase()));
+        if(subOpt)sub.value=subOpt.value;
+      }
+      if(f.theme)document.getElementById('w-theme').value=f.theme;
+      if(f.setting)document.getElementById('w-setting').value=f.setting;
+      if(f.characters)document.getElementById('w-characters').value=f.characters;
+      if(f.pov)document.getElementById('w-pov').value=f.pov;
+      if(f.tone)document.getElementById('w-tone').value=f.tone;
+      if(f.length)document.getElementById('w-length').value=f.length;
+      if(f.structure)document.getElementById('w-structure').value=f.structure;
+      if(f.era)document.getElementById('w-era').value=f.era;
+      if(f.elements&&Array.isArray(f.elements)){
+        tagElements.length=0;
+        f.elements.forEach(el=>tagElements.push(el));
+        renderTags();
+      }
+      currentUser.credits=d.credits_remaining;updateAuthUI();
+      toast(`AI 已填寫所有欄位！🤖 ${d.model} · 💎 ${d.credits_remaining} 積分`,'success');
+    }catch(err){
+      toast('AI 填寫失敗：'+err.message,'error');
+    }
+  }else{
+    toast('請先登入以使用 AI 全權生成功能','error');
+  }
+
+  ld.classList.remove('active');btn.disabled=false;
 }
 
 // =============================================

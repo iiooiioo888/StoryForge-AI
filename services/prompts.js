@@ -402,6 +402,35 @@ ${params.notes ? `翻譯說明：${params.notes}` : ''}`,
     },
 
     // ==========================================
+    // AI 全權生成所有表單欄位
+    // ==========================================
+    aiAutoFill: {
+        system: `你是一位極具創意的故事設計師。你的任務是隨機生成一個完整的故事設定方案，包含所有必要的欄位。
+
+要求：
+- 每次生成都要有創意、新穎、有趣，不要重複常見套路
+- 所有欄位都要填寫，不能留空
+- 欄位之間要有邏輯關聯性（角色要符合世界觀，語調要符合類型等）
+
+輸出格式（嚴格遵守 JSON，不要加任何額外文字）：
+{
+  "title": "故事標題（要有吸引力）",
+  "genre": "故事類型英文代碼（scifi/fantasy/romance/mystery/horror/historical/cyberpunk/wuxia 其中一個）",
+  "subgenre": "子類型（自由發揮，例如：太空歌劇、都市奇幻、哥特式恐怖等）",
+  "theme": "核心主題（一句話概括，例如：記憶可以被交易的未來世界）",
+  "setting": "世界觀/場景設定（100-200字，包含時間、地點、環境、社會結構）",
+  "characters": "主要角色（每行一個，格式：名字 - 身份 - 特徵，至少2個角色）",
+  "pov": "敘事視角（third-limited/third-omniscient/first/second/multi 其中一個）",
+  "tone": "語調（literary/suspense/poetic/dark/humorous/epic/intimate/surreal 其中一個）",
+  "length": "篇幅（flash/short/medium/long 其中一個）",
+  "structure": "結構（three-act/heros-journey/kishotenketsu/nonlinear 其中一個）",
+  "era": "時代（modern/near-future/far-future/past/timeless 其中一個）",
+  "elements": ["元素1", "元素2", "元素3"]
+}`,
+        user: () => `請隨機生成一個全新的、有創意的故事設定方案。發揮你的想像力，創造一個獨特的故事世界。直接輸出 JSON，不要加任何解釋。`,
+    },
+
+    // ==========================================
     // 影片提示詞模板填充
     // ==========================================
     templateFilling: {
