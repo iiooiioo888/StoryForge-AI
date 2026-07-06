@@ -1250,6 +1250,182 @@ tr:hover td { background: rgba(108,92,231,0.02); }
 }
 
 /* ============================================
+   Dark Mode
+   ============================================ */
+
+[data-theme="dark"] {
+    --dark: #E8E8E8;
+    --dark-light: #B0B0B0;
+    --gray: #666;
+    --gray-light: #333;
+    --light: #1a1a2e;
+    --white: #16213e;
+    --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+[data-theme="dark"] body {
+    background: #0f0f23;
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .navbar {
+    background: rgba(22, 33, 62, 0.95);
+    border-bottom-color: rgba(255,255,255,0.06);
+}
+
+[data-theme="dark"] .card {
+    background: #16213e;
+    border-color: #1a1a3e;
+}
+
+[data-theme="dark"] .card:hover {
+    box-shadow: 0 4px 20px rgba(108,92,231,0.15);
+}
+
+[data-theme="dark"] .sidebar {
+    background: #16213e;
+    border-right-color: #1a1a3e;
+}
+
+[data-theme="dark"] .form-input,
+[data-theme="dark"] .form-select,
+[data-theme="dark"] .form-textarea {
+    background: #1a1a3e;
+    border-color: #2a2a4e;
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .form-input:focus,
+[data-theme="dark"] .form-select:focus,
+[data-theme="dark"] .form-textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(108,92,231,0.2);
+}
+
+[data-theme="dark"] .btn-secondary {
+    background: #1a1a3e;
+    border-color: #2a2a4e;
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .btn-ghost:hover {
+    background: #1a1a3e;
+}
+
+[data-theme="dark"] .prompt-text {
+    background: #0d0d1a;
+}
+
+[data-theme="dark"] .modal {
+    background: #16213e;
+}
+
+[data-theme="dark"] .toast { color: white; }
+
+[data-theme="dark"] .hero {
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 50%, #2d1b69 100%);
+}
+
+[data-theme="dark"] th { background: #1a1a3e; }
+[data-theme="dark"] tr:hover td { background: rgba(108,92,231,0.05); }
+
+[data-theme="dark"] .footer { background: #0a0a1a; }
+
+[data-theme="dark"] .modal-overlay { background: rgba(0,0,0,0.7); }
+
+[data-theme="dark"] .story-cover { opacity: 0.9; }
+
+[data-theme="dark"] .stat-card { background: #16213e; }
+
+[data-theme="dark"] .chapter-item { border-color: #2a2a4e; }
+[data-theme="dark"] .chapter-item:hover { background: rgba(108,92,231,0.05); }
+
+[data-theme="dark"] .character-card { background: #16213e; border-color: #2a2a4e; }
+
+[data-theme="dark"] .notif-item:hover { background: #1a1a3e; }
+
+[data-theme="dark"] .template-card { background: #1a1a3e; border-color: #2a2a4e; color: #e0e0e0; }
+[data-theme="dark"] .template-card.active { background: rgba(108,92,231,0.15); }
+
+[data-theme="dark"] .platform-btn { background: #1a1a3e; border-color: #2a2a4e; color: #e0e0e0; }
+[data-theme="dark"] .platform-btn.active { background: rgba(108,92,231,0.1); }
+
+[data-theme="dark"] ::-webkit-scrollbar-track { background: #0f0f23; }
+[data-theme="dark"] ::-webkit-scrollbar-thumb { background: #333; }
+
+/* ============================================
+   Keyboard Shortcut Hints
+   ============================================ */
+
+.shortcut-hint {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--dark);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    box-shadow: var(--shadow-lg);
+    z-index: 9999;
+    display: none;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.shortcut-hint.show { display: block; }
+
+.shortcut-hint kbd {
+    background: rgba(255,255,255,0.15);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    margin: 0 2px;
+}
+
+/* ============================================
+   Auto-save Indicator
+   ============================================ */
+
+.autosave-indicator {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.autosave-indicator.show { opacity: 1; }
+.autosave-indicator.saving { background: var(--warning); color: var(--dark); }
+.autosave-indicator.saved { background: var(--success); color: white; }
+.autosave-indicator.error { background: var(--danger); color: white; }
+
+/* ============================================
+   Theme Toggle Button
+   ============================================ */
+
+.theme-toggle {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    font-size: 1.2rem;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-toggle:hover { background: var(--light); }
+
+/* ============================================
    Utility Classes
    ============================================ */
 

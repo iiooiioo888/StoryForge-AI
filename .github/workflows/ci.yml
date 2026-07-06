@@ -1,0 +1,55 @@
+name: StoryForge AI CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x, 22.x]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check syntax
+        run: |
+          node -c server.js
+          node -c models/index.js
+          for f in routes/*.mongo.js; do node -c "$f"; done
+
+      - name: Start server and test
+        run: |
+          timeout 30 node server.js &
+          sleep 10
+          curl -f http://localhost:3000/api/stories || exit 1
+          curl -f http://localhost:3000/api/llm/status || exit 1
+          curl -f http://localhost:3000/api/camera/movements || exit 1
+          echo "✅ All API tests passed"
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+      - run: npm ci
+      - name: Check for console.log in production code
+        run: |
+          ! grep -r "console.log" routes/ models/ services/ middleware/ --include="*.js" | grep -v "logger" | grep -v "// eslint" | head -5
+        continue-on-error: true

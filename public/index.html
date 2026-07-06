@@ -25,6 +25,7 @@
             <li id="navAdmin" class="hidden"><a href="#" onclick="router.navigate('admin')" data-page="admin">管理後台</a></li>
         </ul>
         <div class="nav-actions" id="navActions">
+            <button class="theme-toggle" onclick="toggleTheme()" title="切換主題">🌙</button>
             <button class="btn btn-primary btn-sm" onclick="router.navigate('login')">登入</button>
         </div>
     </nav>
@@ -753,7 +754,13 @@
         </div>
     </div>
 
+    <!-- Auto-save Indicator -->
+    <div class="autosave-indicator" id="autosaveIndicator"></div>
+    <!-- Shortcut Hint -->
+    <div class="shortcut-hint" id="shortcutHint"></div>
+
     <script src="/js/app.js"></script>
     <script src="/js/llm.js"></script>
+    <script src="/js/features.js"></script>
 </body>
 </html>
