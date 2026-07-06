@@ -696,56 +696,95 @@ async function showDashTab(tab) {
 
         case 'ai-generate': {
             if (categories.length === 0) { try { const d = await api('/stories/meta/categories'); categories = d.categories; } catch(e){} }
+            // Check LLM status
+            let llmStatus = { configured: [], default: 'openai' };
+            try { llmStatus = await api('/llm/status'); } catch(e) {}
+            const hasLLM = llmStatus.configured.length > 0;
+
             c.innerHTML = `
-                <div class="dashboard-header"><h1>🤖 AI輔助生成</h1><p>讓AI幫助你構思和生成故事</p></div>
-                
-                <div class="ai-step">
-                    <div class="ai-step-number">1</div>
-                    <div class="ai-step-content">
-                        <div class="ai-step-title">設定故事參數</div>
-                        <p class="text-muted mb-2">告訴AI你想寫什麼樣的故事</p>
-                        <div class="grid grid-2">
-                            <div class="form-group"><label class="form-label">故事類型</label>
-                                <select class="form-select" id="aiGenre">${categories.map(c => `<option value="${c.name}">${c.icon} ${c.name}</option>`).join('')}</select>
-                            </div>
-                            <div class="form-group"><label class="form-label">語調風格</label>
-                                <select class="form-select" id="aiTone"><option>史詩壯闊</option><option>輕鬆幽默</option><option>黑暗沉重</option><option>溫馨治癒</option><option>緊張懸疑</option><option>浪漫細膩</option></select>
-                            </div>
-                        </div>
-                        <div class="form-group"><label class="form-label">核心想法 / 靈感</label><textarea class="form-textarea" id="aiIdea" placeholder="例如：一個能聽見他人內心聲音的女孩，在一次意外中失去了這個能力，卻發現真正的溝通不需要超能力..." style="min-height:100px;"></textarea></div>
+                <div class="dashboard-header flex justify-between items-center">
+                    <div><h1>🤖 AI 智能創作中心</h1><p>LLM 驅動的全方位內容生成</p></div>
+                    <div class="flex gap-2">
+                        <span class="tag tag-${hasLLM ? 'success' : 'warning'}">${hasLLM ? '✅ LLM 已連接' : '⚠️ LLM 未配置'}</span>
+                        <button class="btn btn-sm btn-ghost" onclick="showDashTab('llm-config')">⚙️ LLM 設定</button>
                     </div>
                 </div>
 
-                <div class="ai-step">
-                    <div class="ai-step-number">2</div>
-                    <div class="ai-step-content">
-                        <div class="ai-step-title">角色設定（可選）</div>
-                        <p class="text-muted mb-2">描述主要角色，或留空讓AI發揮</p>
-                        <div class="grid grid-2">
-                            <div class="form-group"><label class="form-label">主角名稱</label><input type="text" class="form-input" id="aiCharName" placeholder="角色名"></div>
-                            <div class="form-group"><label class="form-label">角色類型</label><select class="form-select" id="aiCharRole"><option>主角</option><option>反派</option><option>導師</option><option>夥伴</option></select></div>
-                        </div>
-                        <div class="form-group"><label class="form-label">角色描述</label><textarea class="form-textarea" id="aiCharDesc" placeholder="外貌、性格、背景..." style="min-height:60px;"></textarea></div>
-                    </div>
+                ${!hasLLM ? `<div class="card mb-3" style="border:2px solid var(--warning);background:rgba(253,203,110,0.05);"><div class="card-body"><h3 style="font-weight:700;margin-bottom:0.5rem;">⚠️ LLM 未配置</h3><p style="font-size:0.9rem;color:var(--dark-light);margin-bottom:1rem;">要使用 AI 生成功能，請先配置 LLM API Key。支援 OpenAI、Anthropic Claude、DeepSeek 等。</p><button class="btn btn-primary" onclick="showDashTab('llm-config')">前往配置 LLM →</button></div></div>` : ''}
+
+                <div class="grid grid-4 mb-3" style="gap:1rem;">
+                    <div class="card" style="cursor:pointer;${!hasLLM?'opacity:0.5':''}" onclick="${hasLLM?"showAITask('full-story')":"void(0)"}"><div class="card-body text-center"><div style="font-size:2rem;">📖</div><div style="font-weight:700;font-size:0.9rem;">一鍵生成故事</div><div style="font-size:0.75rem;color:var(--gray);">35積分</div></div></div>
+                    <div class="card" style="cursor:pointer;${!hasLLM?'opacity:0.5':''}" onclick="${hasLLM?"showAITask('outline')":"void(0)"}"><div class="card-body text-center"><div style="font-size:2rem;">📋</div><div style="font-weight:700;font-size:0.9rem;">生成故事大綱</div><div style="font-size:0.75rem;color:var(--gray);">15積分</div></div></div>
+                    <div class="card" style="cursor:pointer;${!hasLLM?'opacity:0.5':''}" onclick="${hasLLM?"showAITask('video-prompt')":"void(0)"}"><div class="card-body text-center"><div style="font-size:2rem;">🎬</div><div style="font-weight:700;font-size:0.9rem;">LLM 影片提示詞</div><div style="font-size:0.75rem;color:var(--gray);">25積分</div></div></div>
+                    <div class="card" style="cursor:pointer;${!hasLLM?'opacity:0.5':''}" onclick="${hasLLM?"showAITask('characters')":"void(0)"}"><div class="card-body text-center"><div style="font-size:2rem;">👥</div><div style="font-weight:700;font-size:0.9rem;">生成角色</div><div style="font-size:0.75rem;color:var(--gray);">10積分</div></div></div>
+                </div>
+                <div class="grid grid-4 mb-3" style="gap:1rem;">
+                    <div class="card" style="cursor:pointer;${!hasLLM?'opacity:0.5':''}" onclick="${hasLLM?"showAITask('world')":"void(0)"}"><div class="card-body text-center"><div style="font-size:2rem;">🌍</div><div style="font-weight:700;font-size:0.9rem;">生成世界觀</div><div style="font-size:0.75rem;color:var(--gray);">15積分</div></div></div>
+                    <div class="card" style="cursor:pointer;${!hasLLM?'opacity:0.5':''}" onclick="${hasLLM?"showAITask('rewrite')":"void(0)"}"><div class="card-body text-center"><div style="font-size:2rem;">✨</div><div style="font-weight:700;font-size:0.9rem;">改寫/潤色</div><div style="font-size:0.75rem;color:var(--gray);">15積分</div></div></div>
+                    <div class="card" style="cursor:pointer;${!hasLLM?'opacity:0.5':''}" onclick="${hasLLM?"showAITask('translate')":"void(0)"}"><div class="card-body text-center"><div style="font-size:2rem;">🌐</div><div style="font-weight:700;font-size:0.9rem;">翻譯</div><div style="font-size:0.75rem;color:var(--gray);">10積分</div></div></div>
+                    <div class="card" style="cursor:pointer;${!hasLLM?'opacity:0.5':''}" onclick="${hasLLM?"showAITask('dialogue')":"void(0)"}"><div class="card-body text-center"><div style="font-size:2rem;">💬</div><div style="font-weight:700;font-size:0.9rem;">生成對話</div><div style="font-size:0.75rem;color:var(--gray);">10積分</div></div></div>
                 </div>
 
-                <div class="ai-step">
-                    <div class="ai-step-number">3</div>
-                    <div class="ai-step-content">
-                        <div class="ai-step-title">生成選項</div>
-                        <div class="grid grid-3">
-                            <div class="form-group"><label class="form-label">目標字數</label><select class="form-select" id="aiLength"><option value="500">短篇 (500字)</option><option value="1000" selected>中篇 (1000字)</option><option value="2000">長篇 (2000字)</option></select></div>
-                            <div class="form-group"><label class="form-label">章節數</label><select class="form-select" id="aiChapters"><option value="1" selected>1章</option><option value="3">3章</option><option value="5">5章</option></select></div>
-                            <div class="form-group"><label class="form-label">&nbsp;</label><button class="btn btn-primary" style="width:100%;" onclick="aiGenerateStory()">🚀 AI生成故事</button></div>
-                        </div>
-                        <div class="card mt-2" style="background:rgba(253,203,110,0.1);border:1px solid var(--warning);"><div class="card-body" style="padding:1rem;"><p style="font-size:0.85rem;">💡 <strong>提示：</strong>AI生成會消耗 10 積分。生成後你可以自由編輯和修改內容。目前積分：<strong style="color:var(--primary);">💎 ${currentUser.credits}</strong></p></div></div>
-                    </div>
-                </div>
-
-                <div id="aiResult" class="hidden">
+                <div id="aiTaskArea"></div>
+                <div id="aiResult" class="hidden mt-3">
                     <div class="card">
-                        <div class="card-header"><h3>✨ AI生成結果</h3><button class="btn btn-sm btn-ghost" onclick="document.getElementById('aiResult').classList.add('hidden')">隱藏</button></div>
+                        <div class="card-header"><h3>✨ AI 生成結果</h3><div class="flex gap-2"><span class="tag tag-primary" id="aiResultModel"></span><button class="btn btn-sm btn-ghost" onclick="document.getElementById('aiResult').classList.add('hidden')">隱藏</button></div></div>
                         <div class="card-body" id="aiResultContent"></div>
+                    </div>
+                </div>
+            `;
+            break;
+        }
+
+        case 'llm-config': {
+            let llmStatus = { providers: [], configured: [], default: 'openai' };
+            try { llmStatus = await api('/llm/status'); } catch(e) {}
+            c.innerHTML = `
+                <div class="dashboard-header"><h1>⚙️ LLM 模型配置</h1><p>配置大語言模型 API，驅動所有 AI 生成功能</p></div>
+                <div class="card mb-3">
+                    <div class="card-header"><h3>🔌 支援的模型提供商</h3></div>
+                    <div class="card-body">
+                        <div class="grid grid-2">
+                        ${llmStatus.providers.map(p => `
+                            <div class="card" style="border:2px solid ${p.hasApiKey ? 'var(--success)' : 'var(--gray-light)'};"><div class="card-body">
+                                <div class="flex justify-between items-center mb-1"><h3 style="font-weight:700;">${p.name}</h3><span class="tag tag-${p.hasApiKey ? 'success' : 'warning'}">${p.hasApiKey ? '✅ 已配置' : '⚠️ 未配置'}</span></div>
+                                <div style="font-size:0.85rem;color:var(--gray);margin-bottom:0.75rem;">模型：${Object.entries(p.models).map(([k,v]) => `${k}: ${v}`).join(' / ')}</div>
+                                <div class="form-group"><label class="form-label">API Key</label><input type="password" class="form-input" id="llmKey_${p.id}" placeholder="${p.hasApiKey ? '已設定（留空保持原樣）' : '輸入 API Key'}"></div>
+                                ${p.id === 'custom' ? `<div class="form-group"><label class="form-label">Base URL</label><input type="text" class="form-input" id="llmUrl_${p.id}" placeholder="https://your-api.com/v1"></div>` : ''}
+                                <button class="btn btn-sm btn-primary" onclick="saveLLMConfig('${p.id}')">保存配置</button>
+                            </div></div>
+                        `).join('')}
+                        </div>
+                    </div>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-header"><h3>🎯 預設模型</h3></div>
+                    <div class="card-body">
+                        <div class="grid grid-2">
+                            <div class="form-group"><label class="form-label">預設提供商</label><select class="form-select" id="llmDefaultProvider">${llmStatus.providers.map(p => `<option value="${p.id}" ${p.id === llmStatus.default ? 'selected' : ''}>${p.name}</option>`).join('')}</select></div>
+                            <div class="form-group"><label class="form-label">模型等級</label><select class="form-select" id="llmDefaultTier"><option value="fast">快速 (低成本)</option><option value="balanced" selected>平衡 (推薦)</option><option value="powerful">強力 (高品質)</option></select></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>📊 積分消耗說明</h3></div>
+                    <div class="card-body">
+                        <div class="grid grid-2">
+                            <div>
+                                <div class="flex justify-between mb-1"><span>📖 一鍵生成故事</span><strong>35 積分</strong></div>
+                                <div class="flex justify-between mb-1"><span>📋 生成大綱</span><strong>15 積分</strong></div>
+                                <div class="flex justify-between mb-1"><span>📝 生成正文</span><strong>20 積分</strong></div>
+                                <div class="flex justify-between mb-1"><span>🎬 影片提示詞（故事）</span><strong>25 積分</strong></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1"><span>🎬 影片提示詞（描述）</span><strong>10 積分</strong></div>
+                                <div class="flex justify-between mb-1"><span>👥 生成角色</span><strong>10 積分</strong></div>
+                                <div class="flex justify-between mb-1"><span>🌍 生成世界觀</span><strong>15 積分</strong></div>
+                                <div class="flex justify-between mb-1"><span>✨ 改寫/潤色</span><strong>15 積分</strong></div>
+                                <div class="flex justify-between mb-1"><span>🌐 翻譯</span><strong>10 積分</strong></div>
+                                <div class="flex justify-between mb-1"><span>💬 生成對話</span><strong>10 積分</strong></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             `;

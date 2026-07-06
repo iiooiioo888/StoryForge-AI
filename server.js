@@ -39,6 +39,7 @@ app.use('/api/stories', require('./routes/stories')(db));
 app.use('/api/prompts', require('./routes/prompts')(db));
 app.use('/api/camera', require('./routes/camera')(db));
 app.use('/api/tools', require('./routes/tools')(db));
+app.use('/api/llm', require('./routes/llm')(db));
 app.use('/api/admin', require('./routes/admin')(db));
 
 // SPA fallback - serve index.html for non-API routes
