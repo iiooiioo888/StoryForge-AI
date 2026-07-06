@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>STORYFORGE — AI 故事創作與影片提示詞平台</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎭</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Noto+Serif+TC:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
 <style>
@@ -592,8 +591,6 @@ body::after{
   .prompt-split{grid-template-columns:1fr}
   .prompt-scene-list{position:static;max-height:none}
 }
-#auth-area{display:flex;align-items:center;gap:.8rem}
-
 @media(max-width:600px){
   .container{padding:1rem 1.2rem}
   .nav{padding:0 1rem}.nav-brand span{display:none}
@@ -616,9 +613,7 @@ body::after{
     <button class="nav-link" data-tab="workshop">故事工作坊</button>
     <button class="nav-link" data-tab="library">故事資料庫</button>
     <button class="nav-link" data-tab="prompts">影片提示詞</button>
-    <button class="nav-link" data-tab="camera">鏡頭語言</button>
   </div>
-  <div id="auth-area"><button class="btn btn-secondary btn-sm" onclick="showAuthModal()" id="auth-btn">登入</button></div>
 </nav>
 
 <main class="main">
@@ -864,87 +859,11 @@ body::after{
   </div>
 </div>
 
-<!-- CAMERA PANEL -->
-<div id="panel-camera" class="panel">
-  <div class="container">
-    <div class="section-title">鏡頭語言百科 <span class="count" id="cam-count"></span></div>
-    <div class="prompt-top-bar">
-      <div class="form-group" style="margin-bottom:0">
-        <label class="form-label">分類</label>
-        <select class="form-select" id="cam-cat-filter" onchange="filterCamMovements()">
-          <option value="">全部</option>
-          <option value="basic">基礎運鏡</option>
-          <option value="dynamic">動態運鏡</option>
-          <option value="complex">複合運鏡</option>
-          <option value="aerial">空中運鏡</option>
-          <option value="special">特殊運鏡</option>
-        </select>
-      </div>
-      <div style="flex:1"></div>
-      <div class="form-group" style="margin-bottom:0">
-        <label class="form-label">自定義組合</label>
-        <button class="btn btn-primary btn-sm" onclick="showComposeModal()">🔧 鏡頭語言組合器</button>
-      </div>
-    </div>
-    <div class="story-grid" id="cam-grid" style="margin-top:1.5rem"></div>
-  </div>
-</div>
-
-<!-- AUTH MODAL -->
-<div class="modal-overlay" id="auth-modal">
-  <div class="modal" style="max-width:480px">
-    <div class="modal-header">
-      <h3 id="auth-modal-title">登入</h3>
-      <button class="modal-close" onclick="closeAuthModal()">×</button>
-    </div>
-    <div class="modal-body">
-      <div id="auth-login-form">
-        <div class="form-group"><label class="form-label">用戶名</label><input type="text" class="form-input" id="auth-username" placeholder="用戶名或郵件"></div>
-        <div class="form-group"><label class="form-label">密碼</label><input type="password" class="form-input" id="auth-password" placeholder="密碼"></div>
-        <div id="auth-error" style="color:var(--danger);font-size:.8rem;margin-bottom:1rem;display:none"></div>
-        <button class="btn btn-primary btn-block" onclick="doLogin()">登入</button>
-        <p style="text-align:center;margin-top:1rem;font-size:.8rem;color:var(--text-dim)">沒有帳號？<a href="#" onclick="showRegisterForm()" style="color:var(--accent)">免費註冊</a></p>
-        <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border)">
-          <p style="font-size:.7rem;color:var(--text-ghost);text-align:center;margin-bottom:.8rem">示範帳號</p>
-          <div style="display:flex;gap:.8rem;justify-content:center">
-            <button class="btn btn-ghost btn-sm" onclick="fillDemo('admin','admin123')">👑 管理員</button>
-            <button class="btn btn-ghost btn-sm" onclick="fillDemo('demo','demo123')">👤 用戶</button>
-          </div>
-        </div>
-      </div>
-      <div id="auth-register-form" style="display:none">
-        <div class="form-row">
-          <div class="form-group"><label class="form-label">用戶名 *</label><input type="text" class="form-input" id="reg-username"></div>
-          <div class="form-group"><label class="form-label">顯示名稱</label><input type="text" class="form-input" id="reg-displayname"></div>
-        </div>
-        <div class="form-group"><label class="form-label">電子郵件 *</label><input type="email" class="form-input" id="reg-email"></div>
-        <div class="form-group"><label class="form-label">密碼 *</label><input type="password" class="form-input" id="reg-password"></div>
-        <div id="reg-error" style="color:var(--danger);font-size:.8rem;margin-bottom:1rem;display:none"></div>
-        <button class="btn btn-primary btn-block" onclick="doRegister()">🎉 註冊並獲得100積分</button>
-        <p style="text-align:center;margin-top:1rem;font-size:.8rem;color:var(--text-dim)">已有帳號？<a href="#" onclick="showLoginForm()" style="color:var(--accent)">登入</a></p>
-      </div>
-    </div>
-  </div>
-</div>
-
 <div class="toast-container" id="toast-container"></div>
 
 <script>
 // =============================================
-// API CLIENT
-// =============================================
-let currentUser=null;
-async function api(path,options={}){
-  const config={headers:{'Content-Type':'application/json'},...options};
-  if(options.body&&typeof options.body==='object')config.body=JSON.stringify(options.body);
-  const res=await fetch(`/api${path}`,config);
-  const data=await res.json();
-  if(!res.ok)throw new Error(data.error||'請求失敗');
-  return data;
-}
-
-// =============================================
-// LOCAL DB (fallback for offline)
+// DATABASE
 // =============================================
 const DB={KEY:'storyforge_v3',
   getAll(){try{return JSON.parse(localStorage.getItem(this.KEY))||[]}catch{return[]}},
@@ -1420,303 +1339,8 @@ function toast(msg,type='success'){
   c.appendChild(el);setTimeout(()=>{el.style.opacity='0';el.style.transform='translateX(24px)';el.style.transition='all .35s';},2800);setTimeout(()=>el.remove(),3200);
 }
 
-// =============================================
-// AUTH FUNCTIONS
-// =============================================
-async function checkAuth(){try{const d=await api('/auth/me');currentUser=d.user;updateAuthUI();}catch(e){currentUser=null;updateAuthUI();}}
-function updateAuthUI(){
-  const btn=document.getElementById('auth-btn');
-  if(currentUser){
-    const initial=(currentUser.displayName||currentUser.username)[0].toUpperCase();
-    btn.outerHTML=`<div style="display:flex;align-items:center;gap:.8rem;cursor:pointer" onclick="router?.navigate?.('dashboard')">
-      <div style="width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--bg);font-weight:600">${initial}</div>
-      <div><div style="font-size:.75rem;color:var(--text)">${currentUser.displayName||currentUser.username}</div><div style="font-size:.6rem;color:var(--accent-dim)">💎 ${currentUser.credits} 積分</div></div>
-    </div>`;
-  }
-}
-function showAuthModal(){document.getElementById('auth-modal').classList.add('active');}
-function closeAuthModal(){document.getElementById('auth-modal').classList.remove('active');}
-function showLoginForm(){document.getElementById('auth-login-form').style.display='block';document.getElementById('auth-register-form').style.display='none';document.getElementById('auth-modal-title').textContent='登入';}
-function showRegisterForm(){document.getElementById('auth-login-form').style.display='none';document.getElementById('auth-register-form').style.display='block';document.getElementById('auth-modal-title').textContent='註冊';}
-function fillDemo(u,p){document.getElementById('auth-username').value=u;document.getElementById('auth-password').value=p;}
-
-async function doLogin(){
-  const username=document.getElementById('auth-username').value.trim();
-  const password=document.getElementById('auth-password').value;
-  const errEl=document.getElementById('auth-error');
-  if(!username||!password){errEl.textContent='請填寫所有欄位';errEl.style.display='block';return;}
-  try{
-    const d=await api('/auth/login',{method:'POST',body:{username,password}});
-    currentUser=d.user;updateAuthUI();closeAuthModal();toast('登入成功','success');
-    refreshHome();refreshLibrary();
-  }catch(err){errEl.textContent=err.message;errEl.style.display='block';}
-}
-
-async function doRegister(){
-  const username=document.getElementById('reg-username').value.trim();
-  const email=document.getElementById('reg-email').value.trim();
-  const display_name=document.getElementById('reg-displayname').value.trim();
-  const password=document.getElementById('reg-password').value;
-  const errEl=document.getElementById('reg-error');
-  if(!username||!email||!password){errEl.textContent='請填寫必填欄位';errEl.style.display='block';return;}
-  try{
-    const d=await api('/auth/register',{method:'POST',body:{username,email,password,display_name}});
-    currentUser=d.user;updateAuthUI();closeAuthModal();toast('註冊成功！已獲得100積分 🎉','success');
-  }catch(err){errEl.textContent=err.message;errEl.style.display='block';}
-}
-
-// =============================================
-// CAMERA PAGE
-// =============================================
-let cameraMovements=[];
-async function loadCamera(){
-  try{const d=await api('/camera/movements');cameraMovements=d.movements||[];renderCameraGrid();}catch(e){}
-}
-function filterCamMovements(){
-  const cat=document.getElementById('cam-cat-filter').value;
-  const filtered=cat?cameraMovements.filter(m=>m.category===cat):cameraMovements;
-  renderCameraGrid(filtered);
-}
-function renderCameraGrid(items){
-  const grid=document.getElementById('cam-grid');
-  if(!grid)return;
-  const data=items||cameraMovements;
-  document.getElementById('cam-count').textContent=`${data.length} 種運鏡`;
-  grid.innerHTML=data.map(m=>`
-    <div class="story-card">
-      <div class="card-top"><span class="genre-tag">${m.icon||'🎥'}</span><span class="card-badge">${m.category}</span></div>
-      <h3>${m.nameZh}</h3>
-      <p style="font-size:.8rem;color:var(--text-dim);font-family:var(--mono);margin-bottom:.5rem">${m.nameEn}</p>
-      <p>${m.description||''}</p>
-      <div class="card-tags"><span class="mini-tag">難度 ${'⭐'.repeat(m.difficulty||1)}</span></div>
-      <div class="card-meta">
-        <span>${m.useCase||''}</span>
-        <button class="icon-btn" onclick="copyTxt(this,'${(m.englishPrompt||'').replace(/'/g,"\\'")}')" title="複製提示詞">📋</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-function showComposeModal(){
-  document.getElementById('modal-title').textContent='鏡頭語言組合器';
-  document.getElementById('modal-body').innerHTML=`
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">景別</label>
-        <select class="form-select" id="compose-shot">
-          <option value="">--</option>
-          <option value="extreme close-up">大特寫</option>
-          <option value="close-up">特寫</option>
-          <option value="medium shot">中景</option>
-          <option value="long shot">遠景</option>
-          <option value="extreme wide shot">大遠景</option>
-        </select>
-      </div>
-      <div class="form-group"><label class="form-label">角度</label>
-        <select class="form-select" id="compose-angle">
-          <option value="">--</option>
-          <option value="eye level">平視</option>
-          <option value="low angle">仰拍</option>
-          <option value="high angle">俯拍</option>
-          <option value="dutch angle">荷蘭角</option>
-          <option value="bird's eye view">鳥瞰</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">運鏡</label>
-        <select class="form-select" id="compose-move">
-          <option value="">--</option>
-          <option value="slow dolly in">推鏡</option>
-          <option value="tracking shot">跟蹤</option>
-          <option value="arc shot orbiting">弧形環繞</option>
-          <option value="crane shot">升降</option>
-          <option value="handheld">手持</option>
-          <option value="one continuous take">一鏡到底</option>
-        </select>
-      </div>
-      <div class="form-group"><label class="form-label">燈光</label>
-        <select class="form-select" id="compose-light">
-          <option value="">--</option>
-          <option value="golden hour">黃金時刻</option>
-          <option value="dramatic side lighting">戲劇側光</option>
-          <option value="neon glow">霓虹燈光</option>
-          <option value="moonlight">月光</option>
-          <option value="backlighting">逆光</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-group"><label class="form-label">場景描述</label><textarea class="form-textarea" id="compose-scene" placeholder="描述場景..."></textarea></div>
-    <button class="btn btn-primary btn-block" onclick="doCompose()">組合生成</button>
-    <div id="compose-result" style="margin-top:1.5rem"></div>
-  `;
-  document.getElementById('story-modal').classList.add('active');
-}
-
-function doCompose(){
-  const shot=document.getElementById('compose-shot').value;
-  const angle=document.getElementById('compose-angle').value;
-  const move=document.getElementById('compose-move').value;
-  const light=document.getElementById('compose-light').value;
-  const scene=document.getElementById('compose-scene').value;
-  const parts=[scene,shot,angle,move].filter(Boolean);
-  const prompt=parts.join('. ')+'. '+((light?`Lighting: ${light}.`:'')+' Style: cinematic. Mood: dramatic.');
-  document.getElementById('compose-result').innerHTML=`
-    <div class="prompt-block">
-      <div class="prompt-type">Composed Prompt · 組合提示詞</div>
-      <div class="prompt-text">${prompt}</div>
-      <button class="copy-btn" onclick="copyTxt(this,'${prompt.replace(/'/g,"\\'")}')">COPY</button>
-    </div>
-  `;
-}
-
-// =============================================
-// LLM-POWERED GENERATION
-// =============================================
-async function generateStory(){
-  const genre=document.getElementById('w-genre').value;
-  if(!genre){toast('請先選擇故事類型','error');return;}
-  const idea=document.getElementById('w-theme').value||document.getElementById('w-setting').value||'一個故事';
-  const ld=document.getElementById('gen-loading'),btn=document.getElementById('btn-generate');
-  ld.classList.add('active');btn.disabled=true;btn.style.opacity='.5';
-
-  if(currentUser){
-    try{
-      const d=await api('/llm/generate-full-story',{method:'POST',body:{
-        genre:document.getElementById('w-genre').options[document.getElementById('w-genre').selectedIndex].text,
-        tone:document.getElementById('w-tone').options[document.getElementById('w-tone').selectedIndex].text,
-        idea,characterName:(document.getElementById('w-characters').value||'').split('\n')[0]?.split('-')[0]?.trim(),
-        wordCount:document.getElementById('w-length').value==='long'?3000:document.getElementById('w-length').value==='medium'?2000:1000
-      }});
-      currentStoryContent=d.content;
-      currentEditId=null;
-      const out=document.getElementById('story-output');
-      out.style.display='block';document.getElementById('story-edit-area').style.display='none';
-      out.innerHTML=currentStoryContent.replace(/《([^》]+)》/,'<h2>《$1》</h2>').replace(/·\s*·\s*·/g,'<div class="scene-break">· · ·</div>');
-      document.getElementById('story-toolbar-title').textContent=document.getElementById('w-title').value||'未命名故事';
-      currentUser.credits=d.credits_remaining;updateAuthUI();
-      toast(`故事生成完成！🤖 ${d.model} · 💎 ${d.credits_remaining} 積分`,'success');
-    }catch(err){
-      toast('LLM 生成失敗，使用本地模板：'+err.message,'info');
-      generateStoryLocal();
-    }
-  }else{
-    generateStoryLocal();
-  }
-
-  ld.classList.remove('active');btn.disabled=false;btn.style.opacity='1';
-}
-
-function generateStoryLocal(){
-  const p={
-    title:document.getElementById('w-title').value,genre:document.getElementById('w-genre').value,
-    subgenre:document.getElementById('w-subgenre').value,theme:document.getElementById('w-theme').value,
-    setting:document.getElementById('w-setting').value,characters:document.getElementById('w-characters').value,
-    tone:document.getElementById('w-tone').value,length:document.getElementById('w-length').value,
-    pov:document.getElementById('w-pov').value,structure:document.getElementById('w-structure').value,
-    era:document.getElementById('w-era').value,elements:[...tagElements]
-  };
-  currentStoryContent=StoryEngine.generate(p);currentEditId=null;
-  const out=document.getElementById('story-output');
-  out.style.display='block';document.getElementById('story-edit-area').style.display='none';
-  out.innerHTML=currentStoryContent.replace(/《([^》]+)》/,'<h2>《$1》</h2>').replace(/·\s*·\s*·/g,'<div class="scene-break">· · ·</div>');
-  document.getElementById('story-toolbar-title').textContent=p.title||'未命名故事';
-  const cs=p.characters.split('\n').filter(c=>c.trim());
-  const c1=(cs[0]||'').split('-')[0]?.trim()||'主角';
-  const c2=cs.length>1?(cs[1]||'').split('-')[0]?.trim():c1;
-  currentOutline=StoryEngine.generateOutline(p.genre,p.title,c1,c2,p.setting||'世界');
-  currentCharCards=StoryEngine.generateCharCards(p.characters);
-  renderOutline();renderCharCards();renderSceneBreakdown();
-  toast('故事生成完成','success');
-}
-
-async function generatePrompts(){
-  const id=document.getElementById('prompt-story-select').value;
-  if(!id){toast('請先選擇故事','error');return;}
-  const story=DB.getById(id);if(!story){toast('找不到故事','error');return;}
-  const vs=document.getElementById('prompt-video-style').value,plat=document.getElementById('prompt-platform').value;
-  const ld=document.getElementById('prompt-loading'),btn=document.getElementById('btn-gen-prompts');
-  ld.classList.add('active');btn.disabled=true;
-
-  if(currentUser&&story.content){
-    try{
-      const d=await api('/llm/generate-video-prompt',{method:'POST',body:{
-        scene:story.content.substring(0,500),platform:plat,style:vs,mood:'cinematic'
-      }});
-      const prompt=d.prompt;
-      currentScenes=[{id:1,title:'場景 1',summary:story.content.substring(0,80),mainPrompt:prompt.prompt_en||'',negPrompt:prompt.negative_prompt||'',camera:prompt.camera_breakdown?.shot_size||'Cinematic',lens:'50mm',lighting:'cinematic lighting',colorGrade:'professional',styleRef:'cinematic',fps:'24fps',duration:'8s',aspect:'16:9',videoStyle:vs,charName:'主角',visuals:'cinematic environment'}];
-      currentUser.credits=d.credits_remaining;updateAuthUI();
-      renderPrompts(story.title);
-      document.getElementById('prompts-empty').style.display='none';
-      toast('提示詞生成完成！','success');
-    }catch(err){
-      toast('LLM 生成失敗，使用本地引擎','info');
-      generatePromptsLocal(story,vs,plat);
-    }
-  }else{
-    generatePromptsLocal(story,vs,plat);
-  }
-
-  ld.classList.remove('active');btn.disabled=false;
-}
-
-function generatePromptsLocal(story,vs,plat){
-  const txt=(story.content||'').replace(/《[^》]+》\n*/g,'').trim();
-  const sts=PromptEngine.splitScenes(txt);
-  const cn=(story.characters||'').split('\n')[0]?.split('-')[0]?.trim()||'主角';
-  currentScenes=sts.map((t,i)=>PromptEngine.genScene(t,i+1,sts.length,story.genre,story.tone,cn,vs,plat));
-  renderPrompts(story.title);
-  document.getElementById('prompts-empty').style.display='none';
-  toast(`已為 ${currentScenes.length} 個場景生成影片提示詞`,'success');
-}
-
-// =============================================
-// SAVE TO BACKEND
-// =============================================
-async function saveStory(){
-  if(!currentStoryContent){toast('請先生成或撰寫故事','error');return;}
-  const title=document.getElementById('w-title').value||'未命名故事';
-  if(currentUser){
-    try{
-      await api('/stories',{method:'POST',body:{
-        title,content:currentStoryContent,genre:document.getElementById('w-genre').options[document.getElementById('w-genre').selectedIndex]?.text,
-        tone:document.getElementById('w-tone').options[document.getElementById('w-tone').selectedIndex]?.text,
-        status:'published',visibility:'public'
-      }});
-      toast('故事已保存到服務器','success');
-    }catch(err){toast('保存失敗：'+err.message,'error');}
-  }
-  // Also save locally
-  const d={title,genre:document.getElementById('w-genre').value,subgenre:document.getElementById('w-subgenre').value,theme:document.getElementById('w-theme').value,setting:document.getElementById('w-setting').value,characters:document.getElementById('w-characters').value,tone:document.getElementById('w-tone').value,pov:document.getElementById('w-pov').value,structure:document.getElementById('w-structure').value,era:document.getElementById('w-era').value,elements:[...tagElements],content:currentStoryContent,outline:currentOutline,charCards:currentCharCards};
-  if(currentEditId){const o=DB.getById(currentEditId);d.version=(o?.version||0)+1;DB.update(currentEditId,d);}
-  else{const s=DB.add(d);currentEditId=s.id;}
-  refreshHome();toast('故事已保存','success');
-}
-
-async function loadServerStories(){
-  if(!currentUser)return;
-  try{
-    const d=await api('/stories/user/mine');
-    // Merge server stories into local DB
-    const local=DB.getAll();
-    (d.stories||[]).forEach(s=>{
-      if(!local.find(l=>l.serverId===s._id)){
-        DB.add({serverId:s._id,title:s.title,content:s.content,genre:s.genre,tone:s.tone,setting:'',characters:'',theme:s.summary||'',elements:[],sceneCount:0,promptCount:0});
-      }
-    });
-    refreshHome();refreshLibrary();
-  }catch(e){}
-}
-
-// =============================================
-// INIT
-// =============================================
-async function initApp(){
-  await checkAuth();
-  refreshHome();refreshLibrary();refreshPromptSel();
-  await loadCamera();
-  if(currentUser)await loadServerStories();
-}
-initApp();
+// Init
+refreshHome();refreshLibrary();refreshPromptSel();
 
 // Sample data
 if(!DB.getAll().length){
