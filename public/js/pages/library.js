@@ -1,123 +1,71 @@
-// ============================================
-// StoryForge AI — Library (ES Module)
-// ============================================
+// ═══ Library ═══
 import { DB } from '../api.js';
-import { esc, toast } from '../utils.js';
-import { renderCard } from '../components.js';
-
-let currentFilter = 'all';
+import { toast } from '../utils.js';
 
 export function refreshLibrary() {
-  const search = (document.getElementById('search-input')?.value || '').toLowerCase();
-  const stories = DB.getAll().filter(s => {
-    const matchFilter = currentFilter === 'all' || s.genre === currentFilter;
-    const matchSearch = !search || s.title?.toLowerCase().includes(search) || s.content?.toLowerCase().includes(search);
-    return matchFilter && matchSearch;
-  });
-  
+  const stories = DB.getAll();
   const grid = document.getElementById('library-grid');
   const empty = document.getElementById('library-empty');
+  const count = document.getElementById('lib-count');
+  if (count) count.textContent = `${stories.length} 篇`;
   if (!grid) return;
-  
-  if (!stories.length) {
-    grid.innerHTML = '';
-    if (empty) empty.style.display = 'block';
-    return;
-  }
-  
+  if (!stories.length) { grid.innerHTML = ''; if (empty) empty.style.display = ''; return; }
   if (empty) empty.style.display = 'none';
-  grid.innerHTML = stories.map(s => renderCard(s)).join('');
+  grid.innerHTML = stories.map((s, i) => {
+    const bg = `hsl(${7 * Math.abs(s.title?.charCodeAt(0) || 65) % 360},45%,18%)`;
+    return `<div class="card" data-action="viewStory" data-story-id="${s.id}" style="animation-delay:${i*.05}s">
+      <div style="height:80px;background:${bg};border-radius:var(--radius);margin-bottom:.8rem;display:flex;align-items:center;justify-content:center;font-size:1.5rem">📖</div>
+      <h3>${esc(s.title || '未命名')}</h3>
+      <p>${esc(s.content?.substring(0, 80) || '')}...</p>
+      <div class="card-meta"><span>${(s.wordCount || 0).toLocaleString()} 字</span><span>${esc(s.genre || '')}</span></div>
+    </div>`;
+  }).join('');
 }
 
 export function viewStory(id) {
   const story = DB.getById(id);
   if (!story) return;
-  
-  document.getElementById('modal-title').textContent = story.title || '未命名故事';
-  
-  const content = `
-    <div style="margin-bottom:1rem">
-      <span class="genre-tag" style="display:inline-block">${story.genre || '未分類'}</span>
-      ${story.subgenre ? `<span class="mini-tag" style="margin-left:.5rem">${story.subgenre}</span>` : ''}
-    </div>
-    ${story.theme ? `<p style="font-size:.88rem;color:var(--text-muted);margin-bottom:.5rem">主題：${esc(story.theme)}</p>` : ''}
-    <div class="story-output" style="max-height:50vh;overflow-y:auto">${(story.content || '').replace(/\n/g, '<br>')}</div>
-    <div class="btn-group" style="margin-top:1.5rem">
-      <button class="btn btn-primary" data-action="editFromModal" data-story-id="${id}">編輯</button>
-      <button class="btn btn-secondary" data-action="promptFromModal" data-story-id="${id}">生成提示詞</button>
-    </div>
-  `;
-  
-  document.getElementById('modal-body').innerHTML = content;
+  document.getElementById('modal-title').textContent = story.title || '未命名';
+  document.getElementById('modal-body').innerHTML = `
+    <div style="margin-bottom:1rem"><span class="tag">${esc(story.genre || '未分類')}</span></div>
+    ${story.theme ? `<p style="color:var(--text-muted);margin-bottom:1rem">主題：${esc(story.theme)}</p>` : ''}
+    <div style="line-height:1.9;max-height:50vh;overflow-y:auto;white-space:pre-wrap">${esc(story.content || '')}</div>
+    <div style="margin-top:1.5rem;display:flex;gap:.5rem">
+      <button class="btn btn-primary btn-sm" data-action="editStory" data-story-id="${id}">編輯</button>
+      <button class="btn btn-secondary btn-sm" data-action="sendToPrompts" data-story-id="${id}">生成提示詞</button>
+      <button class="btn btn-ghost btn-sm" data-action="deleteStory" data-story-id="${id}" style="margin-left:auto;color:var(--danger)">刪除</button>
+    </div>`;
   document.getElementById('story-modal').classList.add('active');
-}
-
-export function closeModal() {
-  document.getElementById('story-modal')?.classList.remove('active');
 }
 
 export function editStory(id) {
   const story = DB.getById(id);
   if (!story) return;
-  
-  // Set workshop fields
+  state_editId = id;
   document.getElementById('w-title').value = story.title || '';
   document.getElementById('w-genre').value = story.genre || '';
   document.getElementById('w-theme').value = story.theme || '';
   document.getElementById('w-setting').value = story.setting || '';
   document.getElementById('w-characters').value = story.characters || '';
-  document.getElementById('w-tone').value = story.tone || 'literary';
-  document.getElementById('w-pov').value = story.pov || 'third-limited';
-  
-  // Show edit area
   const output = document.getElementById('story-output');
-  const editArea = document.getElementById('story-edit-area');
-  if (output) output.style.display = 'none';
-  if (editArea) {
-    editArea.style.display = 'block';
-    editArea.value = story.content || '';
-  }
-  
-  // Switch to workshop
-  const { switchTab } = require_router();
+  if (output) output.innerHTML = `<div style="line-height:1.9;white-space:pre-wrap">${esc(story.content || '')}</div>`;
+  document.getElementById('story-modal').classList.remove('active');
   switchTab('workshop');
-  toast('已載入故事', 'success');
+  toast('已載入故事');
 }
 
-function require_router() {
-  // Lazy import to avoid circular deps
-  return { switchTab: (tab) => document.querySelector(`[data-tab="${tab}"]`)?.click() };
-}
+import { state } from '../router.js';
+let state_editId = null;
 
 export function deleteStory(id) {
-  if (!confirm('確定要刪除？')) return;
-  DB.delete(id);
-  refreshLibrary();
-  toast('已刪除', 'success');
+  if (!confirm('確定刪除？')) return;
+  DB.delete(id); refreshLibrary(); toast('已刪除');
 }
 
-export function toggleEdit() {
-  const output = document.getElementById('story-output');
-  const editArea = document.getElementById('story-edit-area');
-  if (!output || !editArea) return;
-  
-  if (editArea.style.display === 'none') {
-    editArea.style.display = 'block';
-    output.style.display = 'none';
-  } else {
-    editArea.style.display = 'none';
-    output.style.display = 'block';
-    output.innerHTML = editArea.value.replace(/\n/g, '<br>');
-  }
+export function sendToPrompts(id) {
+  document.getElementById('story-modal')?.classList.remove('active');
+  switchTab('prompts');
+  setTimeout(() => { document.getElementById('prompt-story-select').value = id; }, 100);
 }
 
-export function exportStory() {
-  const content = document.getElementById('story-edit-area')?.value || document.getElementById('story-output')?.textContent || '';
-  if (!content) return toast('沒有可匯出的故事', 'error');
-  
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([content], { type: 'text/plain;charset=utf-8' }));
-  a.download = `${document.getElementById('w-title')?.value || 'story'}.txt`;
-  a.click();
-  toast('已匯出', 'success');
-}
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }

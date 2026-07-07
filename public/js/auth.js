@@ -1,1 +1,53 @@
-import{api,setCurrentUser}from"./api.js";import{toast}from"./utils.js";export{currentUser}from"./api.js";export async function checkAuth(){try{const e=await api("/auth/me");setCurrentUser(e.user),updateAuthUI()}catch{setCurrentUser(null),updateAuthUI()}}export function updateAuthUI(){const e=document.getElementById("auth-area"),t=document.getElementById("auth-btn");e&&t&&import("./api.js").then(({currentUser:e})=>{if(e){const n=e.display_name||e.username;t.innerHTML=`<span style="margin-right:4px">${n[0]}</span> ${n}`,t.onclick=()=>switchTab("dashboard")}else t.innerHTML="登入",t.onclick=null})}export function showAuthModal(){document.getElementById("auth-modal")?.classList.add("active")}export function closeAuthModal(){document.getElementById("auth-modal")?.classList.remove("active")}export function showLoginForm(){document.getElementById("auth-login-form").style.display="block",document.getElementById("auth-register-form").style.display="none",document.getElementById("auth-modal-title").textContent="登入"}export function showRegisterForm(){document.getElementById("auth-login-form").style.display="none",document.getElementById("auth-register-form").style.display="block",document.getElementById("auth-modal-title").textContent="免費註冊"}export function fillDemo(e,t){document.getElementById("auth-username").value=e,document.getElementById("auth-password").value=t}export async function doLogin(){const e=document.getElementById("auth-username").value,t=document.getElementById("auth-password").value,n=document.getElementById("auth-error");if(!e||!t)return n.textContent="請填寫所有欄位",void n.classList.remove("hidden");try{const n=await api("/auth/login",{method:"POST",body:{username:e,password:t}});setCurrentUser(n.user),closeAuthModal(),updateAuthUI(),toast("登入成功！")}catch(e){n.textContent=e.message,n.classList.remove("hidden")}}export async function doRegister(){const e=document.getElementById("reg-username").value,t=document.getElementById("reg-email").value,n=document.getElementById("reg-password").value,o=document.getElementById("reg-error");if(!e||!t||!n)return o.textContent="請填寫所有必填欄位",void o.classList.remove("hidden");try{const o=await api("/auth/register",{method:"POST",body:{username:e,email:t,password:n,display_name:e}});setCurrentUser(o.user),closeAuthModal(),updateAuthUI(),toast("註冊成功！歡迎加入 StoryForge")}catch(e){o.textContent=e.message,o.classList.remove("hidden")}}
+// ═══ Auth ═══
+import { api, setUser } from './api.js';
+import { toast } from './utils.js';
+
+export async function checkAuth() {
+  try {
+    const d = await api('/auth/me');
+    setUser(d.user);
+  } catch { setUser(null); }
+}
+
+export function updateAuthUI() {
+  import('./api.js').then(({ currentUser }) => {
+    const btn = document.getElementById('auth-btn');
+    if (!btn) return;
+    if (currentUser) {
+      btn.textContent = currentUser.display_name || currentUser.username;
+      btn.dataset.action = 'logout';
+    } else {
+      btn.textContent = '登入';
+      btn.dataset.action = 'showAuthModal';
+    }
+  });
+}
+
+export function showAuthModal() { document.getElementById('auth-modal')?.classList.add('active'); }
+export function closeModal() { document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active')); }
+export function showLoginForm() { document.getElementById('login-form').style.display = ''; document.getElementById('register-form').style.display = 'none'; }
+export function showRegisterForm() { document.getElementById('login-form').style.display = 'none'; document.getElementById('register-form').style.display = ''; }
+export function fillDemo(u, p) { document.getElementById('auth-username').value = u; document.getElementById('auth-password').value = p; }
+
+export async function doLogin() {
+  const u = document.getElementById('auth-username').value;
+  const p = document.getElementById('auth-password').value;
+  const err = document.getElementById('auth-error');
+  if (!u || !p) { err.textContent = '請填寫所有欄位'; err.style.display = ''; return; }
+  try {
+    const d = await api('/auth/login', { method: 'POST', body: { username: u, password: p } });
+    setUser(d.user); closeModal(); updateAuthUI(); toast('登入成功！');
+  } catch (e) { err.textContent = e.message; err.style.display = ''; }
+}
+
+export async function doRegister() {
+  const u = document.getElementById('reg-username').value;
+  const e = document.getElementById('reg-email').value;
+  const p = document.getElementById('reg-password').value;
+  const err = document.getElementById('reg-error');
+  if (!u || !e || !p) { err.textContent = '請填寫所有欄位'; err.style.display = ''; return; }
+  try {
+    const d = await api('/auth/register', { method: 'POST', body: { username: u, email: e, password: p, display_name: u } });
+    setUser(d.user); closeModal(); updateAuthUI(); toast('註冊成功！');
+  } catch (ex) { err.textContent = ex.message; err.style.display = ''; }
+}

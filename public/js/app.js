@@ -1,215 +1,75 @@
-// ============================================
-// StoryForge AI — Main Entry Point (ES Module)
-// ============================================
-
-// ── Imports ──
-import { currentUser, api, DB, SUB_GENRES } from './api.js';
-import { esc, formatNum, timeAgo, copyTxt, toast, showLoading, showError, initScrollReveal } from './utils.js';
-import {
-  checkAuth, updateAuthUI, showAuthModal, closeAuthModal,
-  showLoginForm, showRegisterForm, fillDemo, doLogin, doRegister
-} from './auth.js';
-import {
-  handleTagInput, removeTag, renderTags, renderCard,
-  showSkeleton, setBtnLoading, toggleSection, updateStepper
-} from './components.js';
-import {
-  switchTab, toggleTheme, loadTheme, toggleMobileNav,
-  addCommonTag, toggleReadingMode, toggleFullscreenPreview,
-  initKeyboardShortcuts, state
-} from './router.js';
+// ═══ StoryForge AI — App Entry ═══
+import { api, DB } from './api.js';
+import { toast } from './utils.js';
+import { checkAuth, updateAuthUI, showAuthModal, closeModal, showLoginForm, showRegisterForm, fillDemo, doLogin, doRegister } from './auth.js';
+import { switchTab, toggleTheme, loadTheme } from './router.js';
 import { refreshHome } from './pages/home.js';
-import {
-  StoryEngine, generateStory, renderOutline, renderCharCards,
-  renderSceneBreakdown, saveStory, aiAutoFill,
-  generateStoryLocal, loadServerStories
-} from './pages/workshop.js';
-import {
-  refreshLibrary, viewStory, closeModal, editStory,
-  deleteStory, toggleEdit, exportStory
-} from './pages/library.js';
-import {
-  refreshPromptSel, onPromptStoryChange, sendToPrompts,
-  storyToPrompts, generatePrompts, renderPrompts,
-  scrollToScene, exportAllPrompts
-} from './pages/prompts.js';
-import {
-  loadCamera, switchCamTab, renderCameraGrid,
-  showComposeModal, doCompose
-} from './pages/camera.js';
-import { loadDashboard, updateProfile } from './pages/dashboard.js';
+import { generateStory, saveStory, exportStory, aiAutoFill } from './pages/workshop.js';
+import { refreshLibrary, viewStory, editStory, deleteStory, sendToPrompts } from './pages/library.js';
+import { refreshPromptSel, generatePrompts } from './pages/prompts.js';
+import { loadCamera, loadCameraTab } from './pages/camera.js';
 
-// ── Handler Registry ──
-const handlers = {
-  // Navigation
-  switchTab:         (el) => switchTab(el.dataset.tab || 'home'),
-  toggleMobileNav,
+// ═══ Event Delegation ═══
+const actions = {
+  switchTab: (el) => switchTab(el.dataset.tab || 'home'),
   toggleTheme,
-  
-  // Auth
-  showAuthModal,
-  closeAuthModal,
-  showLoginForm,
-  showRegisterForm,
-  doLogin,
-  doRegister,
-  fillDemo:          (el) => fillDemo(el.dataset.username, el.dataset.password),
-  
-  // Workshop
-  aiAutoFill,
-  generateStory,
-  saveStory,
-  
-  // Library
-  closeModal,
-  toggleEdit,
-  exportStory,
-  viewStory:         (el) => { const id = el.dataset.storyId; if (id) viewStory(id); },
-  removeTag:         (el) => { const i = parseInt(el.dataset.index); if (!isNaN(i)) removeTag(i); },
-  editFromModal:     (el) => { closeModal(); setTimeout(() => editStory(el.dataset.storyId), 100); },
-  promptFromModal:   (el) => { closeModal(); setTimeout(() => storyToPrompts(el.dataset.storyId), 100); },
-  
-  // Prompts
-  sendToPrompts,
+  showAuthModal, closeModal, showLoginForm, showRegisterForm,
+  fillDemo: (el) => fillDemo(el.dataset.username, el.dataset.password),
+  doLogin, doRegister,
+  generateStory, saveStory, exportStory, aiAutoFill,
+  refreshLibrary,
+  viewStory: (el) => viewStory(el.dataset.storyId),
+  editStory: (el) => { closeModal(); setTimeout(() => editStory(el.dataset.storyId), 100); },
+  deleteStory: (el) => deleteStory(el.dataset.storyId),
+  sendToPrompts: (el) => { closeModal(); setTimeout(() => sendToPrompts(el.dataset.storyId), 100); },
   generatePrompts,
-  
-  // Camera
-  showComposeModal,
-  doCompose,
-  switchCamTab:      (el) => switchCamTab(el.dataset.camTab, el),
-  
-  // Components
-  toggleSection:     (el) => toggleSection(el.dataset.section),
-  addCommonTag:      (el) => addCommonTag(el),
-  
-  // Reading / Preview
-  toggleReadingMode,
-  toggleFullscreenPreview,
-  
-  // Focus input
-  focusInput:        (el) => {
-    const target = document.getElementById(el.dataset.target);
-    if (target) target.focus();
-  },
-  
-  // Copy prompt (dynamic content)
-  copyPrompt:        (el) => {
-    const text = el.dataset.text || el.closest('.prompt-block')?.querySelector('.prompt-text')?.textContent || '';
-    if (text) copyTxt(el, text);
-  },
-  
-  // Delete story
-  deleteStory:       (el) => {
-    const id = el.dataset.storyId;
-    if (id && confirm('確定要刪除這個故事嗎？')) deleteStory(id);
-  },
+  loadCameraTab: (el) => loadCameraTab(el.dataset.camTab),
+  logout: () => { location.reload(); },
 };
 
-// ── Central Event Delegation ──
 document.addEventListener('click', (e) => {
-  const target = e.target.closest('[data-action]');
-  if (!target) return;
-  
-  const action = target.dataset.action;
-  const handler = handlers[action];
-  
-  if (handler) {
-    e.preventDefault();
-    handler(target);
-  } else {
-    console.warn(`Unknown action: ${action}`);
-  }
+  const el = e.target.closest('[data-action]');
+  if (!el) return;
+  const action = actions[el.dataset.action];
+  if (action) { e.preventDefault(); action(el); }
 });
 
-// ── Tag Input Delegation ──
-document.addEventListener('keydown', (e) => {
-  if (e.target.matches('#elements-input')) {
-    handleTagInput(e);
-  }
-});
-
-// ── Workshop Tab Switching ──
+// Workshop tabs
 document.addEventListener('click', (e) => {
   const tab = e.target.closest('[data-wtab]');
   if (!tab) return;
-  const tabId = tab.dataset.wtab;
   document.querySelectorAll('.workshop-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.workshop-tab-content').forEach(c => c.classList.remove('active'));
   tab.classList.add('active');
-  const content = document.getElementById(`wtab-${tabId}`);
-  if (content) content.classList.add('active');
+  document.getElementById(`wtab-${tab.dataset.wtab}`)?.classList.add('active');
 });
 
-// ── Filter Tags (Library) ──
-document.addEventListener('click', (e) => {
-  const tag = e.target.closest('.filter-tag');
-  if (!tag) return;
-  document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
-  tag.classList.add('active');
-  const filter = tag.dataset.filter;
-  const cards = document.querySelectorAll('#library-grid .story-card');
-  cards.forEach(card => {
-    if (filter === 'all' || card.dataset.genre === filter) {
-      card.style.display = '';
-    } else {
-      card.style.display = 'none';
-    }
-  });
+// Search library
+document.addEventListener('input', (e) => {
+  if (e.target.id === 'search-input') {
+    const q = e.target.value.toLowerCase();
+    document.querySelectorAll('#library-grid .card').forEach(card => {
+      const text = card.textContent.toLowerCase();
+      card.style.display = text.includes(q) ? '' : 'none';
+    });
+  }
 });
 
-// ── Keyboard Shortcuts Panel ──
-function showShortcutsPanel() {
-  const shortcuts = [
-    ['Ctrl+K', '搜尋'],
-    ['Ctrl+S', '保存故事'],
-    ['Ctrl+Enter', 'AI 生成'],
-    ['Esc', '關閉 Modal'],
-    ['1-6', '切換頁面'],
-    ['?', '顯示快捷鍵'],
-  ];
-  
-  let html = '<div style="display:grid;gap:.8rem">';
-  shortcuts.forEach(([key, desc]) => {
-    html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--border)">
-      <span style="font-family:var(--mono);font-size:.75rem;background:var(--surface-3);padding:.2rem .6rem;border-radius:4px;border:1px solid var(--border-light)">${key}</span>
-      <span style="font-size:.85rem;color:var(--text-muted)">${desc}</span>
-    </div>`;
-  });
-  html += '</div>';
-  
-  document.getElementById('modal-title').textContent = '鍵盤快捷鍵';
-  document.getElementById('modal-body').innerHTML = html;
-  document.getElementById('story-modal').classList.add('active');
-}
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  if (e.target.matches('input, textarea, select')) return;
+  const tabs = ['home', 'workshop', 'library', 'prompts', 'camera'];
+  const num = parseInt(e.key);
+  if (num >= 1 && num <= tabs.length) { e.preventDefault(); switchTab(tabs[num - 1]); }
+  if (e.key === 'Escape') closeModal();
+});
 
-// ── Initialize ──
-async function initApp() {
+// ═══ Init ═══
+async function init() {
   loadTheme();
   await checkAuth();
-  await loadServerStories();
-  initKeyboardShortcuts();
-  initScrollReveal();
-  
-  // Footer reveal
-  const footer = document.querySelector('.site-footer');
-  if (footer) {
-    const io = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) { footer.classList.add('visible'); io.unobserve(footer); }
-    }, { threshold: 0.1 });
-    io.observe(footer);
-  }
-  
-  // Load home page
+  updateAuthUI();
   refreshHome();
-  
-  // Add keyboard shortcut for '?'
-  document.addEventListener('keydown', (e) => {
-    if (e.key === '?' && !e.target.matches('input, textarea, select')) {
-      e.preventDefault();
-      showShortcutsPanel();
-    }
-  });
 }
 
-// Start
-initApp();
+init();

@@ -289,6 +289,35 @@ async function seedIfEmpty() {
                       ]},
                 ]);
                 console.log('  ✓ Seeded 2 demo workflows');
+                // 新增包含新節點類型的工作流範本
+                await models.Workflow.create({
+                    userId: demoUser._id,
+                    name: 'Lighting & Render Pipeline',
+                    description: '含燈光設定、渲染匯出、AI prompt 生成的完整工作流',
+                    status: 'draft',
+                    tags: ['demo', 'lighting', 'render', 'ai'],
+                    nodes: [
+                        { id: 'wa1', type: 'world-anchor', x: 80, y: 150, params: { gravity: 9.8, globalLighting: 'HDRi', physicsRules: { gravity: 9.8, fluid: false, cloth: false } } },
+                        { id: 'sc1', type: 'scene-composer', x: 360, y: 100, params: { cameraLayout: 'free', depthRange: 150, weather: { type: 'clear', intensity: 0.5, wind: 5 } } },
+                        { id: 'cc1', type: 'cinematic-camera', x: 360, y: 300, params: { lensModel: 'ARRI', focalLength: 85, fStop: 2.8, iso: 800, frameRate: '24' } },
+                        { id: 'lr1', type: 'lighting-rig', x: 640, y: 150, params: { preset: 'golden-hour', intensity: 1.0, colorTemperature: 3500, mood: 'warm' } },
+                        { id: 'pg1', type: 'prompt-generator', x: 640, y: 350, params: { style: 'cinematic', platform: 'sora', customInstructions: 'Golden hour mood' } },
+                        { id: 'ro1', type: 'render-output', x: 920, y: 200, params: { renderEngine: 'cycles', resolution: '4K', format: 'mp4', quality: 90, frameRate: '24' } },
+                    ],
+                    connections: [
+                        { id: 'c1', fromNode: 'wa1', fromOutput: 'worldDNA', toNode: 'sc1', toInput: 'worldDNA' },
+                        { id: 'c2', fromNode: 'sc1', fromOutput: 'sceneBlueprint', toNode: 'cc1', toInput: 'sceneBlueprint' },
+                        { id: 'c3', fromNode: 'wa1', fromOutput: 'worldDNA', toNode: 'lr1', toInput: 'worldDNA' },
+                        { id: 'c4', fromNode: 'sc1', fromOutput: 'sceneBlueprint', toNode: 'lr1', toInput: 'sceneBlueprint' },
+                        { id: 'c5', fromNode: 'wa1', fromOutput: 'worldDNA', toNode: 'pg1', toInput: 'worldDNA' },
+                        { id: 'c6', fromNode: 'sc1', fromOutput: 'sceneBlueprint', toNode: 'pg1', toInput: 'sceneBlueprint' },
+                        { id: 'c7', fromNode: 'cc1', fromOutput: 'cameraData', toNode: 'pg1', toInput: 'cameraData' },
+                        { id: 'c8', fromNode: 'lr1', fromOutput: 'lightingData', toNode: 'pg1', toInput: 'lightingData' },
+                        { id: 'c9', fromNode: 'cc1', fromOutput: 'cameraData', toNode: 'ro1', toInput: 'cameraData' },
+                        { id: 'c10', fromNode: 'lr1', fromOutput: 'lightingData', toNode: 'ro1', toInput: 'lightingData' },
+                    ],
+                });
+                console.log('  ✓ Seeded extended workflow: Lighting & Render Pipeline');
             }
         }
     } catch (e) { console.error('Workflow seed error:', e.message, e.stack); }

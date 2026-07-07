@@ -90,6 +90,42 @@ module.exports = function (models) {
                 format: 'stereo',
             },
         },
+        'lighting-rig': {
+            label: 'Lighting Rig',
+            description: 'Professional lighting setup with presets, color temperature & mood control',
+            inputs: ['worldDNA', 'sceneBlueprint'],
+            outputs: ['lightingData'],
+            defaultParams: {
+                preset: 'three-point',
+                intensity: 1.0,
+                colorTemperature: 5600,
+                mood: 'neutral',
+            },
+        },
+        'render-output': {
+            label: 'Render Output',
+            description: 'Configure render engine, resolution, format & export settings',
+            inputs: ['cameraData', 'lightingData', 'performanceData'],
+            outputs: ['renderConfig'],
+            defaultParams: {
+                renderEngine: 'cycles',
+                resolution: '1080p',
+                format: 'mp4',
+                quality: 80,
+                frameRate: '24',
+            },
+        },
+        'prompt-generator': {
+            label: 'Prompt Generator',
+            description: 'Generate AI video/image prompts from scene data and visual inputs',
+            inputs: ['worldDNA', 'sceneBlueprint', 'cameraData', 'lightingData'],
+            outputs: ['generatedPrompt'],
+            defaultParams: {
+                style: 'cinematic',
+                platform: 'sora',
+                customInstructions: '',
+            },
+        },
     };
 
     // ===== Simulate node execution based on type =====
@@ -212,6 +248,116 @@ module.exports = function (models) {
                         ],
                         editRef: editSequence,
                         performanceRef: performanceData,
+                        generatedAt: new Date().toISOString(),
+                    },
+                };
+            }
+            case 'lighting-rig': {
+                const worldDNA = inputs?.worldDNA || {};
+                const sceneBlueprint = inputs?.sceneBlueprint || {};
+                // 根據 preset 計算光源配置
+                const presetConfigs = {
+                    'three-point': { keyLight: { angle: 45, intensity: 1.0 }, fillLight: { angle: -30, intensity: 0.5 }, backLight: { angle: 180, intensity: 0.7 } },
+                    'rembrandt': { keyLight: { angle: 45, intensity: 1.2 }, fillLight: { angle: -20, intensity: 0.3 }, backLight: null },
+                    'chiaroscuro': { keyLight: { angle: 60, intensity: 1.5 }, fillLight: null, backLight: null },
+                    'neon': { keyLight: { angle: 0, intensity: 0.8, color: '#ff00ff' }, fillLight: { angle: 120, intensity: 0.6, color: '#00ffff' }, backLight: { angle: 240, intensity: 0.4, color: '#7b68ee' } },
+                    'candlelight': { keyLight: { angle: 30, intensity: 0.6, color: '#ff9329' }, fillLight: null, backLight: null },
+                    'golden-hour': { keyLight: { angle: 15, intensity: 0.9, color: '#ffa500' }, fillLight: { angle: -45, intensity: 0.4 }, backLight: { angle: 170, intensity: 0.3, color: '#ffd700' } },
+                    'moonlight': { keyLight: { angle: 90, intensity: 0.4, color: '#4169e1' }, fillLight: null, backLight: null },
+                    'silhouette': { keyLight: { angle: 180, intensity: 1.8 }, fillLight: null, backLight: null },
+                    'volumetric-fog': { keyLight: { angle: 30, intensity: 1.3, volumetric: true }, fillLight: { angle: -60, intensity: 0.5, volumetric: true }, backLight: null },
+                };
+                const config = presetConfigs[mergedParams.preset] || presetConfigs['three-point'];
+                return {
+                    lightingData: {
+                        preset: mergedParams.preset,
+                        intensity: mergedParams.intensity,
+                        colorTemperature: mergedParams.colorTemperature,
+                        mood: mergedParams.mood,
+                        sources: config,
+                        envRef: worldDNA.globalLighting || 'natural',
+                        sceneRef: sceneBlueprint.layout || 'default',
+                        generatedAt: new Date().toISOString(),
+                    },
+                };
+            }
+            case 'render-output': {
+                const cameraData = inputs?.cameraData || {};
+                const lightingData = inputs?.lightingData || {};
+                const performanceData = inputs?.performanceData || {};
+                // 解析解析度
+                const resMap = { '720p': [1280, 720], '1080p': [1920, 1080], '2K': [2048, 1080], '4K': [3840, 2160], '8K': [7680, 4320] };
+                const [width, height] = resMap[mergedParams.resolution] || [1920, 1080];
+                return {
+                    renderConfig: {
+                        renderEngine: mergedParams.renderEngine,
+                        resolution: mergedParams.resolution,
+                        width,
+                        height,
+                        format: mergedParams.format,
+                        quality: mergedParams.quality,
+                        frameRate: mergedParams.frameRate,
+                        cameraRef: cameraData,
+                        lightingRef: lightingData,
+                        performanceRef: performanceData,
+                        estimatedFileSize: `${Math.round(width * height * 3 * mergedParams.quality / 100 / 1024)}KB/frame`,
+                        generatedAt: new Date().toISOString(),
+                    },
+                };
+            }
+            case 'prompt-generator': {
+                const worldDNA = inputs?.worldDNA || {};
+                const sceneBlueprint = inputs?.sceneBlueprint || {};
+                const cameraData = inputs?.cameraData || {};
+                const lightingData = inputs?.lightingData || {};
+                // 根據平台和風格生成 prompt
+                const styleAdjectives = {
+                    'cinematic': 'cinematic, dramatic lighting, shallow depth of field, film grain, widescreen',
+                    'anime': 'anime style, cel-shaded, vibrant colors, Studio Ghibli aesthetic, detailed backgrounds',
+                    'realistic': 'photorealistic, hyper-detailed, natural lighting, 8K resolution, RAW photo',
+                    'artistic': 'artistic, painterly, impressionistic, soft brushstrokes, gallery quality',
+                    'commercial': 'high-end commercial, polished, aspirational, perfect product lighting',
+                    'noir': 'film noir, high contrast black and white, moody shadows, venetian blind lighting',
+                };
+                const styleAdj = styleAdjectives[mergedParams.style] || styleAdjectives['cinematic'];
+                const environment = sceneBlueprint.environment || sceneBlueprint.layout || 'outdoor scene';
+                const timeOfDay = worldDNA.timeOfDay || 'golden-hour';
+                const cameraMovement = cameraData.movement || 'static';
+                const lightingMood = lightingData.mood || 'neutral';
+                // 組合 prompt
+                const promptParts = [
+                    styleAdj,
+                    `${environment} setting`,
+                    `time of day: ${timeOfDay}`,
+                    `camera: ${cameraMovement}`,
+                    `lighting mood: ${lightingMood}, color temperature: ${lightingData.colorTemperature || 5600}K`,
+                ];
+                if (mergedParams.customInstructions) {
+                    promptParts.push(mergedParams.customInstructions);
+                }
+                const generatedText = promptParts.join('. ');
+                // 根據平台調整格式
+                const platformFormats = {
+                    'sora': `[Sora format] ${generatedText}`,
+                    'runway': `[Runway Gen-3] ${generatedText}`,
+                    'kling': `[Kling AI] ${generatedText}`,
+                    'midjourney': `/imagine ${generatedText} --ar 16:9 --v 6`,
+                    'dalle': `${generatedText}`,
+                    'stable-diffusion': `${generatedText}, best quality, masterpiece`,
+                };
+                return {
+                    generatedPrompt: {
+                        text: platformFormats[mergedParams.platform] || generatedText,
+                        platform: mergedParams.platform,
+                        style: mergedParams.style,
+                        negativePrompt: mergedParams.style === 'anime' ? 'blurry, low quality, deformed, ugly' : 'low quality, blurry, artifacts',
+                        sourceData: {
+                            environment,
+                            timeOfDay,
+                            cameraMovement,
+                            lightingMood,
+                        },
+                        customInstructions: mergedParams.customInstructions,
                         generatedAt: new Date().toISOString(),
                     },
                 };
