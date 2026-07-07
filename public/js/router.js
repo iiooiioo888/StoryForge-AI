@@ -6,9 +6,9 @@ export const state = { tab: 'home', editId: null, storyContent: '' };
 export function switchTab(tab) {
   state.tab = tab;
   document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-  document.querySelector(`.nav-link[data-tab="${tab}"]`)?.classList.add('active');
+  document.querySelector('.nav-link[data-tab="' + tab + '"]')?.classList.add('active');
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.getElementById(`panel-${tab}`)?.classList.add('active');
+  document.getElementById('panel-' + tab)?.classList.add('active');
   document.getElementById('nav-links')?.classList.remove('open');
   window.scrollTo({ top: 0, behavior: 'smooth' });
   // Lazy load
@@ -16,7 +16,6 @@ export function switchTab(tab) {
   if (tab === 'library') import('./pages/library.js').then(m => m.refreshLibrary());
   if (tab === 'prompts') import('./pages/prompts.js').then(m => m.refreshPromptSel());
   if (tab === 'camera') import('./pages/camera.js').then(m => m.loadCamera());
-  if (tab === 'credits') import('./pages/credits.js').then(m => m.refreshCredits());
 }
 
 export function toggleTheme() {

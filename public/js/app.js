@@ -17,23 +17,24 @@ const actions = {
   fillDemo: (el) => fillDemo(el.dataset.username, el.dataset.password),
   doLogin, doRegister,
   generateStory, saveStory, exportStory, aiAutoFill,
-  refreshLibrary,
   viewStory: (el) => viewStory(el.dataset.storyId),
   editStory: (el) => { closeModal(); setTimeout(() => editStory(el.dataset.storyId), 100); },
   deleteStory: (el) => deleteStory(el.dataset.storyId),
   sendToPrompts: (el) => { closeModal(); setTimeout(() => sendToPrompts(el.dataset.storyId), 100); },
   generatePrompts,
   loadCameraTab: (el) => loadCameraTab(el.dataset.camTab),
-  showRechargeModal,
-  doRecharge,
   logout: () => { location.reload(); },
 };
 
+// Click delegation
 document.addEventListener('click', (e) => {
   const el = e.target.closest('[data-action]');
   if (!el) return;
   const action = actions[el.dataset.action];
-  if (action) { e.preventDefault(); action(el); }
+  if (action) {
+    e.preventDefault();
+    try { action(el); } catch (err) { console.error('Action error:', err); toast('操作失敗', 'error'); }
+  }
 });
 
 // Workshop tabs
@@ -43,7 +44,8 @@ document.addEventListener('click', (e) => {
   document.querySelectorAll('.workshop-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.workshop-tab-content').forEach(c => c.classList.remove('active'));
   tab.classList.add('active');
-  document.getElementById(`wtab-${tab.dataset.wtab}`)?.classList.add('active');
+  const content = document.getElementById('wtab-' + tab.dataset.wtab);
+  if (content) content.classList.add('active');
 });
 
 // Search library
@@ -51,8 +53,7 @@ document.addEventListener('input', (e) => {
   if (e.target.id === 'search-input') {
     const q = e.target.value.toLowerCase();
     document.querySelectorAll('#library-grid .card').forEach(card => {
-      const text = card.textContent.toLowerCase();
-      card.style.display = text.includes(q) ? '' : 'none';
+      card.style.display = card.textContent.toLowerCase().includes(q) ? '' : 'none';
     });
   }
 });
@@ -68,11 +69,15 @@ document.addEventListener('keydown', (e) => {
 
 // ═══ Init ═══
 async function init() {
-  loadTheme();
-  await checkAuth();
-  updateAuthUI();
-  updateAuthUI();
-  refreshHome();
+  try {
+    loadTheme();
+    await checkAuth();
+    updateAuthUI();
+    refreshHome();
+    console.log('StoryForge AI initialized');
+  } catch (err) {
+    console.error('Init error:', err);
+  }
 }
 
 init();
