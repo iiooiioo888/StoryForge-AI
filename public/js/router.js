@@ -16,6 +16,7 @@ export function switchTab(tab) {
   if (tab === 'library') import('./pages/library.js').then(m => m.refreshLibrary());
   if (tab === 'prompts') import('./pages/prompts.js').then(m => m.refreshPromptSel());
   if (tab === 'camera') import('./pages/camera.js').then(m => m.loadCamera());
+  if (tab === 'credits') import('./pages/credits.js').then(m => m.refreshCredits());
 }
 
 export function toggleTheme() {

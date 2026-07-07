@@ -1,6 +1,7 @@
 // ═══ Auth ═══
 import { api, setUser } from './api.js';
 import { toast } from './utils.js';
+import { updateNavCredits } from './pages/credits.js';
 
 export async function checkAuth() {
   try {
@@ -36,7 +37,7 @@ export async function doLogin() {
   if (!u || !p) { err.textContent = '請填寫所有欄位'; err.style.display = ''; return; }
   try {
     const d = await api('/auth/login', { method: 'POST', body: { username: u, password: p } });
-    setUser(d.user); closeModal(); updateAuthUI(); toast('登入成功！');
+    setUser(d.user); closeModal(); updateAuthUI(); updateNavCredits(); toast('登入成功！');
   } catch (e) { err.textContent = e.message; err.style.display = ''; }
 }
 
@@ -48,6 +49,6 @@ export async function doRegister() {
   if (!u || !e || !p) { err.textContent = '請填寫所有欄位'; err.style.display = ''; return; }
   try {
     const d = await api('/auth/register', { method: 'POST', body: { username: u, email: e, password: p, display_name: u } });
-    setUser(d.user); closeModal(); updateAuthUI(); toast('註冊成功！');
+    setUser(d.user); closeModal(); updateAuthUI(); updateNavCredits(); toast('註冊成功！');
   } catch (ex) { err.textContent = ex.message; err.style.display = ''; }
 }

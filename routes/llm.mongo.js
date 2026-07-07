@@ -2,6 +2,7 @@ const express = require('express');
 const { authMiddleware, optionalAuth } = require('../middleware/auth');
 const LLMService = require('../services/llm');
 const PROMPTS = require('../services/prompts');
+const { deductCredits } = require('../middleware/credits');
 
 module.exports = function (models) {
     const router = express.Router();
@@ -69,7 +70,7 @@ module.exports = function (models) {
     });
 
     // ========== 生成大綱 ==========
-    router.post('/generate-outline', authMiddleware, async (req, res) => {
+    router.post('/generate-outline', authMiddleware, deductCredits(models, 15, 'AI 故事大綱生成'), async (req, res) => {
         try {
             const { provider, tier, ...params } = req.body;
 
@@ -96,10 +97,7 @@ module.exports = function (models) {
                 'completed', result.usage || {}
             );
 
-            await models.User.updateOne({ _id: req.user.id }, { $inc: { credits: -15 } });
-            const user = await models.User.findById(req.user.id).select('credits');
-
-            res.json({ success: true, outline, model: result.model, provider: result.provider, credits: user.credits });
+            res.json({ success: true, outline, model: result.model, provider: result.provider, credits: req.creditsRemaining });
         } catch (err) {
             await logInteraction(req.user.id, 'story_outline',
                 { prompt: JSON.stringify(req.body) }, {}, {}, 'failed', {}, err
@@ -109,7 +107,7 @@ module.exports = function (models) {
     });
 
     // ========== 生成內容 ==========
-    router.post('/generate-content', authMiddleware, async (req, res) => {
+    router.post('/generate-content', authMiddleware, deductCredits(models, 20, 'AI 故事內容生成'), async (req, res) => {
         try {
             const { provider, tier, ...params } = req.body;
 
@@ -128,10 +126,7 @@ module.exports = function (models) {
                 'completed', result.usage || {}
             );
 
-            await models.User.updateOne({ _id: req.user.id }, { $inc: { credits: -20 } });
-            const user = await models.User.findById(req.user.id).select('credits');
-
-            res.json({ success: true, content: result.content, model: result.model, provider: result.provider, credits: user.credits });
+            res.json({ success: true, content: result.content, model: result.model, provider: result.provider, credits: req.creditsRemaining });
         } catch (err) {
             await logInteraction(req.user.id, 'story_content',
                 { prompt: JSON.stringify(req.body) }, {}, {}, 'failed', {}, err
@@ -141,7 +136,7 @@ module.exports = function (models) {
     });
 
     // ========== 生成完整故事 ==========
-    router.post('/generate-full-story', authMiddleware, async (req, res) => {
+    router.post('/generate-full-story', authMiddleware, deductCredits(models, 50, 'AI 完整故事生成'), async (req, res) => {
         try {
             const { provider, tier, ...params } = req.body;
 
@@ -168,10 +163,7 @@ module.exports = function (models) {
                 'completed', result.usage || {}
             );
 
-            await models.User.updateOne({ _id: req.user.id }, { $inc: { credits: -50 } });
-            const user = await models.User.findById(req.user.id).select('credits');
-
-            res.json({ success: true, story: storyData, model: result.model, provider: result.provider, credits: user.credits });
+            res.json({ success: true, story: storyData, model: result.model, provider: result.provider, credits: req.creditsRemaining });
         } catch (err) {
             await logInteraction(req.user.id, 'story_full',
                 { prompt: JSON.stringify(req.body) }, {}, {}, 'failed', {}, err
@@ -181,7 +173,7 @@ module.exports = function (models) {
     });
 
     // ========== 生成影片提示詞（從故事） ==========
-    router.post('/generate-video-prompts', authMiddleware, async (req, res) => {
+    router.post('/generate-video-prompts', authMiddleware, deductCredits(models, 25, 'AI 影片提示詞批量生成'), async (req, res) => {
         try {
             const { story_id, platform = 'general', provider, tier } = req.body;
             if (!story_id) return res.status(400).json({ error: '缺少故事ID' });
@@ -232,10 +224,7 @@ module.exports = function (models) {
                 'completed', result.usage || {}
             );
 
-            await models.User.updateOne({ _id: req.user.id }, { $inc: { credits: -25 } });
-            const user = await models.User.findById(req.user.id).select('credits');
-
-            res.json({ success: true, prompts: savedPrompts, model: result.model, provider: result.provider, credits: user.credits });
+            res.json({ success: true, prompts: savedPrompts, model: result.model, provider: result.provider, credits: req.creditsRemaining });
         } catch (err) {
             await logInteraction(req.user.id, 'video_prompt_story',
                 { prompt: JSON.stringify(req.body) }, {}, {}, 'failed', {}, err
@@ -245,7 +234,7 @@ module.exports = function (models) {
     });
 
     // ========== 從描述生成影片提示詞 ==========
-    router.post('/generate-video-prompt', authMiddleware, async (req, res) => {
+    router.post('/generate-video-prompt', authMiddleware, deductCredits(models, 10, 'AI 影片提示詞生成'), async (req, res) => {
         try {
             const { description, platform = 'general', style, mood, provider, tier } = req.body;
             if (!description) return res.status(400).json({ error: '缺少場景描述' });
@@ -289,10 +278,7 @@ module.exports = function (models) {
                 'completed', result.usage || {}
             );
 
-            await models.User.updateOne({ _id: req.user.id }, { $inc: { credits: -10 } });
-            const user = await models.User.findById(req.user.id).select('credits');
-
-            res.json({ success: true, prompt: saved, model: result.model, provider: result.provider, credits: user.credits });
+            res.json({ success: true, prompt: saved, model: result.model, provider: result.provider, credits: req.creditsRemaining });
         } catch (err) {
             await logInteraction(req.user.id, 'video_prompt_desc',
                 { prompt: JSON.stringify(req.body) }, {}, {}, 'failed', {}, err
@@ -302,7 +288,7 @@ module.exports = function (models) {
     });
 
     // ========== 續寫故事 ==========
-    router.post('/continue', authMiddleware, async (req, res) => {
+    router.post('/continue', authMiddleware, deductCredits(models, 20, 'AI 故事續寫'), async (req, res) => {
         try {
             const { story_id, direction, length = 'medium', provider, tier } = req.body;
             if (!story_id) return res.status(400).json({ error: '缺少故事ID' });
@@ -330,10 +316,7 @@ module.exports = function (models) {
                 'completed', result.usage || {}
             );
 
-            await models.User.updateOne({ _id: req.user.id }, { $inc: { credits: -20 } });
-            const user = await models.User.findById(req.user.id).select('credits');
-
-            res.json({ success: true, continuation: result.content, model: result.model, provider: result.provider, credits: user.credits });
+            res.json({ success: true, continuation: result.content, model: result.model, provider: result.provider, credits: req.creditsRemaining });
         } catch (err) {
             await logInteraction(req.user.id, 'story_continue',
                 { prompt: JSON.stringify(req.body) }, {}, {}, 'failed', {}, err
@@ -343,7 +326,7 @@ module.exports = function (models) {
     });
 
     // ========== 生成角色 ==========
-    router.post('/characters', authMiddleware, async (req, res) => {
+    router.post('/characters', authMiddleware, deductCredits(models, 10, 'AI 角色生成'), async (req, res) => {
         try {
             const { genre, role_type, count = 3, provider, tier } = req.body;
 
@@ -371,10 +354,7 @@ module.exports = function (models) {
                 'completed', result.usage || {}
             );
 
-            await models.User.updateOne({ _id: req.user.id }, { $inc: { credits: -10 } });
-            const user = await models.User.findById(req.user.id).select('credits');
-
-            res.json({ success: true, characters, model: result.model, provider: result.provider, credits: user.credits });
+            res.json({ success: true, characters, model: result.model, provider: result.provider, credits: req.creditsRemaining });
         } catch (err) {
             await logInteraction(req.user.id, 'character_gen',
                 { prompt: JSON.stringify(req.body) }, {}, {}, 'failed', {}, err
@@ -384,7 +364,7 @@ module.exports = function (models) {
     });
 
     // ========== 生成世界觀 ==========
-    router.post('/world', authMiddleware, async (req, res) => {
+    router.post('/world', authMiddleware, deductCredits(models, 15, 'AI 世界觀生成'), async (req, res) => {
         try {
             const { genre, era, elements, provider, tier } = req.body;
 
@@ -412,10 +392,7 @@ module.exports = function (models) {
                 'completed', result.usage || {}
             );
 
-            await models.User.updateOne({ _id: req.user.id }, { $inc: { credits: -15 } });
-            const user = await models.User.findById(req.user.id).select('credits');
-
-            res.json({ success: true, world, model: result.model, provider: result.provider, credits: user.credits });
+            res.json({ success: true, world, model: result.model, provider: result.provider, credits: req.creditsRemaining });
         } catch (err) {
             await logInteraction(req.user.id, 'world_gen',
                 { prompt: JSON.stringify(req.body) }, {}, {}, 'failed', {}, err
@@ -425,7 +402,7 @@ module.exports = function (models) {
     });
 
     // ========== 改寫/潤色 ==========
-    router.post('/rewrite', authMiddleware, async (req, res) => {
+    router.post('/rewrite', authMiddleware, deductCredits(models, 10, 'AI 改寫潤色'), async (req, res) => {
         try {
             const { text, style, instruction, provider, tier } = req.body;
             if (!text) return res.status(400).json({ error: '缺少文本內容' });
@@ -446,10 +423,7 @@ module.exports = function (models) {
                 'completed', result.usage || {}
             );
 
-            await models.User.updateOne({ _id: req.user.id }, { $inc: { credits: -10 } });
-            const user = await models.User.findById(req.user.id).select('credits');
-
-            res.json({ success: true, rewritten: result.content, model: result.model, provider: result.provider, credits: user.credits });
+            res.json({ success: true, rewritten: result.content, model: result.model, provider: result.provider, credits: req.creditsRemaining });
         } catch (err) {
             await logInteraction(req.user.id, 'story_rewrite',
                 { prompt: (req.body.text || '').slice(0, 500) }, {}, {}, 'failed', {}, err
@@ -459,7 +433,7 @@ module.exports = function (models) {
     });
 
     // ========== 翻譯 ==========
-    router.post('/translate', authMiddleware, async (req, res) => {
+    router.post('/translate', authMiddleware, deductCredits(models, 10, 'AI 翻譯'), async (req, res) => {
         try {
             const { text, target_language = 'English', source_language, provider, tier } = req.body;
             if (!text) return res.status(400).json({ error: '缺少文本內容' });
@@ -480,10 +454,7 @@ module.exports = function (models) {
                 'completed', result.usage || {}
             );
 
-            await models.User.updateOne({ _id: req.user.id }, { $inc: { credits: -10 } });
-            const user = await models.User.findById(req.user.id).select('credits');
-
-            res.json({ success: true, translation: result.content, model: result.model, provider: result.provider, credits: user.credits });
+            res.json({ success: true, translation: result.content, model: result.model, provider: result.provider, credits: req.creditsRemaining });
         } catch (err) {
             await logInteraction(req.user.id, 'story_translate',
                 { prompt: (req.body.text || '').slice(0, 500) }, {}, {}, 'failed', {}, err
@@ -493,7 +464,7 @@ module.exports = function (models) {
     });
 
     // ========== 生成對話 ==========
-    router.post('/dialogue', authMiddleware, async (req, res) => {
+    router.post('/dialogue', authMiddleware, deductCredits(models, 10, 'AI 對話生成'), async (req, res) => {
         try {
             const { characters, context, tone, count = 5, provider, tier } = req.body;
 
@@ -521,10 +492,7 @@ module.exports = function (models) {
                 'completed', result.usage || {}
             );
 
-            await models.User.updateOne({ _id: req.user.id }, { $inc: { credits: -10 } });
-            const user = await models.User.findById(req.user.id).select('credits');
-
-            res.json({ success: true, dialogues, model: result.model, provider: result.provider, credits: user.credits });
+            res.json({ success: true, dialogues, model: result.model, provider: result.provider, credits: req.creditsRemaining });
         } catch (err) {
             await logInteraction(req.user.id, 'dialogue_gen',
                 { prompt: JSON.stringify(req.body) }, {}, {}, 'failed', {}, err
@@ -534,7 +502,7 @@ module.exports = function (models) {
     });
 
     // ========== AI 全權生成所有欄位 ==========
-    router.post('/generate-all-fields', authMiddleware, async (req, res) => {
+    router.post('/generate-all-fields', authMiddleware, deductCredits(models, 5, 'AI 全權生成欄位'), async (req, res) => {
         try {
             const { provider, tier } = req.body;
 
@@ -573,10 +541,7 @@ module.exports = function (models) {
                 'completed', result.usage || {}
             );
 
-            await models.User.updateOne({ _id: req.user.id }, { $inc: { credits: -5 } });
-            const user = await models.User.findById(req.user.id).select('credits');
-
-            res.json({ success: true, fields, model: result.model, provider: result.provider, credits: user.credits });
+            res.json({ success: true, fields, model: result.model, provider: result.provider, credits: req.creditsRemaining });
         } catch (err) {
             await logInteraction(req.user.id, 'ai_autofill',
                 { prompt: 'AI 全權生成所有欄位' }, {}, {}, 'failed', {}, err

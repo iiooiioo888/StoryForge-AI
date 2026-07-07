@@ -60,6 +60,7 @@ const UserSchema = new Schema({
     status:     { type: String, enum: ['active', 'banned', 'suspended'], default: 'active' },
     credits:    { type: Number, default: 100 },
     bio:        { type: String, default: '' },
+    stripeCustomerId: { type: String, default: '' },
     lastLogin:  { type: Date },
 }, { timestamps: true, toJSON: snakeTransform });
 
@@ -897,6 +898,42 @@ const WorkflowSchema = new Schema({
 WorkflowSchema.index({ userId: 1, updatedAt: -1 });
 
 // ==========================================
+// 積分交易紀錄（Credit Transaction）
+// ==========================================
+const CreditTransactionSchema = new Schema({
+    userId:         { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+    amount:         { type: Number, required: true },           // 變動數量（正=增加, 負=扣除）
+    type:           { type: String, enum: ['deduction', 'purchase', 'bonus', 'refund', 'signup_bonus', 'subscription'], required: true, index: true },
+    description:    { type: String, default: '' },              // 交易描述
+    balanceAfter:   { type: Number, required: true },           // 交易後餘額
+    relatedId:      { type: Schema.Types.ObjectId },            // 關聯 ID（如 AIInteraction）
+    metadata:       { type: Schema.Types.Mixed },               // 額外資訊
+}, { timestamps: true, toJSON: snakeTransform });
+
+CreditTransactionSchema.index({ userId: 1, createdAt: -1 });
+
+// ==========================================
+// 訂閱方案（Subscription）
+// ==========================================
+const SubscriptionSchema = new Schema({
+    userId:         { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+    plan:           { type: String, enum: ['free', 'basic', 'pro', 'enterprise'], default: 'free', required: true },
+    billingCycle:   { type: String, enum: ['monthly', 'yearly'], default: 'monthly' },
+    creditsPerMonth:{ type: Number, default: 0 },               // 每月贈送積分
+    maxWorkflows:   { type: Number, default: 5 },               // 最大工作流數量
+    maxExports:     { type: Number, default: 3 },               // 每月最大匯出數
+    priceCents:     { type: Number, default: 0 },               // 價格（美分）
+    features:       [{ type: String }],
+    status:         { type: String, enum: ['active', 'canceled', 'past_due', 'trialing'], default: 'active' },
+    currentPeriodStart: { type: Date },
+    currentPeriodEnd:   { type: Date },
+    stripeSubscriptionId: { type: String },
+    stripeCustomerId:     { type: String },
+}, { timestamps: true, toJSON: snakeTransform });
+
+SubscriptionSchema.index({ userId: 1, status: 1 });
+
+// ==========================================
 // Export all models
 // ==========================================
 module.exports = {
@@ -935,4 +972,6 @@ module.exports = {
     AIInteraction:     mongoose.model('AIInteraction', AIInteractionSchema),
     AIOptimizationTask:mongoose.model('AIOptimizationTask', AIOptimizationTaskSchema),
     Workflow:          mongoose.model('Workflow', WorkflowSchema),
+    CreditTransaction: mongoose.model('CreditTransaction', CreditTransactionSchema),
+    Subscription:      mongoose.model('Subscription', SubscriptionSchema),
 };

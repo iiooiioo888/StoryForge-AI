@@ -194,3 +194,51 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
   .hero-stats { flex-wrap: wrap; gap: 1.5rem; }
   .grid { grid-template-columns: 1fr; }
 }
+
+/* ═══ Credits ═══ */
+.nav-credits { display: flex; align-items: center; gap: .4rem; padding: .35rem .7rem;
+  background: var(--accent-glow); border: 1px solid rgba(59,130,246,.2); border-radius: var(--radius);
+  cursor: pointer; transition: var(--transition); white-space: nowrap; }
+.nav-credits:hover { border-color: var(--accent); }
+.credits-icon { font-size: .9rem; }
+.credits-amount { font: 600 .85rem var(--mono); color: var(--accent); }
+
+.credits-dashboard { margin-bottom: 1rem; }
+.credits-balance-card {
+  background: linear-gradient(135deg, rgba(59,130,246,.1), rgba(59,130,246,.05));
+  border: 1px solid rgba(59,130,246,.2); border-radius: var(--radius-lg);
+  padding: 1.5rem; text-align: center; margin-bottom: 1rem; }
+.credits-balance-label { font-size: .85rem; color: var(--text-muted); margin-bottom: .5rem; }
+.credits-balance-value { font: 700 2.5rem var(--mono); color: var(--accent); margin-bottom: 1rem; }
+.credits-balance-actions { display: flex; justify-content: center; }
+
+.credits-stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.credits-stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1rem; text-align: center; }
+.credits-stat-label { font-size: .78rem; color: var(--text-dim); margin-bottom: .3rem; }
+.credits-stat-value { font: 600 1.3rem var(--mono); color: var(--text); }
+
+.credits-filter { margin-bottom: 1rem; }
+
+/* 交易紀錄項目 */
+.tx-item { display: flex; align-items: center; gap: .8rem; padding: .8rem 1rem;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  margin-bottom: .5rem; transition: var(--transition); }
+.tx-item:hover { border-color: var(--border-hover); }
+.tx-icon { font-size: 1.2rem; flex-shrink: 0; }
+.tx-info { flex: 1; min-width: 0; }
+.tx-desc { font-size: .85rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tx-time { font-size: .72rem; color: var(--text-dim); margin-top: .2rem; }
+.tx-amount { font: 600 .9rem var(--mono); white-space: nowrap; }
+.tx-amount.positive { color: var(--success); }
+.tx-amount.negative { color: var(--danger); }
+.tx-balance { font: 400 .75rem var(--mono); color: var(--text-dim); white-space: nowrap; }
+
+/* 充值選項 */
+.recharge-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: .8rem; margin-bottom: 1rem; }
+.recharge-option { background: var(--surface); border: 2px solid var(--border); border-radius: var(--radius);
+  padding: 1rem; text-align: center; cursor: pointer; transition: var(--transition); }
+.recharge-option:hover { border-color: var(--accent); }
+.recharge-option.selected { border-color: var(--accent); background: var(--accent-glow); }
+.recharge-option .amount { display: block; font: 700 1.2rem var(--mono); color: var(--text); }
+.recharge-option .price { display: block; font-size: .75rem; color: var(--text-dim); margin-top: .3rem; }

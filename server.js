@@ -440,6 +440,7 @@ app.use('/api/stories', ContentModeration.middleware({ fields: ['content', 'titl
     app.use('/api/llm', require('./routes/llm.mongo')(models));
     app.use('/api/admin', require('./routes/admin.mongo')(models));
     app.use('/api/workflows', require('./routes/workflows.mongo')(models));
+    app.use('/api/credits', require('./routes/credits.mongo')(models));
 
     // ===== SSE Streaming Endpoint =====
     app.post('/api/llm/stream', require('./middleware/auth').authMiddleware, async (req, res) => {
@@ -456,6 +457,44 @@ app.use('/api/stories', ContentModeration.middleware({ fields: ['content', 'titl
             mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
             memory: process.memoryUsage(),
         });
+    });
+
+    // ===== Landing Page（首頁） =====
+    app.get('/', (req, res) => {
+        res.sendFile(path.join(__dirname, 'public', 'landing.html'));
+    });
+
+    // ===== App 路由（SPA） =====
+    app.get('/app', (req, res) => {
+        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    });
+
+    // ===== robots.txt 與 sitemap.xml =====
+    app.get('/robots.txt', (req, res) => {
+        res.type('text/plain');
+        res.send(`User-agent: *
+Allow: /
+Disallow: /api/
+Sitemap: https://storyforge.ai/sitemap.xml`);
+    });
+
+    app.get('/sitemap.xml', (req, res) => {
+        res.type('application/xml');
+        res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://storyforge.ai/</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://storyforge.ai/app</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+</urlset>`);
     });
 
     // ===== SPA Fallback =====

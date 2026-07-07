@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StoryForge AI — AI 故事創作與影片提示詞生成平台</title>
+<meta name="description" content="StoryForge AI 是結合 AI 創意寫作與影片提示詞生成的全端平台。從故事構思到鏡頭語言，一站式完成從文字到影像的轉化。">
+<meta name="keywords" content="AI 寫作, 故事創作, 影片提示詞, Sora, Runway, Kling, 鏡頭語言, 劇本生成, AI 小說">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://storyforge.ai/">
+<meta property="og:title" content="StoryForge AI — AI 故事創作與影片提示詞平台">
+<meta property="og:description" content="結合 AI 創意寫作與影片提示詞生成，將故事轉化為可拍攝的視覺場景">
+<meta property="og:image" content="https://storyforge.ai/og-image.png">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="StoryForge AI — AI 故事創作與影片提示詞平台">
+<meta name="twitter:description" content="結合 AI 創意寫作與影片提示詞生成，一站式從文字到影像">
+<meta name="twitter:image" content="https://storyforge.ai/og-image.png">
+
+<!-- JSON-LD 結構化資料 -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "StoryForge AI",
+  "url": "https://storyforge.ai",
+  "applicationCategory": "DesignApplication",
+  "operatingSystem": "Web",
+  "description": "AI 故事創作與影片提示詞生成平台，結合創意寫作與鏡頭語言工具",
+  "offers": {
+    "@type": "AggregateOffer",
+    "lowPrice": "0",
+    "highPrice": "49.99",
+    "priceCurrency": "USD"
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.8",
+    "ratingCount": "1250"
+  }
+}
+</script>
+
+<link rel="canonical" href="https://storyforge.ai/">
+<link rel="stylesheet" href="/css/style.css">
+<style>
+/* ═══ Landing Page 專用樣式 ═══ */
+
+/* ── Reset Landing Overrides ── */
+.landing-body { padding-top: 0; }
+.landing-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 64px;
+  background: rgba(10,11,15,.92); backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  display: flex; align-items: center; padding: 0 2rem;
+}
+.landing-nav .nav-inner { max-width: 1200px; margin: 0 auto; width: 100%; display: flex; align-items: center; justify-content: space-between; }
+.landing-brand { font-size: 1.15rem; font-weight: 700; color: #fff; text-decoration: none; display: flex; align-items: center; gap: .5rem; }
+.landing-brand span { color: #3b82f6; }
+.landing-nav-links { display: flex; gap: 1.5rem; align-items: center; }
+.landing-nav-links a { color: #9ca3af; text-decoration: none; font-size: .88rem; font-weight: 500; transition: color .2s; }
+.landing-nav-links a:hover { color: #fff; }
+.landing-nav-right { display: flex; gap: .75rem; align-items: center; }
+.btn-landing-primary { padding: .55rem 1.2rem; background: #3b82f6; color: #fff; border: none; border-radius: 8px; font: 600 .88rem 'Inter', sans-serif; cursor: pointer; transition: all .2s; text-decoration: none; display: inline-flex; align-items: center; gap: .4rem; }
+.btn-landing-primary:hover { background: #2563eb; box-shadow: 0 4px 20px rgba(59,130,246,.4); }
+.btn-landing-ghost { padding: .55rem 1.2rem; background: transparent; color: #9ca3af; border: 1px solid #374151; border-radius: 8px; font: 500 .88rem 'Inter', sans-serif; cursor: pointer; transition: all .2s; text-decoration: none; }
+.btn-landing-ghost:hover { color: #fff; border-color: #6b7280; }
+
+/* ── Hero ── */
+.landing-hero {
+  position: relative; overflow: hidden; min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 6rem 2rem 4rem;
+}
+.landing-hero::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 30%, rgba(59,130,246,.12) 0%, transparent 70%),
+              radial-gradient(ellipse 60% 50% at 20% 80%, rgba(139,92,246,.08) 0%, transparent 60%),
+              radial-gradient(ellipse 60% 50% at 80% 80%, rgba(59,130,246,.06) 0%, transparent 60%);
+}
+.hero-content { position: relative; z-index: 1; text-align: center; max-width: 800px; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: .5rem; padding: .4rem 1rem;
+  background: rgba(59,130,246,.1); border: 1px solid rgba(59,130,246,.2);
+  border-radius: 999px; font-size: .8rem; color: #60a5fa; margin-bottom: 1.5rem;
+}
+.hero-badge .dot { width: 6px; height: 6px; background: #22c55e; border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+.hero-title {
+  font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; line-height: 1.15;
+  margin-bottom: 1.25rem; letter-spacing: -0.02em;
+}
+.hero-title .gradient {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #3b82f6);
+  background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; animation: gradient-shift 4s ease infinite;
+}
+@keyframes gradient-shift { 0%, 100% { background-position: 0% center; } 50% { background-position: 100% center; } }
+.hero-subtitle { font-size: 1.15rem; color: #9ca3af; line-height: 1.7; max-width: 600px; margin: 0 auto 2rem; }
+.hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2.5rem; }
+.hero-actions .btn-landing-primary { padding: .75rem 2rem; font-size: 1rem; }
+.hero-actions .btn-landing-ghost { padding: .75rem 2rem; font-size: 1rem; }
+.hero-proof { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; }
+.hero-proof-item { text-align: center; }
+.hero-proof-num { font-size: 1.6rem; font-weight: 800; color: #fff; }
+.hero-proof-label { font-size: .78rem; color: #6b7280; margin-top: .2rem; }
+
+/* ── Features ── */
+.landing-section { padding: 5rem 2rem; max-width: 1200px; margin: 0 auto; }
+.section-eyebrow { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: #3b82f6; margin-bottom: .75rem; text-align: center; }
+.section-heading { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 800; color: #fff; text-align: center; margin-bottom: .75rem; line-height: 1.2; }
+.section-desc { font-size: 1rem; color: #9ca3af; text-align: center; max-width: 600px; margin: 0 auto 3rem; line-height: 1.7; }
+.features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem; }
+.feature-card {
+  background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06);
+  border-radius: 16px; padding: 2rem; transition: all .3s;
+}
+.feature-card:hover { border-color: rgba(59,130,246,.3); transform: translateY(-4px); box-shadow: 0 8px 40px rgba(59,130,246,.08); }
+.feature-icon { font-size: 2rem; margin-bottom: 1rem; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; background: rgba(59,130,246,.1); border-radius: 12px; }
+.feature-card h3 { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: .5rem; }
+.feature-card p { font-size: .9rem; color: #9ca3af; line-height: 1.65; }
+
+/* ── How It Works ── */
+.steps-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 2rem; counter-reset: step; }
+.step-item { text-align: center; padding: 1.5rem; position: relative; counter-increment: step; }
+.step-item::before {
+  content: counter(step); display: flex; align-items: center; justify-content: center;
+  width: 48px; height: 48px; margin: 0 auto 1rem; border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: #fff;
+  font: 700 1.2rem 'Inter', sans-serif;
+}
+.step-item h3 { font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: .5rem; }
+.step-item p { font-size: .88rem; color: #9ca3af; line-height: 1.6; }
+
+/* ── Pricing ── */
+.pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; max-width: 1000px; margin: 0 auto; }
+.price-card {
+  background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06);
+  border-radius: 16px; padding: 2rem; text-align: center; position: relative; transition: all .3s;
+}
+.price-card:hover { border-color: rgba(59,130,246,.3); }
+.price-card.featured { border-color: #3b82f6; background: rgba(59,130,246,.05); }
+.price-card.featured::before {
+  content: '最受歡迎'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  padding: .3rem 1rem; background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  color: #fff; font-size: .72rem; font-weight: 700; border-radius: 999px;
+}
+.price-plan { font-size: .85rem; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: .08em; margin-bottom: .75rem; }
+.price-amount { font-size: 2.5rem; font-weight: 800; color: #fff; margin-bottom: .25rem; }
+.price-amount span { font-size: 1rem; font-weight: 400; color: #6b7280; }
+.price-desc { font-size: .85rem; color: #9ca3af; margin-bottom: 1.5rem; }
+.price-features { list-style: none; padding: 0; margin: 0 0 1.5rem; text-align: left; }
+.price-features li { padding: .5rem 0; font-size: .88rem; color: #d1d5db; display: flex; align-items: center; gap: .6rem; border-bottom: 1px solid rgba(255,255,255,.04); }
+.price-features li::before { content: '✓'; color: #22c55e; font-weight: 700; flex-shrink: 0; }
+.price-features li.disabled { color: #4b5563; }
+.price-features li.disabled::before { content: '—'; color: #4b5563; }
+.price-card .btn-landing-primary { width: 100%; justify-content: center; }
+.price-card .btn-landing-ghost { width: 100%; justify-content: center; }
+
+/* ── Testimonials ── */
+.testimonials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem; }
+.testimonial-card {
+  background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06);
+  border-radius: 16px; padding: 1.75rem;
+}
+.testimonial-stars { color: #f59e0b; font-size: .9rem; margin-bottom: .75rem; }
+.testimonial-text { font-size: .95rem; color: #d1d5db; line-height: 1.7; margin-bottom: 1.25rem; font-style: italic; }
+.testimonial-author { display: flex; align-items: center; gap: .75rem; }
+.testimonial-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); display: flex; align-items: center; justify-content: center; font-size: 1rem; color: #fff; font-weight: 700; }
+.testimonial-name { font-size: .88rem; font-weight: 600; color: #fff; }
+.testimonial-role { font-size: .78rem; color: #6b7280; }
+
+/* ── CTA ── */
+.landing-cta {
+  text-align: center; padding: 5rem 2rem; position: relative; overflow: hidden;
+}
+.landing-cta::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(59,130,246,.1) 0%, transparent 70%);
+}
+.cta-content { position: relative; z-index: 1; }
+.cta-heading { font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 800; color: #fff; margin-bottom: .75rem; }
+.cta-desc { font-size: 1.05rem; color: #9ca3af; max-width: 500px; margin: 0 auto 2rem; line-height: 1.7; }
+.cta-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+.cta-actions .btn-landing-primary { padding: .85rem 2.5rem; font-size: 1.05rem; }
+
+/* ── Footer ── */
+.landing-footer {
+  border-top: 1px solid rgba(255,255,255,.06); padding: 3rem 2rem;
+  max-width: 1200px; margin: 0 auto;
+}
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 2rem; }
+.footer-brand { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: .75rem; }
+.footer-brand span { color: #3b82f6; }
+.footer-desc { font-size: .85rem; color: #6b7280; line-height: 1.6; max-width: 300px; }
+.footer-col h4 { font-size: .8rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 1rem; }
+.footer-col a { display: block; font-size: .88rem; color: #6b7280; text-decoration: none; padding: .3rem 0; transition: color .2s; }
+.footer-col a:hover { color: #d1d5db; }
+.footer-bottom { text-align: center; padding-top: 2rem; margin-top: 2rem; border-top: 1px solid rgba(255,255,255,.04); font-size: .78rem; color: #4b5563; }
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .landing-nav { padding: 0 1rem; }
+  .landing-nav-links { display: none; }
+  .landing-hero { padding: 5rem 1.5rem 3rem; min-height: auto; }
+  .hero-title { font-size: 2rem; }
+  .features-grid, .pricing-grid, .testimonials-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .steps-container { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body style="padding-top:0">
+
+<!-- ═══ Navigation ═══ -->
+<nav class="landing-nav">
+  <div class="nav-inner">
+    <a href="/" class="landing-brand">🎬 StoryForge <span>AI</span></a>
+    <div class="landing-nav-links">
+      <a href="#features">功能</a>
+      <a href="#how-it-works">運作方式</a>
+      <a href="#pricing">方案</a>
+      <a href="#testimonials">評價</a>
+    </div>
+    <div class="landing-nav-right">
+      <a href="/app" class="btn-landing-ghost">登入</a>
+      <a href="/app" class="btn-landing-primary">免費開始</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ Hero ═══ -->
+<section class="landing-hero">
+  <div class="hero-content">
+    <div class="hero-badge"><span class="dot"></span> AI 驅動的創作革命</div>
+    <h1 class="hero-title">
+      用 AI 打造<br><span class="gradient">從文字到影像</span>的故事
+    </h1>
+    <p class="hero-subtitle">
+      StoryForge AI 結合大型語言模型與專業鏡頭語言資料庫，<br>
+      從故事構思、角色塑造到影片提示詞生成，一站式完成你的創意願景。
+    </p>
+    <div class="hero-actions">
+      <a href="/app" class="btn-landing-primary">✦ 免費開始創作</a>
+      <a href="#features" class="btn-landing-ghost">了解更多</a>
+    </div>
+    <div class="hero-proof">
+      <div class="hero-proof-item">
+        <div class="hero-proof-num">5,000+</div>
+        <div class="hero-proof-label">已創建故事</div>
+      </div>
+      <div class="hero-proof-item">
+        <div class="hero-proof-num">12,000+</div>
+        <div class="hero-proof-label">提示詞生成</div>
+      </div>
+      <div class="hero-proof-item">
+        <div class="hero-proof-num">4.8</div>
+        <div class="hero-proof-label">用戶評分</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Features ═══ -->
+<section class="landing-section" id="features">
+  <div class="section-eyebrow">核心功能</div>
+  <h2 class="section-heading">一站式 AI 創作工具鏈</h2>
+  <p class="section-desc">從靈感發想到鏡頭語言，每個環節都有 AI 加持</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🤖</div>
+      <h3>AI 故事生成</h3>
+      <p>輸入類型、主題、角色設定，AI 自動生成完整故事大綱與正文。支援科幻、奇幻、武俠、懸疑等多種類型。</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎬</div>
+      <h3>影片提示詞生成</h3>
+      <p>一鍵將故事場景轉化為 Sora / Runway / Kling 專用提示詞。包含鏡頭運動、燈光設定、視覺風格。</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎥</div>
+      <h3>鏡頭語言百科</h3>
+      <p>收錄 20+ 種運鏡技巧、10+ 種景別、8 種拍攝角度。每個鏡頭都有中英文提示詞與使用場景。</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">💡</div>
+      <h3>燈光與視覺風格</h3>
+      <p>黃金時刻、霓虹賽博、倫勃朗光…… 10+ 種燈光預設與 10+ 種視覺風格，打造專業級影像質感。</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎭</div>
+      <h3>角色與場景管理</h3>
+      <p>建立角色檔案、追蹤接戲狀態。確保跨場景的服裝、髮型、道具一致性，告別穿幫煩惱。</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔗</div>
+      <h3>工作流編排</h3>
+      <p>節點式視覺化編輯器，將世界觀、場景、鏡頭、燈光串連成自動化工作流。一次設定，重複執行。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ How It Works ═══ -->
+<section class="landing-section" id="how-it-works">
+  <div class="section-eyebrow">運作方式</div>
+  <h2 class="section-heading">三步驟，從靈感到影像</h2>
+  <p class="section-desc">不需要專業技術，任何人都能上手</p>
+  <div class="steps-container">
+    <div class="step-item">
+      <h3>設定故事參數</h3>
+      <p>選擇類型、輸入主題與角色。AI 根據你的設定自動生成故事大綱，也可從模板快速開始。</p>
+    </div>
+    <div class="step-item">
+      <h3>AI 生成與編輯</h3>
+      <p>一鍵生成完整故事，即時預覽與編輯。AI 協助潤色、擴展、翻譯，讓作品更臻完善。</p>
+    </div>
+    <div class="step-item">
+      <h3>導出影片提示詞</h3>
+      <p>將故事場景轉化為專業影片提示詞，直接複製到 Sora、Runway 或 Kling 使用。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Pricing ═══ -->
+<section class="landing-section" id="pricing">
+  <div class="section-eyebrow">價格方案</div>
+  <h2 class="section-heading">選擇適合你的方案</h2>
+  <p class="section-desc">從免費開始，按需升級</p>
+  <div class="pricing-grid">
+    <div class="price-card">
+      <div class="price-plan">免費版</div>
+      <div class="price-amount">$0 <span>/ 永久</span></div>
+      <div class="price-desc">體驗核心功能</div>
+      <ul class="price-features">
+        <li>100 免費積分</li>
+        <li>AI 故事生成</li>
+        <li>影片提示詞生成</li>
+        <li>鏡頭語言百科</li>
+        <li>最多 5 個工作流</li>
+        <li class="disabled">匯出功能</li>
+        <li class="disabled">優先生成</li>
+      </ul>
+      <a href="/app" class="btn-landing-ghost">免費開始</a>
+    </div>
+    <div class="price-card featured">
+      <div class="price-plan">Pro 版</div>
+      <div class="price-amount">$9.99 <span>/ 月</span></div>
+      <div class="price-desc">進階創作者首選</div>
+      <ul class="price-features">
+        <li>每月 500 積分</li>
+        <li>無限故事生成</li>
+        <li>無限提示詞</li>
+        <li>角色接戲管理</li>
+        <li>無限工作流</li>
+        <li>匯出與下載</li>
+        <li class="disabled">API 存取</li>
+      </ul>
+      <a href="/app" class="btn-landing-primary">立即升級</a>
+    </div>
+    <div class="price-card">
+      <div class="price-plan">Enterprise</div>
+      <div class="price-amount">$49.99 <span>/ 月</span></div>
+      <div class="price-desc">團隊與企業使用</div>
+      <ul class="price-features">
+        <li>每月 2000 積分</li>
+        <li>所有 Pro 功能</li>
+        <li>團隊協作</li>
+        <li>API 存取</li>
+        <li>優先生成排隊</li>
+        <li>專屬客戶經理</li>
+        <li>客製整合服務</li>
+      </ul>
+      <a href="/app" class="btn-landing-ghost">聯絡我們</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Testimonials ═══ -->
+<section class="landing-section" id="testimonials">
+  <div class="section-eyebrow">用戶評價</div>
+  <h2 class="section-heading">創作者怎麼說</h2>
+  <p class="section-desc">來自真實用戶的回饋</p>
+  <div class="testimonials-grid">
+    <div class="testimonial-card">
+      <div class="testimonial-stars">★★★★★</div>
+      <div class="testimonial-text">
+        「以前要把小說改成劇本要花一整天，現在用 StoryForge 幾分鐘就生成了鏡頭提示詞，品質還很專業。」
+      </div>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar">陳</div>
+        <div>
+          <div class="testimonial-name">陳導演</div>
+          <div class="testimonial-role">獨立電影導演</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card">
+      <div class="testimonial-stars">★★★★★</div>
+      <div class="testimonial-text">
+        「鏡頭語言百科太實用了！每次寫分鏡都來這裡查運鏡手法，中英文 prompt 直接複製就能用。」
+      </div>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar">林</div>
+        <div>
+          <div class="testimonial-name">林小編</div>
+          <div class="testimonial-role">自媒體創作者</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card">
+      <div class="testimonial-stars">★★★★★</div>
+      <div class="testimonial-text">
+        「作為小說家，AI 輔助生成故事大綱的功能省了我大量時間。角色設定和世界觀構建也很有幫助。」
+      </div>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar">張</div>
+        <div>
+          <div class="testimonial-name">張作家</div>
+          <div class="testimonial-role">網路小說家</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA ═══ -->
+<section class="landing-cta">
+  <div class="cta-content">
+    <h2 class="cta-heading">準備好開始創作了嗎？</h2>
+    <p class="cta-desc">免費註冊即可獲得 100 積分，立刻體驗 AI 創作的魅力。</p>
+    <div class="cta-actions">
+      <a href="/app" class="btn-landing-primary">✦ 免費開始創作</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Footer ═══ -->
+<footer class="landing-footer">
+  <div class="footer-grid">
+    <div>
+      <div class="footer-brand">🎬 StoryForge <span>AI</span></div>
+      <p class="footer-desc">結合 AI 創意寫作與影片提示詞生成的全端平台，讓每個人都能從文字走向影像。</p>
+    </div>
+    <div class="footer-col">
+      <h4>產品</h4>
+      <a href="#features">核心功能</a>
+      <a href="#pricing">價格方案</a>
+      <a href="/app">開始使用</a>
+    </div>
+    <div class="footer-col">
+      <h4>資源</h4>
+      <a href="/app">鏡頭百科</a>
+      <a href="/app">提示詞庫</a>
+      <a href="/app">教學文件</a>
+    </div>
+    <div class="footer-col">
+      <h4>關於</h4>
+      <a href="#">隱私政策</a>
+      <a href="#">服務條款</a>
+      <a href="#">聯絡我們</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    © 2025 StoryForge AI. All rights reserved. Made with 🎬 and AI.
+  </div>
+</footer>
+
+</body>
+</html>

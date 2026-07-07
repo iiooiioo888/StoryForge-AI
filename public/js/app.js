@@ -24,6 +24,8 @@ const actions = {
   sendToPrompts: (el) => { closeModal(); setTimeout(() => sendToPrompts(el.dataset.storyId), 100); },
   generatePrompts,
   loadCameraTab: (el) => loadCameraTab(el.dataset.camTab),
+  showRechargeModal,
+  doRecharge,
   logout: () => { location.reload(); },
 };
 
@@ -68,6 +70,7 @@ document.addEventListener('keydown', (e) => {
 async function init() {
   loadTheme();
   await checkAuth();
+  updateAuthUI();
   updateAuthUI();
   refreshHome();
 }

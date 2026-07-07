@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET, authMiddleware } = require('../middleware/auth');
+const { addCredits } = require('../middleware/credits');
 
 module.exports = function (models) {
     const router = express.Router();
@@ -38,6 +39,14 @@ module.exports = function (models) {
                 passwordHash,
                 displayName: display_name || username,
                 credits: freeCredits,
+            });
+            // 記錄註冊贈送積分交易
+            await models.CreditTransaction.create({
+                userId: user._id,
+                amount: freeCredits,
+                type: 'signup_bonus',
+                description: `註冊贈送 ${freeCredits} 積分`,
+                balanceAfter: freeCredits,
             });
 
             const token = jwt.sign(

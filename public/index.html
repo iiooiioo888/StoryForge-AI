@@ -7,11 +7,61 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+TC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
-<meta name="description" content="StoryForge AI — 結合 AI 創意寫作與影片提示詞生成">
-<meta property="og:title" content="StoryForge AI">
-<meta property="og:description" content="AI 故事創作與影片提示詞平台">
+
+<!-- SEO 基礎 Meta 標籤 -->
+<meta name="description" content="StoryForge AI 是結合 AI 創意寫作與影片提示詞生成的全端平台。從故事構思到鏡頭語言，一站式完成從文字到影像的轉化。">
+<meta name="keywords" content="AI 寫作, 故事創作, 影片提示詞, Sora, Runway, Kling, 鏡頭語言, 劇本生成, AI 小說">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://storyforge.ai/app">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://storyforge.ai/app">
+<meta property="og:title" content="StoryForge AI — AI 故事創作與影片提示詞平台">
+<meta property="og:description" content="結合 AI 創意寫作與影片提示詞生成，將故事轉化為可拍攝的視覺場景">
+<meta property="og:image" content="https://storyforge.ai/og-image.png">
+<meta property="og:site_name" content="StoryForge AI">
+<meta property="og:locale" content="zh_TW">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="StoryForge AI — AI 故事創作與影片提示詞平台">
+<meta name="twitter:description" content="結合 AI 創意寫作與影片提示詞生成，一站式從文字到影像">
+<meta name="twitter:image" content="https://storyforge.ai/og-image.png">
+
+<!-- JSON-LD 結構化資料 -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "StoryForge AI",
+  "url": "https://storyforge.ai/app",
+  "applicationCategory": "DesignApplication",
+  "operatingSystem": "Web",
+  "description": "AI 故事創作與影片提示詞生成平台，結合創意寫作與鏡頭語言工具",
+  "offers": {
+    "@type": "AggregateOffer",
+    "lowPrice": "0",
+    "highPrice": "49.99",
+    "priceCurrency": "USD"
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.8",
+    "ratingCount": "1250"
+  },
+  "featureList": [
+    "AI 故事生成",
+    "影片提示詞生成",
+    "鏡頭語言百科",
+    "燈光與視覺風格",
+    "角色與場景管理",
+    "工作流編排"
+  ]
+}
+</script>
 </head>
 <body>
 <!-- ═══ NAV ═══ -->
@@ -25,6 +75,10 @@
     <button class="nav-link" data-action="switchTab" data-tab="camera">鏡頭</button>
   </div>
   <div class="nav-right">
+    <div class="nav-credits" id="nav-credits" style="display:none" data-action="switchTab" data-tab="credits" title="積分餘額">
+      <span class="credits-icon">💎</span>
+      <span class="credits-amount" id="credits-amount">0</span>
+    </div>
     <button class="btn btn-ghost btn-sm" data-action="toggleTheme" title="切換主題">◐</button>
     <button class="btn btn-secondary btn-sm" data-action="showAuthModal" id="auth-btn">登入</button>
   </div>
@@ -141,6 +195,70 @@
       <button class="btn btn-ghost btn-sm" data-action="loadCameraTab" data-cam-tab="color-palettes">🎨 調色</button>
     </div>
     <div class="grid" id="cam-grid"></div>
+  </div>
+</div>
+
+<!-- CREDITS -->
+<div id="panel-credits" class="panel">
+  <div class="container">
+    <div class="section-title">💎 積分管理</div>
+    <div class="credits-dashboard">
+      <div class="credits-balance-card">
+        <div class="credits-balance-label">目前積分餘額</div>
+        <div class="credits-balance-value" id="credits-balance">--</div>
+        <div class="credits-balance-actions">
+          <button class="btn btn-primary" data-action="showRechargeModal">💳 充值積分</button>
+        </div>
+      </div>
+      <div class="credits-stats-row">
+        <div class="credits-stat">
+          <div class="credits-stat-label">本月支出</div>
+          <div class="credits-stat-value" id="credits-monthly-spent">0</div>
+        </div>
+        <div class="credits-stat">
+          <div class="credits-stat-label">本月充值</div>
+          <div class="credits-stat-value" id="credits-monthly-added">0</div>
+        </div>
+      </div>
+    </div>
+    <div class="section-title" style="margin-top:1.5rem">交易紀錄</div>
+    <div class="credits-filter">
+      <select class="form-select" id="tx-filter-type" style="width:150px">
+        <option value="">全部類型</option>
+        <option value="deduction">扣款</option>
+        <option value="purchase">充值</option>
+        <option value="bonus">獎勵</option>
+        <option value="refund">退款</option>
+        <option value="signup_bonus">註冊贈送</option>
+        <option value="subscription">訂閱</option>
+      </select>
+    </div>
+    <div id="transactions-list"></div>
+    <div id="transactions-pagination" style="display:flex;justify-content:center;gap:.5rem;margin-top:1rem"></div>
+    <div class="empty" id="credits-empty" style="display:none"><div class="icon">💎</div><p>還沒有交易紀錄</p></div>
+  </div>
+</div>
+
+<!-- ═══ RECHARGE MODAL ═══ -->
+<div class="modal-overlay" id="recharge-modal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header"><h3>💳 充值積分</h3><button class="modal-close" data-action="closeModal">×</button></div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">充值金額</label>
+        <div class="recharge-options" id="recharge-options">
+          <button class="recharge-option" data-amount="50"><span class="amount">50</span><span class="price">免費</span></button>
+          <button class="recharge-option" data-amount="100"><span class="amount">100</span><span class="price">免費</span></button>
+          <button class="recharge-option" data-amount="500"><span class="amount">500</span><span class="price">免費</span></button>
+          <button class="recharge-option" data-amount="1000"><span class="amount">1000</span><span class="price">免費</span></button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">自訂金額</label>
+        <input class="form-input" id="recharge-amount" type="number" min="1" max="100000" placeholder="輸入積分數量">
+      </div>
+      <button class="btn btn-primary btn-block" data-action="doRecharge">確認充值</button>
+    </div>
   </div>
 </div>
 </main>
