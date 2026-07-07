@@ -4,7 +4,7 @@
 
 // ── Imports ──
 import { currentUser, api, DB, SUB_GENRES } from './api.js';
-import { esc, formatNum, timeAgo, copyTxt, toast } from './utils.js';
+import { esc, formatNum, timeAgo, copyTxt, toast, showLoading, showError, initScrollReveal } from './utils.js';
 import {
   checkAuth, updateAuthUI, showAuthModal, closeAuthModal,
   showLoginForm, showRegisterForm, fillDemo, doLogin, doRegister
@@ -66,8 +66,8 @@ const handlers = {
   exportStory,
   viewStory:         (el) => { const id = el.dataset.storyId; if (id) viewStory(id); },
   removeTag:         (el) => { const i = parseInt(el.dataset.index); if (!isNaN(i)) removeTag(i); },
-  editFromModal:     (el) => { closeModal(); editStory(el.dataset.storyId); },
-  promptFromModal:   (el) => { closeModal(); storyToPrompts(el.dataset.storyId); },
+  editFromModal:     (el) => { closeModal(); setTimeout(() => editStory(el.dataset.storyId), 100); },
+  promptFromModal:   (el) => { closeModal(); setTimeout(() => storyToPrompts(el.dataset.storyId), 100); },
   
   // Prompts
   sendToPrompts,
@@ -96,6 +96,12 @@ const handlers = {
   copyPrompt:        (el) => {
     const text = el.dataset.text || el.closest('.prompt-block')?.querySelector('.prompt-text')?.textContent || '';
     if (text) copyTxt(el, text);
+  },
+  
+  // Delete story
+  deleteStory:       (el) => {
+    const id = el.dataset.storyId;
+    if (id && confirm('確定要刪除這個故事嗎？')) deleteStory(id);
   },
 };
 
@@ -151,26 +157,58 @@ document.addEventListener('click', (e) => {
   });
 });
 
+// ── Keyboard Shortcuts Panel ──
+function showShortcutsPanel() {
+  const shortcuts = [
+    ['Ctrl+K', '搜尋'],
+    ['Ctrl+S', '保存故事'],
+    ['Ctrl+Enter', 'AI 生成'],
+    ['Esc', '關閉 Modal'],
+    ['1-6', '切換頁面'],
+    ['?', '顯示快捷鍵'],
+  ];
+  
+  let html = '<div style="display:grid;gap:.8rem">';
+  shortcuts.forEach(([key, desc]) => {
+    html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--border)">
+      <span style="font-family:var(--mono);font-size:.75rem;background:var(--surface-3);padding:.2rem .6rem;border-radius:4px;border:1px solid var(--border-light)">${key}</span>
+      <span style="font-size:.85rem;color:var(--text-muted)">${desc}</span>
+    </div>`;
+  });
+  html += '</div>';
+  
+  document.getElementById('modal-title').textContent = '鍵盤快捷鍵';
+  document.getElementById('modal-body').innerHTML = html;
+  document.getElementById('story-modal').classList.add('active');
+}
+
 // ── Initialize ──
 async function initApp() {
   loadTheme();
   await checkAuth();
   await loadServerStories();
   initKeyboardShortcuts();
+  initScrollReveal();
   
-  // Scroll reveal observer
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.classList.add('visible');
-        io.unobserve(e.target);
-      }
-    });
-  }, { threshold: 0.1 });
-  document.querySelectorAll('.reveal, .reveal-scale, .reveal-left, .reveal-right').forEach(el => io.observe(el));
+  // Footer reveal
+  const footer = document.querySelector('.site-footer');
+  if (footer) {
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { footer.classList.add('visible'); io.unobserve(footer); }
+    }, { threshold: 0.1 });
+    io.observe(footer);
+  }
   
   // Load home page
   refreshHome();
+  
+  // Add keyboard shortcut for '?'
+  document.addEventListener('keydown', (e) => {
+    if (e.key === '?' && !e.target.matches('input, textarea, select')) {
+      e.preventDefault();
+      showShortcutsPanel();
+    }
+  });
 }
 
 // Start

@@ -1,4 +1,6 @@
 const express = require('express');
+const compression = require('compression');
+const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const mongoose = require('mongoose');
@@ -13,6 +15,23 @@ const ContentModeration = require('./services/moderation');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// ===== Performance Middleware =====
+// Gzip/Brotli compression
+app.use(compression({
+  level: 6,
+  threshold: 1024,
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) return false;
+    return compression.filter(req, res);
+  }
+}));
+
+// Security headers (lightweight)
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false,
+}));
 
 // Initialize services
 const llmService = new LLMService();
@@ -285,7 +304,28 @@ async function seedIfEmpty() {
     app.use(express.json({ limit: '10mb' }));
     app.use(express.urlencoded({ extended: true }));
     app.use(cookieParser());
-    app.use(express.static(path.join(__dirname, 'public')));
+    
+    // ===== Static Files with Cache Headers =====
+    const staticOptions = {
+        maxAge: '1d',           // Cache for 1 day
+        etag: true,             // Enable ETag
+        lastModified: true,     // Enable Last-Modified
+        setHeaders: (res, filePath) => {
+            // Long cache for immutable assets (CSS/JS with hash)
+            if (filePath.match(/\.(css|js)$/)) {
+                res.setHeader('Cache-Control', 'public, max-age=86400, immutable');
+            }
+            // No cache for HTML
+            if (filePath.endsWith('.html')) {
+                res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+            }
+            // Service Worker - no cache
+            if (filePath.endsWith('sw.js')) {
+                res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+            }
+        }
+    };
+    app.use(express.static(path.join(__dirname, 'public'), staticOptions));
 
     // ===== CORS =====
     app.use((req, res, next) => {
@@ -297,7 +337,70 @@ async function seedIfEmpty() {
     });
 
     // ===== Content Moderation on write endpoints =====
-    app.use('/api/stories', ContentModeration.middleware({ fields: ['content', 'title', 'summary'] }));
+    
+    
+    // ===== Request Timeout (30s) =====
+    app.use((req, res, next) => {
+        req.setTimeout(30000, () => {
+            res.status(408).json({ error: '請求超時' });
+        });
+        next();
+    });
+    
+    // ===== Simple Rate Limiting (100 req/min per IP) =====
+    const rateLimitMap = new Map();
+    function rateLimit(maxRequests = 100, windowMs = 60000) {
+        return (req, res, next) => {
+            const ip = req.ip || req.connection.remoteAddress;
+            const now = Date.now();
+            const record = rateLimitMap.get(ip) || { count: 0, reset: now + windowMs };
+            if (now > record.reset) {
+                record.count = 0;
+                record.reset = now + windowMs;
+            }
+            record.count++;
+            rateLimitMap.set(ip, record);
+            if (record.count > maxRequests) {
+                return res.status(429).json({ error: '請求太頻繁，請稍後再試' });
+            }
+            next();
+        };
+    }
+    
+    // Apply rate limit to all API routes
+    app.use('/api', rateLimit(200, 60000));
+    
+// ===== API Response Cache (read-only endpoints) =====
+    const apiCache = new Map();
+    function cacheMiddleware(ttl = 60) {
+        return (req, res, next) => {
+            if (req.method !== 'GET') return next();
+            const key = req.originalUrl;
+            const cached = apiCache.get(key);
+            if (cached && Date.now() - cached.time < ttl * 1000) {
+                res.set('X-Cache', 'HIT');
+                return res.json(cached.data);
+            }
+            const originalJson = res.json.bind(res);
+            res.json = (data) => {
+                apiCache.set(key, { data, time: Date.now() });
+                // Evict old entries
+                if (apiCache.size > 500) {
+                    const oldest = apiCache.keys().next().value;
+                    apiCache.delete(oldest);
+                }
+                res.set('X-Cache', 'MISS');
+                return originalJson(data);
+            };
+            next();
+        };
+    }
+    
+    // Cache camera data (rarely changes)
+    app.use('/api/camera', cacheMiddleware(300));
+    app.use('/api/prompts/templates', cacheMiddleware(300));
+    
+app.use('/api/stories', ContentModeration.middleware({ fields: ['content', 'title', 'summary'] }));
 
     // ===== API Routes =====
     app.use('/api/auth', require('./routes/auth.mongo')(models));

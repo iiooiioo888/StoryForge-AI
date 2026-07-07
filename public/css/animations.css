@@ -7,3 +7,36 @@
 @keyframes shimmer {0%{background-position:-200% 0}100%{background-position:200% 0}}@-webkit-keyframes float {0%,100%{transform:translateY(0)}
 @keyframes float {0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}@keyframes pulse-glow{0%,100%{box-shadow:0 0 20px rgba(37,99,235,.1)}50%{box-shadow:0 0 40px rgba(37,99,235,.2)}}@keyframes rotate-slow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}@keyframes border-dance{0%,100%{border-color:rgba(37,99,235,.15)}50%{border-color:rgba(37,99,235,.35)}}.fade-up{opacity:0;animation:fadeUp .7s cubic-bezier(.22,1,.36,1) forwards}.stagger-1{animation-delay:.15s}.stagger-2{animation-delay:.3s}.stagger-3{animation-delay:.45s}.stagger-4{animation-delay:.6s}.reveal{opacity:0;transform:translateY(32px);transition:opacity .8s cubic-bezier(.22,1,.36,1),transform .8s cubic-bezier(.22,1,.36,1)}.reveal.visible{opacity:1;transform:none}.reveal-scale{opacity:0;transform:scale(.9);transition:opacity .7s ease,transform .7s ease}.reveal-scale.visible{opacity:1;transform:none}.reveal-left{opacity:0;transform:translateX(-32px);transition:opacity .7s ease,transform .7s ease}.reveal-left.visible{opacity:1;transform:none}.reveal-right{opacity:0;transform:translateX(32px);transition:opacity .7s ease,transform .7s ease}.reveal-right.visible{opacity:1;transform:none}.reveal-stagger{opacity:0;transform:translateY(20px);transition:opacity .55s ease,transform .55s ease}.reveal-stagger.visible{opacity:1;transform:none}.reveal-stagger:nth-child(1){transition-delay:.06s}.reveal-stagger:nth-child(2){transition-delay:.14s}.reveal-stagger:nth-child(3){transition-delay:.22s}.reveal-stagger:nth-child(4){transition-delay:.3s}.reveal-stagger:nth-child(5){transition-delay:.38s}.reveal-stagger:nth-child(6){transition-delay:.46s}::selection{background:rgba(37,99,235,.35);color:var(--text)}.panel.active{animation:panelFadeIn .55s cubic-bezier(.22,1,.36,1)}@-webkit-keyframes panelFadeIn {from{opacity:0;transform:translateY(12px)}
 @keyframes panelFadeIn {from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+/* ═══ Loading Dots Animation ═══ */
+.loading-dots .dot {
+  animation: dot-blink 1.4s infinite both;
+}
+.loading-dots .dot:nth-child(2) { animation-delay: .2s; }
+.loading-dots .dot:nth-child(3) { animation-delay: .4s; }
+@keyframes dot-blink {
+  0%, 80%, 100% { opacity: .2; }
+  40% { opacity: 1; }
+}
+
+/* ═══ Toast Progress Bar ═══ */
+@keyframes toast-progress {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+/* ═══ Card Stagger Animation ═══ */
+.story-card {
+  opacity: 0; animation: card-in .5s cubic-bezier(.22,1,.36,1) forwards;
+}
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ═══ Stat Counter Glow ═══ */
+.stat-num {
+  transition: color .3s, text-shadow .3s;
+}
+.stat-num:hover {
+  text-shadow: 0 0 20px var(--accent-dim);
+}
