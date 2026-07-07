@@ -16,7 +16,7 @@ class LLMService {
                 models: {
                     fast: 'gpt-4o-mini',
                     balanced: 'gpt-4o',
-                    powerful: 'gpt-4o',
+                    powerful: 'gpt-4.1',
                 },
                 defaultModel: 'gpt-4o-mini',
             },
@@ -25,11 +25,11 @@ class LLMService {
                 baseUrl: config.anthropicBaseUrl || 'https://api.anthropic.com/v1',
                 apiKey: config.anthropicApiKey || process.env.ANTHROPIC_API_KEY || '',
                 models: {
-                    fast: 'claude-3-haiku-20240307',
-                    balanced: 'claude-3-sonnet-20240229',
-                    powerful: 'claude-3-opus-20240229',
+                    fast: 'claude-3-5-haiku-20241022',
+                    balanced: 'claude-sonnet-4-20250514',
+                    powerful: 'claude-opus-4-20250925',
                 },
-                defaultModel: 'claude-3-haiku-20240307',
+                defaultModel: 'claude-3-5-haiku-20241022',
             },
             deepseek: {
                 name: 'DeepSeek',

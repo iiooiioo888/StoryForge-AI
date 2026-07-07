@@ -585,5 +585,203 @@ module.exports = function (models) {
         }
     });
 
+    // ══════════════════════════════════════════════
+    // 🔬 15秒原子單元架構 — 四階段流水線 API
+    // ══════════════════════════════════════════════
+
+    // ── 關卡一：敘事拆解 ──
+    router.post('/workflow/deconstruct', authMiddleware, async (req, res) => {
+        try {
+            const { provider, tier, ...params } = req.body;
+            if (!params.script && !params.storyContent) return res.status(400).json({ error: '缺少劇本內容' });
+
+            const result = await llm.chat({
+                systemPrompt: PROMPTS.narrativeDeconstruct.system,
+                prompt: PROMPTS.narrativeDeconstruct.user(params),
+                provider, tier, temperature: 0.7, maxTokens: 8192,
+            });
+
+            let deconstruction;
+            try {
+                const jsonMatch = result.content.match(/\{[\s\S]*\}/);
+                deconstruction = JSON.parse(jsonMatch ? jsonMatch[0] : result.content);
+            } catch (e) { deconstruction = { raw: result.content }; }
+
+            // 自動建立 AtomicClip 記錄
+            if (deconstruction.atomic_clips && req.body.storyId) {
+                for (const clip of deconstruction.atomic_clips) {
+                    await models.AtomicClip.create({
+                        storyId: req.body.storyId,
+                        sequenceIndex: clip.index,
+                        duration: clip.duration || 15,
+                        promptEn: clip.prompt_en || '',
+                        promptZh: clip.prompt_zh || '',
+                        camera: {
+                            startFrame: clip.camera?.start || '',
+                            endFrame: clip.camera?.end || '',
+                            movement: clip.camera?.movement || '',
+                            shotSize: clip.camera?.shot_size || '',
+                            angle: clip.camera?.angle || '',
+                        },
+                        physicsSnapshot: {
+                            lightingVector: clip.physics_at_end?.lighting || '',
+                            characterPose: clip.physics_at_end?.character_pose || '',
+                            particleState: clip.physics_at_end?.particles || '',
+                            environmentState: clip.physics_at_end?.environment || '',
+                        },
+                        narrativeCursor: {
+                            percentStart: clip.percent_range?.[0] || 0,
+                            percentEnd: clip.percent_range?.[1] || 25,
+                            storyBeat: clip.narrative_beat || '',
+                            emotionArc: clip.emotion_arc || '',
+                        },
+                        platform: params.platform || 'general',
+                    });
+                }
+            }
+
+            await logInteraction(req.user.id, 'workflow_deconstruct',
+                { prompt: JSON.stringify(params), systemPrompt: PROMPTS.narrativeDeconstruct.system },
+                { provider: result.provider, model: result.model, tier: tier || 'balanced' },
+                { rawResponse: result.content, parsedData: deconstruction, contentType: 'json' },
+                'completed', result.usage || {}
+            );
+
+            res.json({ success: true, deconstruction, model: result.provider });
+        } catch (err) {
+            await logInteraction(req.user.id, 'workflow_deconstruct', { prompt: JSON.stringify(req.body) }, {}, {}, 'failed', {}, err);
+            res.status(500).json({ error: '敘事拆解失敗：' + err.message });
+        }
+    });
+
+    // ── 關卡二：首尾幀鎖定生成 ──
+    router.post('/workflow/generate-atomic', authMiddleware, async (req, res) => {
+        try {
+            const { provider, tier, ...params } = req.body;
+
+            const result = await llm.chat({
+                systemPrompt: PROMPTS.keyframeLockedGenerator.system,
+                prompt: PROMPTS.keyframeLockedGenerator.user(params),
+                provider, tier, temperature: 0.6, maxTokens: 4096,
+            });
+
+            let keyframeData;
+            try {
+                const jsonMatch = result.content.match(/\{[\s\S]*\}/);
+                keyframeData = JSON.parse(jsonMatch ? jsonMatch[0] : result.content);
+            } catch (e) { keyframeData = { raw: result.content }; }
+
+            // 更新 AtomicClip 的首尾幀數據
+            if (params.clipId) {
+                await models.AtomicClip.updateOne({ _id: params.clipId }, {
+                    $set: {
+                        endFramePrompt: keyframeData.end_frame?.prompt_en || '',
+                        'camera.startFrame': keyframeData.start_frame?.prompt_en || '',
+                        'camera.endFrame': keyframeData.end_frame?.prompt_en || '',
+                        promptEn: keyframeData.full_prompt_en || '',
+                        negativePrompt: keyframeData.negative_prompt || '',
+                    }
+                });
+            }
+
+            await logInteraction(req.user.id, 'workflow_generate_atomic',
+                { prompt: JSON.stringify(params) },
+                { provider: result.provider, model: result.model },
+                { rawResponse: result.content, parsedData: keyframeData, contentType: 'json' },
+                'completed', result.usage || {}
+            );
+
+            res.json({ success: true, keyframeData, model: result.provider });
+        } catch (err) {
+            await logInteraction(req.user.id, 'workflow_generate_atomic', { prompt: JSON.stringify(req.body) }, {}, {}, 'failed', {}, err);
+            res.status(500).json({ error: '首尾幀鎖定生成失敗：' + err.message });
+        }
+    });
+
+    // ── 關卡三：一致性校驗 ──
+    router.post('/workflow/validate-consistency', authMiddleware, async (req, res) => {
+        try {
+            const { provider, tier, ...params } = req.body;
+
+            const result = await llm.chat({
+                systemPrompt: PROMPTS.consistencyValidator.system,
+                prompt: PROMPTS.consistencyValidator.user(params),
+                provider, tier, temperature: 0.3, maxTokens: 4096,
+            });
+
+            let validation;
+            try {
+                const jsonMatch = result.content.match(/\{[\s\S]*\}/);
+                validation = JSON.parse(jsonMatch ? jsonMatch[0] : result.content);
+            } catch (e) { validation = { raw: result.content }; }
+
+            // 建立 ConsistencyReport
+            if (params.bridgeId) {
+                await models.ConsistencyReport.create({
+                    storyId: req.body.storyId,
+                    bridgeId: params.bridgeId,
+                    fromClipId: params.clipAId,
+                    toClipId: params.clipBId,
+                    characterDrift: {
+                        detected: validation.checks?.some(c => c.type === 'character_drift' && c.severity !== 'ok') || false,
+                        score: validation.checks?.find(c => c.type === 'character_drift')?.score,
+                        severity: validation.checks?.find(c => c.type === 'character_drift')?.severity || 'ok',
+                    },
+                    lightingDrift: {
+                        detected: validation.checks?.some(c => c.type === 'lighting_break' && c.severity !== 'ok') || false,
+                        severity: validation.checks?.find(c => c.type === 'lighting_break')?.severity || 'ok',
+                    },
+                    overallScore: validation.overall_score,
+                    passed: validation.passed,
+                    autoRepairDone: validation.auto_repair?.needed || false,
+                    repairNotes: JSON.stringify(validation.auto_repair?.actions || []),
+                });
+            }
+
+            await logInteraction(req.user.id, 'workflow_validate',
+                { prompt: JSON.stringify(params) },
+                { provider: result.provider, model: result.model },
+                { rawResponse: result.content, parsedData: validation, contentType: 'json' },
+                'completed', result.usage || {}
+            );
+
+            res.json({ success: true, validation, model: result.provider });
+        } catch (err) {
+            await logInteraction(req.user.id, 'workflow_validate', { prompt: JSON.stringify(req.body) }, {}, {}, 'failed', {}, err);
+            res.status(500).json({ error: '一致性校驗失敗：' + err.message });
+        }
+    });
+
+    // ── 關卡四：動態節奏拼接 ──
+    router.post('/workflow/assemble-rhythm', authMiddleware, async (req, res) => {
+        try {
+            const { provider, tier, ...params } = req.body;
+
+            const result = await llm.chat({
+                systemPrompt: PROMPTS.rhythmicAssembler.system,
+                prompt: PROMPTS.rhythmicAssembler.user(params),
+                provider, tier, temperature: 0.5, maxTokens: 4096,
+            });
+
+            let assembly;
+            try {
+                const jsonMatch = result.content.match(/\{[\s\S]*\}/);
+                assembly = JSON.parse(jsonMatch ? jsonMatch[0] : result.content);
+            } catch (e) { assembly = { raw: result.content }; }
+
+            await logInteraction(req.user.id, 'workflow_assemble',
+                { prompt: JSON.stringify(params) },
+                { provider: result.provider, model: result.model },
+                { rawResponse: result.content, parsedData: assembly, contentType: 'json' },
+                'completed', result.usage || {}
+            );
+
+            res.json({ success: true, assembly, model: result.provider });
+        } catch (err) {
+            await logInteraction(req.user.id, 'workflow_assemble', { prompt: JSON.stringify(req.body) }, {}, {}, 'failed', {}, err);
+            res.status(500).json({ error: '節奏拼接失敗：' + err.message });
+        }
+    });
+
     return router;
 };

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StoryForge AI — Workflow Editor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/workflow.css">
+</head>
+<body>
+<div id="app">
+    <!-- ===== Toolbar ===== -->
+    <div id="toolbar">
+        <span class="logo">🎭 StoryForge</span>
+        <input type="text" class="workflow-name" id="workflowName" value="Untitled Workflow" spellcheck="false">
+        <div class="toolbar-sep"></div>
+        <button class="toolbar-btn" id="btnUndo" title="Undo (Ctrl+Z)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10h10a5 5 0 015 5v2M3 10l4-4M3 10l4 4"/></svg>
+        </button>
+        <button class="toolbar-btn" id="btnRedo" title="Redo (Ctrl+Y)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10H11a5 5 0 00-5 5v2M21 10l-4-4M21 10l-4 4"/></svg>
+        </button>
+        <div class="toolbar-sep"></div>
+        <button class="toolbar-btn" id="btnZoomOut" title="Zoom Out">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35M8 11h6"/></svg>
+        </button>
+        <span class="zoom-display" id="zoomDisplay">100%</span>
+        <button class="toolbar-btn" id="btnZoomIn" title="Zoom In">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35M11 8v6M8 11h6"/></svg>
+        </button>
+        <button class="toolbar-btn" id="btnFitView" title="Fit View">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+        </button>
+        <div class="toolbar-spacer"></div>
+        <button class="toolbar-btn" id="btnSave" title="Save (Ctrl+S)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+            Save
+        </button>
+        <button class="toolbar-btn primary" id="btnExecute" title="Execute Workflow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Execute
+        </button>
+    </div>
+
+    <!-- ===== Main Area ===== -->
+    <div id="main">
+        <!-- Left Sidebar: Node Palette -->
+        <div id="sidebar-left">
+            <div id="palette-search">
+                <input type="text" id="paletteFilter" placeholder="Search nodes...">
+            </div>
+            <div id="palette-list"></div>
+        </div>
+
+        <!-- Center: Canvas -->
+        <div id="canvas-container">
+            <canvas id="node-canvas"></canvas>
+            <div id="minimap-container">
+                <canvas id="minimap-canvas"></canvas>
+            </div>
+            <div id="canvas-status">
+                <span id="statusNodes">Nodes: 0</span>
+                <span id="statusConns">Connections: 0</span>
+                <span id="statusPos">0, 0</span>
+            </div>
+        </div>
+
+        <!-- Right Sidebar: Property Inspector -->
+        <div id="sidebar-right">
+            <div id="inspector-header" style="display:none;">
+                <div class="insp-icon" id="inspIcon"></div>
+                <div class="insp-info">
+                    <div class="insp-name" id="inspName"></div>
+                    <div class="insp-type" id="inspType"></div>
+                </div>
+                <button id="inspector-close">&times;</button>
+            </div>
+            <div id="inspector-body">
+                <div id="inspector-empty">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M3 9h18"/></svg>
+                    <div>Select a node to inspect</div>
+                    <div style="font-size:10px">Double-click for quick edit</div>
+                </div>
+                <div id="inspector-fields" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- Drag ghost -->
+<div class="drag-ghost" id="dragGhost" style="display:none;"></div>
+
+<!-- Workflow Modules (load order matters) -->
+<script src="/js/workflow/node-types.js"></script>
+<script src="/js/workflow/utils.js"></script>
+<script src="/js/workflow/classes.js"></script>
+<script src="/js/workflow/editor.js"></script>
+<script src="/js/workflow/palette.js"></script>
+<script src="/js/workflow/toolbar.js"></script>
+<script src="/js/workflow/init.js"></script>
+</body>
+</html>

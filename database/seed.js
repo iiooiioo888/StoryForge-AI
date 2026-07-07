@@ -10,6 +10,7 @@ const {
     CameraAngle, ShotTransition, CameraLanguageTemplate,
     Comment, Interaction, Notification, StoryTemplate,
     WritingPrompt, ReadingList, SystemSetting, UserPreference,
+    Workflow,
 } = models;
 
 async function seed() {
@@ -258,6 +259,48 @@ async function seed() {
         userDocs.map(u => ({ userId: u._id }))
     );
     console.log('  ✓ 用戶偏好');
+
+    // ========== 工作流 ==========
+    await Workflow.insertMany([
+        {
+            userId: userMap['demo'],
+            name: 'Cinematic Scene Pipeline',
+            description: 'A 3-node cinematic scene generation chain: world DNA → scene blueprint → camera setup',
+            nodes: [
+                { id: 'world-anchor', type: 'world-anchor', x: 100, y: 200, params: { gravity: 9.8, globalLighting: 'HDRi' } },
+                { id: 'scene-composer', type: 'scene-composer', x: 400, y: 150, params: { cameraLayout: 'free', depthRange: 100, weather: { type: 'clear', intensity: 0.3, wind: 5 } } },
+                { id: 'cinematic-camera', type: 'cinematic-camera', x: 700, y: 200, params: { lensModel: 'ARRI', focalLength: 85, fStop: 2.8, iso: 800, frameRate: '24' } },
+            ],
+            connections: [
+                { id: 'conn-1', fromNode: 'world-anchor', fromOutput: 'worldDNA', toNode: 'scene-composer', toInput: 'worldDNA' },
+                { id: 'conn-2', fromNode: 'scene-composer', fromOutput: 'sceneBlueprint', toNode: 'cinematic-camera', toInput: 'sceneBlueprint' },
+            ],
+            status: 'draft',
+            tags: ['cinematic', 'scene-pipeline'],
+        },
+        {
+            userId: userMap['demo'],
+            name: 'Full Production Pipeline',
+            description: 'A 5-node end-to-end production pipeline: world → scene + camera → performance → sync',
+            nodes: [
+                { id: 'world-anchor', type: 'world-anchor', x: 100, y: 300, params: { gravity: 9.8, globalLighting: 'HDRi' } },
+                { id: 'scene-composer', type: 'scene-composer', x: 400, y: 200, params: { cameraLayout: 'free', depthRange: 100, weather: { type: 'clear', intensity: 0.3, wind: 5 } } },
+                { id: 'cinematic-camera', type: 'cinematic-camera', x: 400, y: 400, params: { lensModel: 'ARRI', focalLength: 50, fStop: 4, iso: 400, frameRate: '24' } },
+                { id: 'performance-director', type: 'performance-director', x: 700, y: 300, params: { actingStyle: 'method', emotionIntensity: 0.7, pacing: 'natural' } },
+                { id: 'cine-sync', type: 'cine-sync', x: 1000, y: 300, params: { outputFormat: 'prores', resolution: '4K', colorProfile: 'ACES' } },
+            ],
+            connections: [
+                { id: 'conn-1', fromNode: 'world-anchor', fromOutput: 'worldDNA', toNode: 'scene-composer', toInput: 'worldDNA' },
+                { id: 'conn-2', fromNode: 'scene-composer', fromOutput: 'sceneBlueprint', toNode: 'cinematic-camera', toInput: 'sceneBlueprint' },
+                { id: 'conn-3', fromNode: 'scene-composer', fromOutput: 'sceneBlueprint', toNode: 'performance-director', toInput: 'sceneBlueprint' },
+                { id: 'conn-4', fromNode: 'cinematic-camera', fromOutput: 'cameraSetup', toNode: 'cine-sync', toInput: 'cameraSetup' },
+                { id: 'conn-5', fromNode: 'performance-director', fromOutput: 'performanceData', toNode: 'cine-sync', toInput: 'performanceData' },
+            ],
+            status: 'draft',
+            tags: ['full-pipeline', 'production'],
+        },
+    ]);
+    console.log('  ✓ 工作流數據');
 
     console.log('\n✅ MongoDB 數據初始化完成！');
     console.log(`📊 統計：${categoryDocs.length} 分類 · ${tagDocs.length} 標籤 · ${userDocs.length} 用戶 · ${storyDocs.length} 故事`);

@@ -1,0 +1,25 @@
+<div id="panel-library" class="panel">
+    <div class="container">
+      <div class="library-header">
+        <div class="search-box"><input type="text" placeholder="搜尋故事標題、內容、主題..." id="search-input" oninput="refreshLibrary()"></div>
+        <div class="filter-tags" id="filter-tags">
+          <button class="filter-tag active" data-filter="all">全部</button>
+          <button class="filter-tag" data-filter="scifi">科幻</button>
+          <button class="filter-tag" data-filter="fantasy">奇幻</button>
+          <button class="filter-tag" data-filter="romance">愛情</button>
+          <button class="filter-tag" data-filter="mystery">懸疑</button>
+          <button class="filter-tag" data-filter="horror">恐怖</button>
+          <button class="filter-tag" data-filter="historical">歷史</button>
+          <button class="filter-tag" data-filter="cyberpunk">賽博龐克</button>
+          <button class="filter-tag" data-filter="wuxia">武俠</button>
+        </div>
+      </div>
+      <div class="story-grid" id="library-grid"></div>
+      <div class="empty-state" id="library-empty" style="display:none">
+        <div class="icon">📖</div><p>還沒有保存任何故事</p>
+        <button class="btn btn-primary" onclick="switchTab('workshop')">開始創作</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROMPTS -->

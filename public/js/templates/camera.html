@@ -1,0 +1,124 @@
+<div id="panel-camera" class="panel">
+  <div class="container">
+    <div class="section-title">鏡頭語言百科</div>
+    <!-- Sub-tabs -->
+    <div class="prompt-top-bar" style="margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
+      <button class="btn btn-primary btn-sm cam-tab-btn" data-cam-tab="movements" onclick="switchCamTab('movements',this)">🎥 運鏡</button>
+      <button class="btn btn-ghost btn-sm cam-tab-btn" data-cam-tab="lighting" onclick="switchCamTab('lighting',this)">💡 燈光</button>
+      <button class="btn btn-ghost btn-sm cam-tab-btn" data-cam-tab="visual-styles" onclick="switchCamTab('visual-styles',this)">🎨 視覺風格</button>
+      <button class="btn btn-ghost btn-sm cam-tab-btn" data-cam-tab="color-palettes" onclick="switchCamTab('color-palettes',this)">🎨 色彩調板</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-accent btn-sm" onclick="showComposeModal()">🔧 鏡頭語言組合器</button>
+    </div>
+    <!-- Movements Tab -->
+    <div id="cam-tab-movements" class="cam-tab-panel">
+      <div class="prompt-top-bar">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">分類</label>
+          <select class="form-select" id="cam-cat-filter" onchange="filterCamMovements()">
+            <option value="">全部</option>
+            <option value="basic">基礎運鏡</option>
+            <option value="dynamic">動態運鏡</option>
+            <option value="complex">複合運鏡</option>
+            <option value="aerial">空中運鏡</option>
+            <option value="special">特殊運鏡</option>
+          </select>
+        </div>
+      </div>
+      <div class="story-grid" id="cam-grid" style="margin-top:1.5rem"></div>
+    </div>
+    <!-- Lighting Tab -->
+    <div id="cam-tab-lighting" class="cam-tab-panel" style="display:none">
+      <div class="prompt-top-bar">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">分類</label>
+          <select class="form-select" id="lighting-cat-filter" onchange="filterCamLighting()">
+            <option value="">全部</option>
+            <option value="natural">自然光</option>
+            <option value="studio">棚拍燈光</option>
+            <option value="dramatic">戲劇性燈光</option>
+            <option value="cinematic">電影級燈光</option>
+            <option value="special">特殊燈光</option>
+          </select>
+        </div>
+      </div>
+      <div class="story-grid" id="lighting-grid" style="margin-top:1.5rem"></div>
+    </div>
+    <!-- Visual Styles Tab -->
+    <div id="cam-tab-visual-styles" class="cam-tab-panel" style="display:none">
+      <div class="prompt-top-bar">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">分類</label>
+          <select class="form-select" id="vstyle-cat-filter" onchange="filterCamVisualStyles()">
+            <option value="">全部</option>
+            <option value="photography">攝影</option>
+            <option value="film">電影</option>
+            <option value="animation">動畫</option>
+            <option value="painting">繪畫</option>
+            <option value="digital">數位藝術</option>
+            <option value="experimental">實驗性</option>
+          </select>
+        </div>
+      </div>
+      <div class="story-grid" id="vstyle-grid" style="margin-top:1.5rem"></div>
+    </div>
+    <!-- Color Palettes Tab -->
+    <div id="cam-tab-color-palettes" class="cam-tab-panel" style="display:none">
+      <div class="prompt-top-bar">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">分類</label>
+          <select class="form-select" id="palette-cat-filter" onchange="filterCamPalettes()">
+            <option value="">全部</option>
+            <option value="warm">暖色調</option>
+            <option value="cool">冷色調</option>
+            <option value="neutral">中性色調</option>
+            <option value="vibrant">鮮豔</option>
+            <option value="muted">柔和</option>
+            <option value="monochrome">單色</option>
+            <option value="complementary">互補色</option>
+          </select>
+        </div>
+      </div>
+      <div class="story-grid" id="palette-grid" style="margin-top:1.5rem"></div>
+    </div>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="auth-modal">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <h3 id="auth-modal-title">登入</h3>
+      <button class="modal-close" onclick="closeAuthModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="auth-login-form">
+        <div class="form-group"><label class="form-label">用戶名</label><input type="text" class="form-input" id="auth-username" placeholder="用戶名或郵件"></div>
+        <div class="form-group"><label class="form-label">密碼</label><input type="password" class="form-input" id="auth-password" placeholder="密碼"></div>
+        <div id="auth-error" style="color:var(--danger);font-size:.8rem;margin-bottom:1rem;display:none"></div>
+        <button class="btn btn-primary btn-block" onclick="doLogin()">登入</button>
+        <p style="text-align:center;margin-top:1rem;font-size:.8rem;color:var(--text-dim)">沒有帳號？<a href="#" onclick="showRegisterForm()" style="color:var(--accent)">免費註冊</a></p>
+        <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border)">
+          <p style="font-size:.7rem;color:var(--text-ghost);text-align:center;margin-bottom:.8rem">示範帳號</p>
+          <div style="display:flex;gap:.8rem;justify-content:center">
+            <button class="btn btn-ghost btn-sm" onclick="fillDemo('admin','admin123')">👑 管理員</button>
+            <button class="btn btn-ghost btn-sm" onclick="fillDemo('demo','demo123')">👤 用戶</button>
+          </div>
+        </div>
+      </div>
+      <div id="auth-register-form" style="display:none">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">用戶名 *</label><input type="text" class="form-input" id="reg-username"></div>
+          <div class="form-group"><label class="form-label">顯示名稱</label><input type="text" class="form-input" id="reg-displayname"></div>
+        </div>
+        <div class="form-group"><label class="form-label">電子郵件 *</label><input type="email" class="form-input" id="reg-email"></div>
+        <div class="form-group"><label class="form-label">密碼 *</label><input type="password" class="form-input" id="reg-password"></div>
+        <div id="reg-error" style="color:var(--danger);font-size:.8rem;margin-bottom:1rem;display:none"></div>
+        <button class="btn btn-primary btn-block" onclick="doRegister()">🎉 註冊並獲得100積分</button>
+        <p style="text-align:center;margin-top:1rem;font-size:.8rem;color:var(--text-dim)">已有帳號？<a href="#" onclick="showLoginForm()" style="color:var(--accent)">登入</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
