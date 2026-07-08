@@ -28,4 +28,20 @@ export function toggleTheme() {
 
 export function loadTheme() {
   if (localStorage.getItem('sf_theme') === 'light') document.documentElement.classList.add('light-mode');
+  initScrollEffect();
+}
+
+function initScrollEffect() {
+  const nav = document.getElementById('main-nav');
+  if (!nav) return;
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        nav.classList.toggle('scrolled', window.scrollY > 20);
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
 }

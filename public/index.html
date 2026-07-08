@@ -60,7 +60,7 @@
 </head>
 <body>
 <!-- ═══ NAV ═══ -->
-<nav class="nav">
+<nav class="nav" id="main-nav">
   <div class="nav-brand" data-action="switchTab" data-tab="home">🎬 StoryForge <span>AI</span></div>
   <div class="nav-links" id="nav-links">
     <button class="nav-link active" data-action="switchTab" data-tab="home">首頁</button>
@@ -84,6 +84,7 @@
 <!-- HOME -->
 <div id="panel-home" class="panel active">
   <div class="hero">
+    <div class="hero-badge"><span class="hero-badge-dot"></span>AI 驅動的創作平台</div>
     <h1>🎬 Craft Stories.<br><em>Generate Visions</em>.</h1>
     <p>結合 AI 創意寫作與影片提示詞生成，將故事轉化為可拍攝的視覺場景</p>
     <div class="hero-cta">
@@ -259,14 +260,14 @@
 </main>
 
 <!-- ═══ FOOTER ═══ -->
-<footer class="site-footer" style="padding:2rem 1.5rem;border-top:1px solid var(--border);text-align:center;color:var(--text-dim);font-size:.8rem">
-  <div style="margin-bottom:.5rem">◆ StoryForge AI</div>
-  <div style="display:flex;gap:1rem;justify-content:center;margin-bottom:.5rem">
+<footer class="site-footer">
+  <div class="footer-brand">◆ StoryForge AI</div>
+  <div class="footer-links">
     <button class="btn btn-ghost btn-sm" data-action="switchTab" data-tab="home">首頁</button>
     <button class="btn btn-ghost btn-sm" data-action="switchTab" data-tab="workshop">工作坊</button>
     <button class="btn btn-ghost btn-sm" data-action="switchTab" data-tab="library">資料庫</button>
   </div>
-  <div>© 2026 StoryForge AI — 以創意驅動敘事 · 以想像塑造畫面</div>
+  <div class="footer-copy">© 2026 StoryForge AI — 以創意驅動敘事 · 以想像塑造畫面</div>
 </footer>
 
 <!-- ═══ MODALS ═══ -->

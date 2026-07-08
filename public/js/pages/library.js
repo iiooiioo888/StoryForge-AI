@@ -13,12 +13,18 @@ export function refreshLibrary() {
   if (!stories.length) { grid.innerHTML = ''; if (empty) empty.style.display = ''; return; }
   if (empty) empty.style.display = 'none';
   grid.innerHTML = stories.map((s, i) => {
-    const bg = `hsl(${7 * Math.abs(s.title?.charCodeAt(0) || 65) % 360},45%,18%)`;
+    const hue = (7 * Math.abs(s.title?.charCodeAt(0) || 65)) % 360;
+    const bg = `linear-gradient(135deg, hsl(${hue},50%,14%) 0%, hsl(${hue + 30},40%,10%) 100%)`;
+    const icons = { scifi: '🚀', fantasy: '🗡️', romance: '💕', mystery: '🔍', horror: '👻', wuxia: '⚔️' };
+    const icon = icons[s.genre] || '📖';
     return `<div class="card" data-action="viewStory" data-story-id="${s.id}" style="animation-delay:${i*.05}s">
-      <div style="height:80px;background:${bg};border-radius:var(--radius);margin-bottom:.8rem;display:flex;align-items:center;justify-content:center;font-size:1.5rem">📖</div>
+      <div style="height:90px;background:${bg};border-radius:var(--radius);margin-bottom:.8rem;display:flex;align-items:center;justify-content:center;font-size:1.8rem;position:relative;overflow:hidden">
+        <div style="position:absolute;inset:0;background:radial-gradient(circle at 70% 30%,hsla(${hue},60%,50%,.15),transparent 60%)"></div>
+        <span style="position:relative;filter:drop-shadow(0 2px 8px rgba(0,0,0,.3))">${icon}</span>
+      </div>
       <h3>${esc(s.title || '未命名')}</h3>
       <p>${esc(s.content?.substring(0, 80) || '')}...</p>
-      <div class="card-meta"><span>${(s.wordCount || 0).toLocaleString()} 字</span><span>${esc(s.genre || '')}</span></div>
+      <div class="card-meta"><span>${(s.wordCount || 0).toLocaleString()} 字</span><span class="tag" style="font-size:.65rem">${esc(s.genre || '')}</span></div>
     </div>`;
   }).join('');
 }

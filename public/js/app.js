@@ -69,6 +69,21 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeModal();
 });
 
+// Mobile nav toggle
+document.addEventListener('click', (e) => {
+  const brand = e.target.closest('.nav-brand');
+  if (brand && window.innerWidth <= 768) {
+    document.getElementById('nav-links')?.classList.toggle('open');
+  }
+});
+
+// Close mobile nav on outside click
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.nav-links') && !e.target.closest('.nav-brand')) {
+    document.getElementById('nav-links')?.classList.remove('open');
+  }
+});
+
 // ═══ Init ═══
 async function init() {
   try {
