@@ -2,7 +2,7 @@
 import { api, DB } from './api.js';
 import { toast } from './utils.js';
 import { checkAuth, updateAuthUI, showAuthModal, closeModal, showLoginForm, showRegisterForm, fillDemo, doLogin, doRegister } from './auth.js';
-import { switchTab, toggleTheme, loadTheme } from './router.js';
+import { switchTab, toggleTheme, loadTheme, loadTemplate } from './router.js';
 import { refreshHome } from './pages/home.js';
 import { generateStory, saveStory, exportStory, aiAutoFill } from './pages/workshop.js';
 import { refreshLibrary, viewStory, editStory, deleteStory, sendToPrompts } from './pages/library.js';
@@ -88,6 +88,21 @@ document.addEventListener('click', (e) => {
 async function init() {
   try {
     loadTheme();
+    // Load modals template
+    const modalsHtml = await loadTemplate('modals');
+    if (modalsHtml) {
+      const container = document.createElement('div');
+      container.id = 'modals-container';
+      container.innerHTML = modalsHtml;
+      document.body.appendChild(container);
+    }
+    // Load home template (default active panel)
+    const homeHtml = await loadTemplate('home');
+    const homePanel = document.getElementById('panel-home');
+    if (homePanel && homeHtml) {
+      homePanel.innerHTML = homeHtml;
+      homePanel.dataset.loaded = 'true';
+    }
     await checkAuth();
     updateAuthUI();
     refreshHome();

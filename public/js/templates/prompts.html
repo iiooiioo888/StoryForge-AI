@@ -1,0 +1,10 @@
+<div class="container">
+  <div class="section-title">影片提示詞生成</div>
+  <div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-bottom:1.5rem">
+    <select class="form-select" id="prompt-story-select" style="flex:1;min-width:200px"><option value="">選擇故事...</option></select>
+    <select class="form-select" id="prompt-platform" style="width:120px"><option value="sora">Sora</option><option value="runway">Runway</option><option value="kling">Kling</option><option value="general">通用</option></select>
+    <button class="btn btn-primary" data-action="generatePrompts">✦ 生成</button>
+  </div>
+  <div id="prompts-result"></div>
+  <div class="empty" id="prompts-empty"><div class="icon">🎬</div><p>選擇故事並生成影片提示詞</p></div>
+</div>

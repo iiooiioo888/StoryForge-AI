@@ -2,16 +2,38 @@
 import { toast } from './utils.js';
 
 export const state = { tab: 'home', editId: null, storyContent: '' };
+const templateCache = {};
 
-export function switchTab(tab) {
+export async function loadTemplate(name) {
+  if (templateCache[name]) return templateCache[name];
+  try {
+    const resp = await fetch(`/js/templates/${name}.html`);
+    if (!resp.ok) throw new Error(`Template ${name} not found`);
+    const html = await resp.text();
+    templateCache[name] = html;
+    return html;
+  } catch (e) {
+    console.error('Template load error:', e);
+    return '';
+  }
+}
+
+export async function switchTab(tab) {
   state.tab = tab;
   document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
   document.querySelector('.nav-link[data-tab="' + tab + '"]')?.classList.add('active');
+  const panel = document.getElementById('panel-' + tab);
+  if (panel && !panel.dataset.loaded) {
+    const html = await loadTemplate(tab);
+    if (html) {
+      panel.innerHTML = html;
+      panel.dataset.loaded = 'true';
+    }
+  }
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel-' + tab)?.classList.add('active');
+  panel?.classList.add('active');
   document.getElementById('nav-links')?.classList.remove('open');
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  // Lazy load
   if (tab === 'home') import('./pages/home.js').then(m => m.refreshHome());
   if (tab === 'library') import('./pages/library.js').then(m => m.refreshLibrary());
   if (tab === 'prompts') import('./pages/prompts.js').then(m => m.refreshPromptSel());

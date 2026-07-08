@@ -1,0 +1,37 @@
+<div class="container">
+  <div class="section-title">💎 積分管理</div>
+  <div class="credits-dashboard">
+    <div class="credits-balance-card">
+      <div class="credits-balance-label">目前積分餘額</div>
+      <div class="credits-balance-value" id="credits-balance">--</div>
+      <div class="credits-balance-actions">
+        <button class="btn btn-primary" data-action="showRechargeModal">💳 充值積分</button>
+      </div>
+    </div>
+    <div class="credits-stats-row">
+      <div class="credits-stat">
+        <div class="credits-stat-label">本月支出</div>
+        <div class="credits-stat-value" id="credits-monthly-spent">0</div>
+      </div>
+      <div class="credits-stat">
+        <div class="credits-stat-label">本月充值</div>
+        <div class="credits-stat-value" id="credits-monthly-added">0</div>
+      </div>
+    </div>
+  </div>
+  <div class="section-title" style="margin-top:1.5rem">交易紀錄</div>
+  <div class="credits-filter">
+    <select class="form-select" id="tx-filter-type" style="width:150px">
+      <option value="">全部類型</option>
+      <option value="deduction">扣款</option>
+      <option value="purchase">充值</option>
+      <option value="bonus">獎勵</option>
+      <option value="refund">退款</option>
+      <option value="signup_bonus">註冊贈送</option>
+      <option value="subscription">訂閱</option>
+    </select>
+  </div>
+  <div id="transactions-list"></div>
+  <div id="transactions-pagination" style="display:flex;justify-content:center;gap:.5rem;margin-top:1rem"></div>
+  <div class="empty" id="credits-empty" style="display:none"><div class="icon">💎</div><p>還沒有交易紀錄</p></div>
+</div>
