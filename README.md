@@ -5,15 +5,12 @@
 ### AI 驅動的故事創作與影片提示詞生成平台
 
 [![Node.js](https://img.shields.io/badge/Node.js-22.x-339933?logo=node.js&logoColor=white)](https://nodejs.org)
+[![MongoDB](https://img.shields.io/badge/MongoDB-7-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com)
 [![Express](https://img.shields.io/badge/Express-4.x-000000?logo=express&logoColor=white)](https://expressjs.com)
-[![SQLite](https://img.shields.io/badge/SQLite-3-003B57?logo=sqlite&logoColor=white)](https://sqlite.org)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-<p>一個全功能的故事創作平台，結合 AI 技術生成故事內容，並將故事轉化為專業級影片提示詞，適用於 <b>Sora</b>、<b>Runway</b>、<b>Kling</b>、<b>Pika</b> 等主流 AI 影片生成工具。</p>
-
-<br>
-
-<img src="https://via.placeholder.com/800x400/667eea/ffffff?text=StoryForge+AI+Dashboard" alt="Dashboard Preview" width="80%">
+<p>結合 AI 技術的故事創作平台，支援故事生成、影片提示詞轉換，適用於 <b>Sora</b>、<b>Runway</b>、<b>Kling</b>、<b>Pika</b> 等主流 AI 影片生成工具。</p>
 
 </div>
 
@@ -22,37 +19,38 @@
 ## ✨ 核心功能
 
 ### 📝 故事創作系統
-- **手動創作** — 富文本編輯器，支援多章節、角色設定、世界觀構建
-- **AI 輔助生成** — 輸入靈感，AI 自動生成故事大綱、角色和正文
-- **AI 續寫助手** — 從故事中斷處繼續創作，多種方向可選
-- **8 種故事模板** — 英雄之旅、校園青春、密室懸案、末日生存、甜蜜戀曲、武俠恩仇錄、賽博朋克偵探、美食暖心
+- **手動創作** — 富文本編輯器，多章節、角色設定、世界觀構建
+- **AI 輔助生成** — 輸入靈感，自動生成大綱、角色和正文（支援 SSE 串流）
+- **AI 續寫助手** — 多種方向可選，從中斷處繼續創作
+- **8 種故事類型** — 科幻、奇幻、愛情、懸疑、恐怖、歷史、賽博朋克、武俠
 
 ### 🎬 影片提示詞生成
-- **5 大平台支援** — Sora (OpenAI)、Runway Gen-3、Kling (快手)、Pika Labs、通用格式
-- **12 種專業模板** — 電影級場景、角色特寫、動作場景、風景長鏡頭、對話場景、戰鬥場面、魔法施展、太空場景等
-- **從故事批量生成** — 自動拆分故事場景，生成配套影片提示詞
-- **Negative Prompt** — 自動生成對應平台的負面提示詞
+- **5 大平台** — Sora、Runway Gen-3、Kling、Pika Labs、通用格式
+- **14 種鏡頭類型 + 10 種運鏡動作** — 完整鏡頭語言庫
+- **從故事批量生成** — 自動拆分場景，生成配套影片提示詞
+- **Negative Prompt** — 依平台自動生成負面提示詞
 
 ### 🎥 鏡頭語言百科
-- **26 種鏡頭運動** — 基礎/動態/複合/空中/特殊，含難度等級
-- **10 種景別** — 大特寫(ECU) → 大遠景(ELS)，含構圖說明和情感影響
-- **10 種鏡頭角度** — 平視/仰拍/俯拍/鳥瞰/荷蘭角等，含心理效果分析
-- **12 種轉場效果** — 硬切/溶解/淡入淡出/匹配剪輯等
-- **12 種場景模板** — 英雄出場、懸疑揭示、浪漫相遇、追逐場景等預設組合
-- **自定義組合器** — 選擇景別 + 角度 + 運鏡，一鍵生成專業提示詞
+- **26 種鏡頭運動** — 基礎/動態/複合/空中/特殊
+- **10 種景別** — 大特寫 → 大遠景
+- **10 種鏡頭角度** — 平視/仰拍/俯拍/鳥瞰/荷蘭角等
+- **12 種轉場 + 12 種場景模板**
+- **自定義組合器** — 景別 + 角度 + 運鏡一鍵生成
 
 ### 🛠️ 創作工具箱
-- **🔤 名字生成器** — 角色名/地名/組織名/物品名，奇幻/科幻/武俠/現代四種風格
-- **💡 每日靈感** — 25+ 寫作提示，涵蓋開頭/角色/衝突/世界觀/對話/反轉/結局
-- **📊 數據分析** — 閱讀量/互動率/章節字數分佈/版本歷史
-- **📥 導出工具** — TXT/JSON 格式匯出
-- **🔖 閱讀清單** — 個人收藏管理
-- **⚙️ 個人設定** — 主題/字體/通知偏好
+- **名字生成器** — 角色名/地名/組織名，奇幻/科幻/武俠/現代風格
+- **每日靈感** — 25+ 寫作提示
+- **數據分析** — 閱讀量/互動率/字數分佈
+- **導出工具** — TXT/JSON 格式
 
-### 👥 社區與管理
-- **用戶系統** — 註冊/登入/個人資料/積分系統
-- **互動系統** — 評論/點讚/收藏/分享
-- **管理後台** — 儀表盤/用戶管理/內容審核/分類管理/模板管理/系統設定/AI日誌
+### 🔧 工作流編輯器
+- **節點式流程** — 拖拽節點串聯世界設定、場景、鏡頭、燈光、渲染
+- **預設範本** — Cinematic Scene / Full Production / Lighting & Render 三種範本
+- **AI Prompt 生成** — 節點自動產出 Sora/Runway/Kling 專用提示詞
+
+### 💰 積分系統
+- **用量追蹤** — 記錄每次 AI 生成消耗
+- **積分管理** — 用戶積分餘額、充值、消耗記錄
 
 ---
 
@@ -61,70 +59,90 @@
 ```
 ┌─────────────────────────────────────────────────┐
 │                    Frontend                       │
-│         原生 HTML/CSS/JS SPA (無框架依賴)          │
+│     Vanilla JS SPA (ES Modules, 無框架依賴)        │
+│  pages: home / workshop / library / prompts /    │
+│         camera / credits / admin                  │
+│  engine: story-engine / prompt-engine             │
 ├─────────────────────────────────────────────────┤
 │                    Backend                        │
 │              Node.js + Express                    │
+│   Helmet · CORS · Compression · Rate Limiting     │
+│   Winston Logger · Content Moderation · SSE       │
 ├──────────┬──────────┬──────────┬─────────────────┤
 │ Auth API │Story API │Prompt API│ Camera/Tool API  │
 │  (JWT)   │  (CRUD)  │(Template)│   (Generator)    │
+├──────────┼──────────┼──────────┼─────────────────┤
+│ LLM API  │Workflow  │ Credits  │   Admin API      │
+│ (Stream) │  (CRUD)  │ (用量)   │   (管理後台)      │
 ├──────────┴──────────┴──────────┴─────────────────┤
-│                  SQLite (WAL)                     │
-│  20+ 數據表 | 外鍵約束 | 索引優化                    │
+│                  MongoDB (Mongoose)               │
+│  36 個 Model | Schema 驗證 | 索引優化               │
 └─────────────────────────────────────────────────┘
 ```
 
-### 數據庫結構 (20+ 數據表)
+### 數據模型 (36 個 Mongoose Model)
 
-| 模塊 | 數據表 |
-|------|--------|
-| 用戶系統 | `users`, `user_preferences`, `notifications` |
-| 故事管理 | `stories`, `chapters`, `characters`, `world_settings` |
-| 元數據 | `categories`, `tags`, `story_tags` |
-| 影片提示詞 | `video_prompts`, `video_prompt_templates` |
-| 鏡頭語言 | `camera_movements`, `shot_sizes`, `camera_angles`, `shot_transitions`, `camera_language_templates` |
-| 社交互動 | `interactions`, `comments` |
-| 創作工具 | `story_templates`, `writing_prompts`, `reading_lists`, `reading_list_items`, `story_versions` |
-| 系統 | `ai_generation_logs`, `system_settings`, `name_generator_history` |
+| 模塊 | Model |
+|------|-------|
+| 用戶系統 | `User`, `UserPreference`, `Notification` |
+| 故事管理 | `Story`, `Chapter`, `Character`, `WorldSetting` |
+| 元數據 | `Category`, `Tag`, `StoryTag` |
+| 影片提示詞 | `VideoPrompt`, `VideoPromptTemplate` |
+| 鏡頭語言 | `CameraMovement`, `ShotSize`, `CameraAngle`, `ShotTransition`, `CameraLanguageTemplate` |
+| 社交互動 | `Interaction`, `Comment` |
+| 創作工具 | `StoryTemplate`, `WritingPrompt`, `ReadingList`, `ReadingListItem`, `StoryVersion` |
+| 工作流 | `Workflow`, `WorkflowExecution` |
+| 積分系統 | `Credit`, `CreditTransaction` |
+| LLM | `LLMProvider`, `LLMUsage` |
+| 系統 | `AIGenerationLog`, `SystemSetting`, `NameGeneratorHistory` |
 
 ---
 
 ## 🚀 快速開始
 
-### 環境要求
-
-- **Node.js** >= 18.x
-- **npm** >= 9.x
-
-### 安裝
+### 方式一：Docker（推薦）
 
 ```bash
 # 克隆倉庫
 git clone https://github.com/iiooiioo888/StoryForge-AI.git
 cd StoryForge-AI
 
-# 安裝依賴
-npm install
+# 複製環境變數
+cp .env.example .env
 
-# 初始化數據庫（含示範數據）
-npm run init-db
+# 啟動（含 MongoDB）
+npm run docker:up
 
-# 初始化鏡頭語言數據
-node database/camera_init.js
+# 查看日誌
+npm run docker:logs
 
-# 初始化工具數據
-node database/tools_init.js
-
-# 啟動服務
-npm start
+# 停止
+npm run docker:down
 ```
 
-### 訪問
+服務啟動後：
+- 🌐 **應用**: http://localhost:8888
+- 💚 **健康檢查**: http://localhost:8888/api/health
 
-| 頁面 | 地址 |
-|------|------|
-| 🏠 首頁 | http://localhost:3000 |
-| 📊 管理後台 | http://localhost:3000 (以 admin 帳號登入) |
+### 方式二：本地開發
+
+```bash
+# 環境要求：Node.js >= 22, MongoDB 本地運行
+npm install
+cp .env.example .env
+
+# 初始化資料庫（含示範資料）
+npm run seed
+
+# 啟動
+npm run dev
+```
+
+### 方式三：Docker 開發模式（熱重載）
+
+```bash
+npm run docker:dev
+```
 
 ### 默認帳號
 
@@ -135,41 +153,80 @@ npm start
 
 ---
 
+## ⚙️ 環境變數
+
+| 變數 | 說明 | 預設值 |
+|------|------|--------|
+| `PORT` | 服務端口 | `3000` |
+| `MONGODB_URI` | MongoDB 連接字串 | `mongodb://localhost:27017/storyforge` |
+| `JWT_SECRET` | JWT 簽名密鑰 | *(必填)* |
+| `SESSION_SECRET` | Session 密鑰 | *(必填)* |
+| `CORS_ORIGIN` | 允許的跨域來源 | `http://localhost:3000` |
+| `OPENAI_API_KEY` | OpenAI API Key | *(選填)* |
+| `ANTHROPIC_API_KEY` | Anthropic API Key | *(選填)* |
+
+---
+
 ## 📁 項目結構
 
 ```
 StoryForge-AI/
-├── server.js                  # 主服務器入口
-├── package.json               # 項目配置
+├── server.js                    # 主服務器入口
+├── Dockerfile                   # 多階段 Docker 構建
+├── docker-compose.yml           # 生產環境 Docker 配置
+├── docker-compose.dev.yml       # 開發環境 Docker 配置
+├── .dockerignore                # Docker 忽略規則
 ├── database/
-│   ├── schema.sql             # 核心數據庫 Schema
-│   ├── init.js                # 核心數據初始化
-│   ├── camera_schema.sql      # 鏡頭語言 Schema
-│   ├── camera_init.js         # 鏡頭語言數據初始化
-│   ├── tools_schema.sql       # 工具數據 Schema
-│   └── tools_init.js          # 工具數據初始化
+│   ├── connection.js            # MongoDB 連接模組
+│   └── seed.js                  # 資料初始化 (含示範資料)
+├── models/                      # 36 個 Mongoose Schema
 ├── middleware/
-│   └── auth.js                # JWT 認證中間件
+│   ├── auth.js                  # JWT 認證
+│   ├── performance.js           # 壓縮/快取/安全標頭
+│   ├── logger.js                # Winston 日誌
+│   └── moderation.js            # 內容審核
 ├── routes/
-│   ├── auth.js                # 用戶認證 API
-│   ├── stories.js             # 故事 CRUD API
-│   ├── prompts.js             # 影片提示詞 API
-│   ├── camera.js              # 鏡頭語言 API
-│   ├── tools.js               # 創作工具 API
-│   └── admin.js               # 管理後台 API
+│   ├── auth.mongo.js            # 用戶認證 API
+│   ├── stories.mongo.js         # 故事 CRUD API
+│   ├── prompts.mongo.js         # 影片提示詞 API
+│   ├── camera.mongo.js          # 鏡頭語言 API
+│   ├── tools.mongo.js           # 創作工具 API
+│   ├── llm.mongo.js             # LLM 生成 API (含 SSE)
+│   ├── workflows.mongo.js       # 工作流 API
+│   ├── credits.mongo.js         # 積分系統 API
+│   └── admin.mongo.js           # 管理後台 API
+├── services/
+│   ├── llm.js                   # LLM 多供應商服務
+│   ├── streaming.js             # SSE 串流服務
+│   └── moderation.js            # 內容審核服務
 └── public/
-    ├── index.html             # SPA 入口 (所有頁面)
-    ├── css/
-    │   └── style.css          # 全局樣式 (響應式)
+    ├── index.html               # SPA 入口
+    ├── landing.html             # 首頁
+    ├── css/style.css            # 全局樣式
     └── js/
-        └── app.js             # 前端應用邏輯
+        ├── app.js               # 前端路由與初始化
+        ├── api.js               # API 呼叫層
+        ├── engine/
+        │   ├── story-engine.js  # 故事生成引擎 (8 類型 × 8 子類型)
+        │   └── prompt-engine.js # 提示詞生成引擎 (14 鏡頭 + 10 運鏡)
+        └── pages/
+            ├── home.js          # 首頁
+            ├── workshop.js      # 故事工作台
+            ├── library.js       # 故事庫
+            ├── prompts.js       # 影片提示詞
+            ├── camera.js        # 鏡頭百科
+            ├── credits.js       # 積分系統
+            └── admin.js         # 管理後台
 ```
 
 ---
 
 ## 🔌 API 端點
 
-### 認證 (`/api/auth`)
+<details>
+<summary>展開查看完整 API 列表</summary>
+
+### 認證 `/api/auth`
 | 方法 | 路徑 | 說明 |
 |------|------|------|
 | POST | `/register` | 用戶註冊 |
@@ -179,12 +236,12 @@ StoryForge-AI/
 | PUT | `/profile` | 更新個人資料 |
 | GET | `/notifications` | 獲取通知 |
 
-### 故事 (`/api/stories`)
+### 故事 `/api/stories`
 | 方法 | 路徑 | 說明 |
 |------|------|------|
-| GET | `/` | 故事列表（支援分類/搜索/排序） |
+| GET | `/` | 故事列表 (分類/搜索/排序) |
 | POST | `/` | 創建故事 |
-| GET | `/:id` | 故事詳情（含章節/角色/標籤） |
+| GET | `/:id` | 故事詳情 (含章節/角色/標籤) |
 | PUT | `/:id` | 更新故事 |
 | DELETE | `/:id` | 刪除故事 |
 | POST | `/:id/interact` | 讚/收藏 |
@@ -192,7 +249,7 @@ StoryForge-AI/
 | GET/POST | `/:id/chapters` | 章節管理 |
 | GET/POST | `/:id/characters` | 角色管理 |
 
-### 影片提示詞 (`/api/prompts`)
+### 影片提示詞 `/api/prompts`
 | 方法 | 路徑 | 說明 |
 |------|------|------|
 | GET | `/templates` | 模板列表 |
@@ -200,7 +257,7 @@ StoryForge-AI/
 | POST | `/from-story` | 從故事批量生成 |
 | GET | `/my-prompts` | 我的提示詞 |
 
-### 鏡頭語言 (`/api/camera`)
+### 鏡頭語言 `/api/camera`
 | 方法 | 路徑 | 說明 |
 |------|------|------|
 | GET | `/movements` | 26 種鏡頭運動 |
@@ -210,7 +267,7 @@ StoryForge-AI/
 | GET | `/language-templates` | 場景模板 |
 | POST | `/compose` | 自定義組合生成 |
 
-### 創作工具 (`/api/tools`)
+### 創作工具 `/api/tools`
 | 方法 | 路徑 | 說明 |
 |------|------|------|
 | GET | `/story-templates` | 故事模板庫 |
@@ -219,10 +276,32 @@ StoryForge-AI/
 | POST | `/generate-names` | 名字生成器 |
 | GET | `/stories/:id/analytics` | 數據分析 |
 | POST | `/stories/:id/continue` | AI 續寫 |
-| GET | `/stories/:id/export` | 導出 (TXT/JSON) |
-| GET/PUT | `/preferences` | 個人設定 |
+| GET | `/stories/:id/export` | 導出 |
 
-### 管理 (`/api/admin`)
+### LLM `/api/llm`
+| 方法 | 路徑 | 說明 |
+|------|------|------|
+| POST | `/stream` | SSE 串流生成 |
+| GET | `/providers` | 可用 LLM 供應商 |
+| GET | `/usage` | 使用量統計 |
+
+### 工作流 `/api/workflows`
+| 方法 | 路徑 | 說明 |
+|------|------|------|
+| GET | `/` | 工作流列表 |
+| POST | `/` | 創建工作流 |
+| GET | `/:id` | 工作流詳情 |
+| PUT | `/:id` | 更新工作流 |
+| DELETE | `/:id` | 刪除工作流 |
+| POST | `/:id/execute` | 執行工作流 |
+
+### 積分 `/api/credits`
+| 方法 | 路徑 | 說明 |
+|------|------|------|
+| GET | `/balance` | 積分餘額 |
+| GET | `/history` | 消耗記錄 |
+
+### 管理 `/api/admin`
 | 方法 | 路徑 | 說明 |
 |------|------|------|
 | GET | `/dashboard` | 儀表盤統計 |
@@ -232,54 +311,18 @@ StoryForge-AI/
 | GET/PUT | `/settings` | 系統設定 |
 | GET | `/ai-logs` | AI 生成日誌 |
 
----
-
-## 🎨 頁面一覽
-
-| 頁面 | 路由 | 功能 |
-|------|------|------|
-| 🏠 首頁 | `home` | Hero 展示、功能介紹、數據統計、CTA |
-| 📖 探索 | `explore` | 故事瀏覽、分類篩選、搜索、排序 |
-| 🎬 提示詞 | `prompts` | 影片提示詞生成器、模板選擇、歷史記錄 |
-| 🎥 鏡頭語言 | `camera` | 運鏡百科、景別、角度、轉場、組合器 |
-| 🛠️ 工具箱 | `tools` | 8 大創作工具入口 |
-| 👤 工作台 | `dashboard` | 概覽/故事管理/創建/AI生成/提示詞/設定 |
-| 📖 故事詳情 | `story` | 閱讀體驗、章節、角色、評論 |
-| ✏️ 編輯器 | `editor` | 內容/章節/角色/設定 四標籤編輯 |
-| ⚙️ 管理後台 | `admin` | 儀表盤/用戶/內容/分類/模板/設定/日誌 |
-
----
-
-## 📊 數據統計 (初始化後)
-
-| 類型 | 數量 |
-|------|------|
-| 用戶帳號 | 5 |
-| 示範故事 | 6 篇完整短篇 |
-| 故事分類 | 12 |
-| 標籤 | 30 |
-| 提示詞模板 | 12 |
-| 鏡頭運動 | 26 |
-| 景別 | 10 |
-| 角度 | 10 |
-| 轉場 | 12 |
-| 場景模板 | 12 |
-| 故事模板 | 8 |
-| 寫作提示 | 25+ |
-| 角色 | 8 |
-| 章節 | 8 |
-| 評論 | 11 |
+</details>
 
 ---
 
 ## 🛡️ 安全特性
 
-- **JWT 認證** — HttpOnly Cookie，7 天有效期
-- **密碼加密** — bcrypt 雜湊存儲
-- **權限控制** — 用戶/管理員分級權限
-- **SQL 注入防護** — 參數化查詢
-- **XSS 防護** — 輸出轉義
-- **CORS 配置** — 跨域請求控制
+- **JWT 認證** — HttpOnly Cookie
+- **bcrypt 密碼雜湊**
+- **Helmet 安全標頭**
+- **CORS 跨域控制**
+- **Rate Limiting** — 防止 API 濫用
+- **Content Moderation** — 內容審核中間件
 
 ---
 
@@ -292,7 +335,5 @@ MIT License
 <div align="center">
 
 **Built with ❤️ by StoryForge AI**
-
-[⬆ 回到頂部](#-storyforge-ai)
 
 </div>

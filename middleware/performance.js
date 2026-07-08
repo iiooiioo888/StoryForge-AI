@@ -8,7 +8,20 @@ const helmet = require('helmet');
 function setupPerformance(app) {
     // Helmet 安全頭
     app.use(helmet({
-        contentSecurityPolicy: false,
+        contentSecurityPolicy: {
+            directives: {
+                defaultSrc: ["'self'"],
+                scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdnjs.cloudflare.com", "https://unpkg.com"],
+                styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://fonts.googleapis.com"],
+                imgSrc: ["'self'", "data:", "https:"],
+                fontSrc: ["'self'", "https://cdnjs.cloudflare.com", "https://fonts.gstatic.com"],
+                connectSrc: ["'self'"],
+                mediaSrc: ["'self'", "blob:"],
+                objectSrc: ["'none'"],
+                frameAncestors: ["'self'"],
+                baseUri: ["'self'"],
+            },
+        },
         crossOriginEmbedderPolicy: false,
     }));
 

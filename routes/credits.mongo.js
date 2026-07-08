@@ -5,7 +5,7 @@
  * - GET  /api/credits/transactions 查詢交易紀錄（分頁）
  */
 const express = require('express');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, adminMiddleware } = require('../middleware/auth');
 const { addCredits } = require('../middleware/credits');
 
 module.exports = function (models) {
@@ -32,7 +32,7 @@ module.exports = function (models) {
     });
 
     // ========== 充值積分（模擬充值，正式環境由 Stripe webhook 觸發） ==========
-    router.post('/recharge', authMiddleware, async (req, res) => {
+    router.post('/recharge', authMiddleware, adminMiddleware, async (req, res) => {
         try {
             const { amount, description } = req.body;
 

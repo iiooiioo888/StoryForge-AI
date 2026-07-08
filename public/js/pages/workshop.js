@@ -2,45 +2,48 @@
 import { DB, api, currentUser } from '../api.js';
 import { toast, esc } from '../utils.js';
 import { state, switchTab } from '../router.js';
+import { generate, generateOutline, generateCharCards, generateScenes, SUB_GENRES, GENRE_NAMES, POV_NAMES, STRUCTURE_NAMES } from '../engine/story-engine.js';
 
 export async function generateStory() {
   const title = document.getElementById('w-title')?.value;
-  const genre = document.getElementById('w-genre')?.value;
+  const genre = document.getElementById('w-genre')?.value || 'scifi';
   const theme = document.getElementById('w-theme')?.value;
   const setting = document.getElementById('w-setting')?.value;
   const characters = document.getElementById('w-characters')?.value;
-  const pov = document.getElementById('w-pov')?.value;
+  const pov = document.getElementById('w-pov')?.value || 'third-limited';
   const tone = document.getElementById('w-tone')?.value;
-  
+  const era = document.getElementById('w-era')?.value || 'present';
+  const length = document.getElementById('w-length')?.value || 'medium';
+  const structure = document.getElementById('w-structure')?.value || 'three-act';
+
   if (!title && !theme) { toast('請至少填寫標題或主題', 'warning'); return; }
-  
+
   const btn = document.getElementById('btn-generate');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ 生成中...'; }
-  
+
   try {
     // Try LLM API first
     if (currentUser) {
       const result = await api('/llm/generate-full-story', {
         method: 'POST',
-        body: { title, genre, theme, setting, characters, pov, tone }
+        body: { title, genre, theme, setting, characters, pov, tone, era, length, structure }
       });
-      
+
       if (result.story) {
         const content = result.story.content || result.story.raw || JSON.stringify(result.story);
         const outline = result.story.outline || null;
         const chars = result.story.characters || [];
-        
-        // Save to DB
+
         const story = DB.add({
           title: title || 'AI 生成故事',
           content,
-          genre, theme, setting, characters, pov, tone,
+          genre, theme, setting, characters, pov, tone, era, length, structure,
           outline, charCards: chars,
           wordCount: content.length,
           sceneCount: (content.match(/第.*場景/g) || []).length || 3,
           isAiGenerated: true,
         });
-        
+
         state.editId = story.id;
         state.storyContent = content;
         renderStory(content);
@@ -51,41 +54,34 @@ export async function generateStory() {
         return;
       }
     }
-    
-    // Fallback: local generation
-    const content = localGenerate(title, genre, theme, setting, characters, pov, tone);
+
+    // Fallback: StoryEngine local generation
+    const content = generate({ title, genre, theme, setting, characters, pov, tone, era, length, structure });
+    const charCards = generateCharCards(characters);
+    const outline = generateOutline(genre,
+      (characters || '').split('\n')[0]?.split('-')[0]?.trim() || '旅者',
+      (characters || '').split('\n')[1]?.split('-')[0]?.trim() || '旅者',
+      setting || '那座被遺忘的城市'
+    );
+
     const story = DB.add({
-      title: title || '我的故事', content, genre, theme, setting, characters, pov, tone,
-      wordCount: content.length, sceneCount: 3,
+      title: title || '我的故事', content, genre, theme, setting, characters, pov, tone, era, length, structure,
+      outline, charCards,
+      wordCount: content.length,
+      sceneCount: (content.match(/·\s*·\s*·/g) || []).length + 1 || 3,
     });
     state.editId = story.id;
     state.storyContent = content;
     renderStory(content);
-    toast('故事已生成（本地模式）', 'success');
-    
+    renderOutline(outline);
+    renderCharacters(charCards);
+    toast('故事已生成（本地引擎）', 'success');
+
   } catch (e) {
     toast('生成失敗: ' + e.message, 'error');
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = '✦ AI 生成故事'; }
   }
-}
-
-function localGenerate(title, genre, theme, setting, chars, pov, tone) {
-  const charList = (chars || '').split('\n').filter(c => c.trim());
-  const c1 = charList[0]?.split('-')[0]?.trim() || '主角';
-  const c2 = charList[1]?.split('-')[0]?.trim() || '';
-  
-  return '《' + (title || '未命名故事') + '》\n\n' +
-    '在' + (setting || '一個神秘的地方') + '，' + c1 + '踏上了冒險的旅程。\n\n' +
-    (c2 ? c2 + '的出現改變了一切。\n\n' : '') +
-    '圍繞著「' + (theme || '成長與冒險') + '」的核心，' + c1 + '將面對前所未有的挑戰...\n\n' +
-    '第一章：開始\n\n' +
-    (setting || '這個世界') + '充滿了未知。' + c1 + '站在命運的十字路口...\n\n' +
-    '第二章：轉折\n\n' +
-    '一切都在那一刻改變了。' + c1 + '發現了一個隱藏已久的真相...\n\n' +
-    '第三章：高潮\n\n' +
-    '最終的對決即將來臨。' + c1 + '必須做出選擇...\n\n' +
-    '（故事未完）';
 }
 
 function renderStory(content) {
@@ -109,8 +105,13 @@ function renderOutline(outline) {
     el.innerHTML = '';
     el.appendChild(div);
   } else {
+    const actNames = { act1: '第一幕：建置', act2: '第二幕：對抗', act3: '第三幕：解決' };
     el.innerHTML = Object.entries(outline).map(([k, v]) =>
-      '<div style="margin-bottom:1rem"><strong style="color:var(--accent)">' + esc(k) + '</strong><div style="color:var(--text-muted);margin-top:.3rem">' + esc(typeof v === 'string' ? v : JSON.stringify(v)) + '</div></div>'
+      '<div style="margin-bottom:1.2rem">' +
+      '<strong style="color:var(--accent)">' + esc(actNames[k] || k) + '</strong>' +
+      '<ul style="margin-top:.4rem;padding-left:1.2rem;color:var(--text-muted);line-height:1.8">' +
+      (Array.isArray(v) ? v.map(p => '<li>' + esc(p) + '</li>').join('') : '<li>' + esc(typeof v === 'string' ? v : JSON.stringify(v)) + '</li>') +
+      '</ul></div>'
     ).join('');
   }
 }
@@ -120,10 +121,41 @@ function renderCharacters(chars) {
   if (!el || !chars?.length) return;
   el.innerHTML = chars.map(c =>
     '<div class="card" style="margin-bottom:.8rem;cursor:default">' +
-    '<h3>' + esc(c.name || '角色') + '</h3>' +
-    '<p style="margin:.3rem 0">' + esc(c.description || '') + '</p>' +
+    '<div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.5rem">' +
+    '<div style="width:2.2rem;height:2.2rem;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700">' + esc((c.name || '?').charAt(0)) + '</div>' +
+    '<div><h3 style="margin:0">' + esc(c.name || '角色') + '</h3>' +
+    (c.role ? '<span style="font-size:.75rem;color:var(--text-dim)">' + esc(c.role) + '</span>' : '') +
+    '</div></div>' +
+    (c.description ? '<p style="margin:.3rem 0">' + esc(c.description) + '</p>' : '') +
+    (c.archetype ? '<p style="font-size:.8rem;color:var(--text-dim)">原型: ' + esc(c.archetype) + '</p>' : '') +
+    (c.background ? '<p style="font-size:.8rem;color:var(--text-dim)">背景: ' + esc(c.background) + '</p>' : '') +
+    (c.motivation ? '<p style="font-size:.8rem;color:var(--text-dim)">動機: ' + esc(c.motivation) + '</p>' : '') +
+    (c.flaw ? '<p style="font-size:.8rem;color:var(--text-dim)">缺陷: ' + esc(c.flaw) + '</p>' : '') +
     (c.personality ? '<p style="font-size:.8rem;color:var(--text-dim)">性格: ' + esc(c.personality) + '</p>' : '') +
     (c.backstory ? '<p style="font-size:.8rem;color:var(--text-dim)">背景: ' + esc(c.backstory) + '</p>' : '') +
+    (c.traits ? '<p style="font-size:.8rem;color:var(--text-dim)">特質: ' + esc(c.traits) + '</p>' : '') +
+    '</div>'
+  ).join('');
+}
+
+export function renderScenes() {
+  const el = document.getElementById('scenes-content');
+  if (!el) return;
+  const genre = document.getElementById('w-genre')?.value || 'scifi';
+  const characters = document.getElementById('w-characters')?.value || '';
+  const setting = document.getElementById('w-setting')?.value || '';
+  const era = document.getElementById('w-era')?.value || 'present';
+  const length = document.getElementById('w-length')?.value || 'medium';
+  const tone = document.getElementById('w-tone')?.value || '';
+
+  const scenes = generateScenes({ genre, characters, setting, era, length, tone });
+  el.innerHTML = scenes.map(s =>
+    '<div class="card" style="margin-bottom:.8rem;padding:1rem">' +
+    '<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem">' +
+    '<span class="badge" style="background:var(--accent);color:#fff;font-size:.7rem;padding:.15rem .5rem;border-radius:4px">' + esc(s.title) + '</span>' +
+    '<span style="font-size:.7rem;color:var(--text-dim)">場景 ' + s.id + '</span>' +
+    '</div>' +
+    '<p style="line-height:1.8;font-size:.9rem;white-space:pre-wrap">' + esc(s.text) + '</p>' +
     '</div>'
   ).join('');
 }
@@ -172,21 +204,13 @@ export async function aiAutoFill() {
   finally { if (btn) { btn.disabled = false; btn.textContent = '✦ AI 全權生成'; } }
 }
 
-const SUBGENRES = {
-  scifi: ['賽博朋克', '太空歌劇', '時間旅行', '後末日', '硬科幻', '軟科幻'],
-  fantasy: ['劍與魔法', '都市奇幻', '史詩奇幻', '童話改編', '神話'],
-  romance: ['現代愛情', '古風言情', '校園戀愛', '職場愛情', '奇幻愛情'],
-  mystery: ['推理偵探', '心理懸疑', '犯罪驚悚', '密室', '諜報'],
-  horror: ['靈異恐怖', '心理恐怖', '生存恐怖', '怪物', '哥特'],
-  wuxia: ['傳統武俠', '仙俠', '武俠喜劇', '江湖奇情'],
-};
-
+// ─── Sub-genre dropdown ───
 const genreEl = document.getElementById('w-genre');
 if (genreEl) {
   genreEl.addEventListener('change', () => {
     const sub = document.getElementById('w-subgenre');
     if (!sub) return;
-    const opts = SUBGENRES[genreEl.value] || [];
+    const opts = SUB_GENRES[genreEl.value] || [];
     sub.innerHTML = '<option value="">選擇...</option>' +
       opts.map(o => `<option value="${o}">${o}</option>`).join('');
   });

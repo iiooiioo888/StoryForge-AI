@@ -46,20 +46,28 @@ class StreamingService {
         if (systemPrompt) messages.push({ role: 'system', content: systemPrompt });
         messages.push({ role: 'user', content: prompt });
 
+        const ctx = { aborted: false, transportReq: null };
+        req.on('close', () => {
+            ctx.aborted = true;
+            if (ctx.transportReq && !ctx.transportReq.destroyed) ctx.transportReq.destroy();
+        });
+
         try {
             if (provider === 'anthropic') {
-                await this._streamAnthropic(res, providerConfig, actualModel, messages, maxTokens, temperature);
+                await this._streamAnthropic(ctx, res, providerConfig, actualModel, messages, maxTokens, temperature);
             } else {
-                await this._streamOpenAI(res, providerConfig, actualModel, messages, maxTokens, temperature);
+                await this._streamOpenAI(ctx, res, providerConfig, actualModel, messages, maxTokens, temperature);
             }
         } catch (err) {
-            res.write(`data: ${JSON.stringify({ error: err.message })}\n\n`);
-            res.write('data: [DONE]\n\n');
-            res.end();
+            if (!ctx.aborted && !res.writableEnded) {
+                res.write(`data: ${JSON.stringify({ error: err.message })}\n\n`);
+                res.write('data: [DONE]\n\n');
+                res.end();
+            }
         }
     }
 
-    async _streamOpenAI(res, config, model, messages, maxTokens, temperature) {
+    async _streamOpenAI(ctx, res, config, model, messages, maxTokens, temperature) {
         const url = new URL(`${config.baseUrl}/chat/completions`);
         const body = JSON.stringify({
             model,
@@ -83,18 +91,21 @@ class StreamingService {
             }, (response) => {
                 let buffer = '';
                 response.on('data', (chunk) => {
+                    if (ctx.aborted) return;
                     buffer += chunk.toString();
                     const lines = buffer.split('\n');
                     buffer = lines.pop() || '';
-                    
+
                     for (const line of lines) {
                         const trimmed = line.trim();
                         if (!trimmed || !trimmed.startsWith('data: ')) continue;
                         const data = trimmed.slice(6);
-                        
+
                         if (data === '[DONE]') {
-                            res.write('data: [DONE]\n\n');
-                            res.end();
+                            if (!res.writableEnded) {
+                                res.write('data: [DONE]\n\n');
+                                res.end();
+                            }
                             resolve();
                             return;
                         }
@@ -102,7 +113,7 @@ class StreamingService {
                         try {
                             const parsed = JSON.parse(data);
                             const content = parsed.choices?.[0]?.delta?.content;
-                            if (content) {
+                            if (content && !res.writableEnded) {
                                 res.write(`data: ${JSON.stringify({ content, model })}\n\n`);
                             }
                         } catch (e) {
@@ -111,13 +122,16 @@ class StreamingService {
                     }
                 });
                 response.on('end', () => {
-                    res.write('data: [DONE]\n\n');
-                    res.end();
+                    if (!res.writableEnded) {
+                        res.write('data: [DONE]\n\n');
+                        res.end();
+                    }
                     resolve();
                 });
                 response.on('error', reject);
             });
 
+            ctx.transportReq = req;
             req.on('error', reject);
             req.on('timeout', () => { req.destroy(); reject(new Error('Timeout')); });
             req.write(body);
@@ -125,7 +139,7 @@ class StreamingService {
         });
     }
 
-    async _streamAnthropic(res, config, model, messages, maxTokens, temperature) {
+    async _streamAnthropic(ctx, res, config, model, messages, maxTokens, temperature) {
         const url = new URL(`${config.baseUrl}/messages`);
         const systemPrompt = messages.find(m => m.role === 'system')?.content || '';
         const userMessages = messages.filter(m => m.role !== 'system').map(m => ({ role: m.role, content: m.content }));
@@ -153,6 +167,7 @@ class StreamingService {
             }, (response) => {
                 let buffer = '';
                 response.on('data', (chunk) => {
+                    if (ctx.aborted) return;
                     buffer += chunk.toString();
                     const lines = buffer.split('\n');
                     buffer = lines.pop() || '';
@@ -162,21 +177,27 @@ class StreamingService {
                         if (!trimmed.startsWith('data: ')) continue;
                         try {
                             const parsed = JSON.parse(trimmed.slice(6));
-                            if (parsed.type === 'content_block_delta' && parsed.delta?.text) {
+                            if (parsed.type === 'content_block_delta' && parsed.delta?.text && !res.writableEnded) {
                                 res.write(`data: ${JSON.stringify({ content: parsed.delta.text, model })}\n\n`);
                             }
                             if (parsed.type === 'message_stop') {
-                                res.write('data: [DONE]\n\n');
-                                res.end();
+                                if (!res.writableEnded) {
+                                    res.write('data: [DONE]\n\n');
+                                    res.end();
+                                }
                                 resolve();
                             }
                         } catch (e) {}
                     }
                 });
-                response.on('end', () => { res.write('data: [DONE]\n\n'); res.end(); resolve(); });
+                response.on('end', () => {
+                    if (!res.writableEnded) { res.write('data: [DONE]\n\n'); res.end(); }
+                    resolve();
+                });
                 response.on('error', reject);
             });
 
+            ctx.transportReq = req;
             req.on('error', reject);
             req.write(body);
             req.end();

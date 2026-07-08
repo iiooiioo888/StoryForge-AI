@@ -7,6 +7,16 @@ const { addCredits } = require('../middleware/credits');
 module.exports = function (models) {
     const router = express.Router();
 
+    function setAuthCookie(res, token) {
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            path: '/',
+        });
+    }
+
     // ========== 註冊 ==========
     router.post('/register', async (req, res) => {
         try {
@@ -55,7 +65,7 @@ module.exports = function (models) {
                 { expiresIn: '7d' }
             );
 
-            res.cookie('token', token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+            setAuthCookie(res, token);
             res.json({
                 success: true,
                 message: '註冊成功！',
@@ -104,7 +114,7 @@ module.exports = function (models) {
                 { expiresIn: '7d' }
             );
 
-            res.cookie('token', token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+            setAuthCookie(res, token);
             res.json({
                 success: true,
                 message: '登入成功！',

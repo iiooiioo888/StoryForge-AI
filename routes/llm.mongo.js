@@ -1,5 +1,5 @@
 const express = require('express');
-const { authMiddleware, optionalAuth } = require('../middleware/auth');
+const { authMiddleware, adminMiddleware, optionalAuth } = require('../middleware/auth');
 const LLMService = require('../services/llm');
 const PROMPTS = require('../services/prompts');
 const { deductCredits } = require('../middleware/credits');
@@ -56,7 +56,7 @@ module.exports = function (models) {
     });
 
     // ========== LLM 設定 ==========
-    router.post('/configure', authMiddleware, (req, res) => {
+    router.post('/configure', authMiddleware, adminMiddleware, (req, res) => {
         try {
             const { provider, apiKey, baseUrl } = req.body;
             if (apiKey) llm.setApiKey(provider, apiKey);
