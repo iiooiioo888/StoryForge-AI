@@ -1,6 +1,6 @@
 // ═══ Workshop ═══
 import { DB, api, currentUser } from '../api.js';
-import { toast } from '../utils.js';
+import { toast, esc } from '../utils.js';
 import { state, switchTab } from '../router.js';
 
 export async function generateStory() {
@@ -128,13 +128,6 @@ function renderCharacters(chars) {
   ).join('');
 }
 
-function esc(s) {
-  if (!s) return '';
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
-}
-
 export function saveStory() {
   const title = document.getElementById('w-title')?.value || '未命名';
   const content = state.storyContent || document.getElementById('story-output')?.textContent || '';
@@ -177,4 +170,24 @@ export async function aiAutoFill() {
     }
   } catch (e) { toast('AI 生成失敗: ' + e.message, 'error'); }
   finally { if (btn) { btn.disabled = false; btn.textContent = '✦ AI 全權生成'; } }
+}
+
+const SUBGENRES = {
+  scifi: ['賽博朋克', '太空歌劇', '時間旅行', '後末日', '硬科幻', '軟科幻'],
+  fantasy: ['劍與魔法', '都市奇幻', '史詩奇幻', '童話改編', '神話'],
+  romance: ['現代愛情', '古風言情', '校園戀愛', '職場愛情', '奇幻愛情'],
+  mystery: ['推理偵探', '心理懸疑', '犯罪驚悚', '密室', '諜報'],
+  horror: ['靈異恐怖', '心理恐怖', '生存恐怖', '怪物', '哥特'],
+  wuxia: ['傳統武俠', '仙俠', '武俠喜劇', '江湖奇情'],
+};
+
+const genreEl = document.getElementById('w-genre');
+if (genreEl) {
+  genreEl.addEventListener('change', () => {
+    const sub = document.getElementById('w-subgenre');
+    if (!sub) return;
+    const opts = SUBGENRES[genreEl.value] || [];
+    sub.innerHTML = '<option value="">選擇...</option>' +
+      opts.map(o => `<option value="${o}">${o}</option>`).join('');
+  });
 }

@@ -1,6 +1,6 @@
 // ═══ Camera ═══
 import { api } from '../api.js';
-import { toast, copyText } from '../utils.js';
+import { toast, esc } from '../utils.js';
 
 let data = { movements: [], lighting: [], styles: [], palettes: [] };
 let activeTab = 'movements';
@@ -67,4 +67,3 @@ function renderGrid(tab) {
   }).join('');
 }
 
-function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }

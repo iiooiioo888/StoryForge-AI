@@ -67,7 +67,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
 .btn:disabled { opacity: .5; cursor: not-allowed; }
 
 /* ═══ Forms ═══ */
-.form-group { margin-bottom: 1rem; }
+.form-group { margin-bottom: .8rem; }
 .form-label { display: block; font-size: .78rem; font-weight: 500; color: var(--text-muted); margin-bottom: .4rem; }
 .form-input, .form-select, .form-textarea { width: 100%; padding: .5rem .8rem; font: .88rem var(--font);
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
@@ -140,8 +140,8 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
 
 /* ═══ Section ═══ */
-.section-title { font-size: .85rem; font-weight: 600; color: var(--text); margin-bottom: 1rem;
-  padding-bottom: .6rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: .5rem; }
+.section-title { font-size: .85rem; font-weight: 600; color: var(--text); margin-bottom: .6rem;
+  padding-bottom: .5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: .5rem; }
 
 /* ═══ Workshop ═══ */
 .workshop { display: grid; grid-template-columns: 320px 1fr; gap: 1.5rem; min-height: calc(100vh - 120px); }

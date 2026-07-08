@@ -8,6 +8,7 @@ import { generateStory, saveStory, exportStory, aiAutoFill } from './pages/works
 import { refreshLibrary, viewStory, editStory, deleteStory, sendToPrompts } from './pages/library.js';
 import { refreshPromptSel, generatePrompts } from './pages/prompts.js';
 import { loadCamera, loadCameraTab } from './pages/camera.js';
+import { showRechargeModal, doRecharge } from './pages/credits.js';
 
 // ═══ Event Delegation ═══
 const actions = {
@@ -23,6 +24,7 @@ const actions = {
   sendToPrompts: (el) => { closeModal(); setTimeout(() => sendToPrompts(el.dataset.storyId), 100); },
   generatePrompts,
   loadCameraTab: (el) => loadCameraTab(el.dataset.camTab),
+  showRechargeModal, doRecharge,
   logout: () => { location.reload(); },
 };
 
@@ -61,7 +63,7 @@ document.addEventListener('input', (e) => {
 // Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
   if (e.target.matches('input, textarea, select')) return;
-  const tabs = ['home', 'workshop', 'library', 'prompts', 'camera'];
+  const tabs = ['home', 'workshop', 'library', 'prompts', 'camera', 'credits'];
   const num = parseInt(e.key);
   if (num >= 1 && num <= tabs.length) { e.preventDefault(); switchTab(tabs[num - 1]); }
   if (e.key === 'Escape') closeModal();

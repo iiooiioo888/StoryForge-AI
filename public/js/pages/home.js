@@ -1,6 +1,6 @@
 // ═══ Home Page ═══
 import { DB } from '../api.js';
-import { animateCount } from '../utils.js';
+import { animateCount, esc } from '../utils.js';
 
 export function refreshHome() {
   const stories = DB.getAll();
@@ -20,9 +20,8 @@ function renderCard(s, i = 0) {
   const bg = `hsl(${7 * Math.abs(s.title?.charCodeAt(0) || 65) % 360},45%,18%)`;
   return `<div class="card" data-action="viewStory" data-story-id="${s.id}" style="animation-delay:${i*.06}s">
     <div style="height:80px;background:${bg};border-radius:var(--radius);margin-bottom:.8rem;display:flex;align-items:center;justify-content:center;font-size:1.5rem">📖</div>
-    <h3>${esc2(s.title || '未命名')}</h3>
-    <p>${esc2(s.content?.substring(0, 80) || '')}...</p>
-    <div class="card-meta"><span>${(s.wordCount || 0).toLocaleString()} 字</span><span>${esc2(s.genre || '')}</span></div>
+    <h3>${esc(s.title || '未命名')}</h3>
+    <p>${esc(s.content?.substring(0, 80) || '')}...</p>
+    <div class="card-meta"><span>${(s.wordCount || 0).toLocaleString()} 字</span><span>${esc(s.genre || '')}</span></div>
   </div>`;
 }
-function esc2(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }

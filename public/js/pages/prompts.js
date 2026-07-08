@@ -1,6 +1,6 @@
 // ═══ Prompts ═══
 import { DB, api, currentUser } from '../api.js';
-import { toast, copyText } from '../utils.js';
+import { toast, esc } from '../utils.js';
 
 export function refreshPromptSel() {
   const sel = document.getElementById('prompt-story-select');
@@ -75,4 +75,3 @@ function renderPromptResult(prompt, title) {
   `;
 }
 
-function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }

@@ -1,6 +1,7 @@
 // ═══ Library ═══
 import { DB } from '../api.js';
-import { toast } from '../utils.js';
+import { toast, esc } from '../utils.js';
+import { state, switchTab } from '../router.js';
 
 export function refreshLibrary() {
   const stories = DB.getAll();
@@ -41,7 +42,7 @@ export function viewStory(id) {
 export function editStory(id) {
   const story = DB.getById(id);
   if (!story) return;
-  state_editId = id;
+  state.editId = id;
   document.getElementById('w-title').value = story.title || '';
   document.getElementById('w-genre').value = story.genre || '';
   document.getElementById('w-theme').value = story.theme || '';
@@ -54,9 +55,6 @@ export function editStory(id) {
   toast('已載入故事');
 }
 
-import { state } from '../router.js';
-let state_editId = null;
-
 export function deleteStory(id) {
   if (!confirm('確定刪除？')) return;
   DB.delete(id); refreshLibrary(); toast('已刪除');
@@ -68,4 +66,3 @@ export function sendToPrompts(id) {
   setTimeout(() => { document.getElementById('prompt-story-select').value = id; }, 100);
 }
 
-function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
