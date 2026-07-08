@@ -22,6 +22,7 @@ import {
   initPipeline, startPipeline, endPipeline, jumpToStep,
   sendToVideoScript, generateVideoFromLibrary, quickGenerate
 } from './pipeline.js';
+import { initWritingAssistant, abortStreaming, streamToElement } from './ai-assistant.js';
 
 // ═══ Event Delegation ═══
 const actions = {
@@ -93,6 +94,7 @@ const actions = {
   },
 
   logout: () => { location.reload(); },
+  abortStreaming,
 };
 
 // Click delegation
@@ -218,6 +220,7 @@ async function init() {
     updateAuthUI();
     initGridControls();
     initPipeline();
+    initWritingAssistant();
     refreshHome();
     console.log('StoryForge AI initialized');
   } catch (err) {

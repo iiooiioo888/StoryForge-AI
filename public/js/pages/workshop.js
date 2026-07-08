@@ -3,6 +3,7 @@ import { DB, api, currentUser } from '../api.js';
 import { toast, esc } from '../utils.js';
 import { state, switchTab } from '../router.js';
 import { generate, generateOutline, generateCharCards, generateScenes, SUB_GENRES, GENRE_NAMES, POV_NAMES, STRUCTURE_NAMES } from '../engine/story-engine.js';
+import { streamToElement } from '../ai-assistant.js';
 
 export async function generateStory() {
   const title = document.getElementById('w-title')?.value;
@@ -22,8 +23,53 @@ export async function generateStory() {
   if (btn) { btn.disabled = true; btn.textContent = '⏳ 生成中...'; }
 
   try {
-    // Try LLM API first
+    // Try LLM API with SSE streaming first
     if (currentUser) {
+      // Prepare output area for streaming
+      const outputEl = document.getElementById('story-output');
+      if (outputEl) {
+        outputEl.innerHTML = '<div style="line-height:1.9;font-size:.95rem;white-space:pre-wrap" id="story-stream-target"></div>';
+      }
+      const streamTarget = document.getElementById('story-stream-target');
+
+      const genreName = GENRE_NAMES[genre] || genre;
+      const systemPrompt = `你是一位才華橫溢的小說家。請根據以下設定撰寫完整故事。直接輸出故事正文，不要加任何解釋或標記。\n\n故事類型：${genreName}\n語調：${tone || '文學性'}\n視角：${pov || '第三人稱有限'}\n結構：${structure || '三幕式'}`;
+      const userPrompt = `標題：${title || '未命名'}\n主題：${theme || '自由發揮'}\n世界觀：${setting || '默認世界'}\n角色：${characters || '主角'}\n\n請撰寫一個完整的故事。`;
+
+      const content = await streamToElement(streamTarget, systemPrompt, userPrompt, {
+        appendMode: false,
+        onComplete: (text) => {
+          state.storyContent = text;
+          const wc = document.getElementById('w-word-count');
+          if (wc) wc.textContent = `📊 ${text.length} 字 · ${text.split(/[\n。！？]/).filter(s => s.trim()).length} 段`;
+        },
+      });
+
+      if (content) {
+        const outline = generateOutline(genre,
+          (characters || '').split('\n')[0]?.split('-')[0]?.trim() || '旅者',
+          (characters || '').split('\n')[1]?.split('-')[0]?.trim() || '旅者',
+          setting || '那座被遺忘的城市'
+        );
+        const charCards = generateCharCards(characters);
+
+        const story = DB.add({
+          title: title || 'AI 生成故事', content, genre, theme, setting, characters, pov, tone, era, length, structure,
+          outline, charCards,
+          wordCount: content.length,
+          sceneCount: (content.match(/第.*場景/g) || []).length || 3,
+          isAiGenerated: true,
+        });
+        state.editId = story.id;
+        state.storyContent = content;
+        renderOutline(outline);
+        renderCharacters(charCards);
+        renderScenesFromContent(content);
+        toast('故事生成完成！（串流模式）', 'success');
+        return;
+      }
+
+      // Fallback: non-streaming API
       const result = await api('/llm/generate-full-story', {
         method: 'POST',
         body: { title, genre, theme, setting, characters, pov, tone, era, length, structure }

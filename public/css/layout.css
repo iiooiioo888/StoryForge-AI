@@ -411,7 +411,71 @@
 .grid.list-view .card h3 { font-size: .9rem; }
 .grid.list-view .card p { font-size: .8rem; }
 
-/* ═══ Pipeline Bar ═══ */
+/* ═══ AI Writing Assistant Toolbar ═══ */
+.ai-writing-toolbar {
+  position: absolute; z-index: 250;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  backdrop-filter: blur(20px) saturate(1.5);
+  box-shadow: 0 12px 40px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.05);
+  padding: .6rem;
+  min-width: 300px;
+  opacity: 0; pointer-events: none; transform: translateY(8px) scale(.97);
+  transition: opacity .2s ease, transform .2s ease;
+}
+.ai-writing-toolbar.visible {
+  opacity: 1; pointer-events: auto; transform: translateY(0) scale(1);
+}
+.ai-toolbar-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: .5rem; padding: 0 .2rem;
+}
+.ai-toolbar-title {
+  font: 700 .75rem var(--font); color: var(--accent);
+}
+.ai-toolbar-close {
+  background: none; border: none; color: var(--text-dim); cursor: pointer;
+  font-size: .75rem; padding: .2rem .3rem; border-radius: 4px;
+  transition: var(--transition);
+}
+.ai-toolbar-close:hover { background: rgba(255,255,255,.06); color: var(--text); }
+.ai-toolbar-modes {
+  display: flex; flex-wrap: wrap; gap: .3rem;
+}
+.ai-mode-btn {
+  display: flex; align-items: center; gap: .3rem;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px;
+  padding: .35rem .55rem; cursor: pointer; transition: var(--transition);
+  font: 500 .72rem var(--font); color: var(--text-muted);
+}
+.ai-mode-btn:hover {
+  border-color: var(--mode-color, var(--accent)); color: var(--text);
+  background: rgba(255,255,255,.04);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--mode-color, var(--accent)) 20%, transparent);
+}
+.ai-mode-icon { font-size: .85rem; }
+.ai-mode-label { font-size: .7rem; }
+
+/* Streaming state */
+.ai-toolbar-status {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .3rem 0;
+}
+.ai-streaming-indicator {
+  display: flex; align-items: center; gap: .5rem;
+}
+.ai-streaming-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
+  animation: stream-pulse 1s ease-in-out infinite;
+}
+@keyframes stream-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .4; transform: scale(.7); }
+}
+.ai-streaming-text {
+  font: 500 .75rem var(--font); color: var(--text-muted);
+}
+
+/* Pipeline Bar ═══ */
 .pipeline-bar {
   position: sticky; top: 58px; z-index: 90;
   background: var(--surface); border-bottom: 1px solid var(--border);
