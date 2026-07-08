@@ -183,7 +183,7 @@ export function viewStory(id) {
     <!-- Content -->
     <div class="story-content-section">
       <div style="font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:.5rem">內容預覽</div>
-      <div style="line-height:1.9;max-height:40vh;overflow-y:auto;white-space:pre-wrap;font-size:.9rem">${esc(story.content || '')}</div>
+      <div class="story-content-scroll">${esc(story.content || '')}</div>
     </div>
 
     <!-- Actions -->

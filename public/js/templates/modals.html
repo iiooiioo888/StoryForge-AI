@@ -35,12 +35,12 @@
             <button class="password-toggle" type="button" data-target="auth-password" title="顯示密碼">👁</button>
           </div>
         </div>
-        <div id="auth-error" style="color:var(--danger);font-size:.8rem;margin-bottom:.8rem;display:none"></div>
+        <div id="auth-error" class="auth-error"></div>
         <button class="btn btn-primary btn-block" data-action="doLogin">登入</button>
-        <p style="text-align:center;margin-top:.8rem;font-size:.8rem;color:var(--text-dim)">沒有帳號？<a href="#" data-action="showRegisterForm" style="color:var(--accent)">註冊</a></p>
-        <div style="margin-top:1rem;padding-top:.8rem;border-top:1px solid var(--border)">
-          <p style="text-align:center;font-size:.75rem;color:var(--text-dim);margin-bottom:.6rem">快速體驗</p>
-          <div style="display:flex;gap:.5rem;justify-content:center">
+        <p class="auth-switch">沒有帳號？<a href="#" data-action="showRegisterForm">註冊</a></p>
+        <div class="auth-demo-section">
+          <p class="auth-demo-hint">快速體驗</p>
+          <div class="auth-demo-btns">
             <button class="btn btn-ghost btn-sm" data-action="fillDemo" data-username="demo" data-password="demo123">👤 Demo</button>
             <button class="btn btn-ghost btn-sm" data-action="fillDemo" data-username="admin" data-password="admin123">👑 Admin</button>
           </div>
@@ -56,9 +56,9 @@
             <button class="password-toggle" type="button" data-target="reg-password" title="顯示密碼">👁</button>
           </div>
         </div>
-        <div id="reg-error" style="color:var(--danger);font-size:.8rem;margin-bottom:.8rem;display:none"></div>
+        <div id="reg-error" class="auth-error"></div>
         <button class="btn btn-primary btn-block" data-action="doRegister">註冊</button>
-        <p style="text-align:center;margin-top:.8rem;font-size:.8rem;color:var(--text-dim)">已有帳號？<a href="#" data-action="showLoginForm" style="color:var(--accent)">登入</a></p>
+        <p class="auth-switch">已有帳號？<a href="#" data-action="showLoginForm">登入</a></p>
       </div>
     </div>
   </div>

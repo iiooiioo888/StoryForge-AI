@@ -33,7 +33,7 @@ export async function doLogin() {
   const u = document.getElementById('auth-username').value;
   const p = document.getElementById('auth-password').value;
   const err = document.getElementById('auth-error');
-  if (!u || !p) { err.textContent = '請填寫所有欄位'; err.style.display = ''; return; }
+  if (!u || !p) { err.textContent = '請填寫所有欄位'; err.style.display = 'block'; return; }
   try {
     const d = await api('/auth/login', { method: 'POST', body: { username: u, password: p } });
     setUser(d.user); closeModal(); updateAuthUI(); toast('登入成功！');
@@ -45,7 +45,7 @@ export async function doRegister() {
   const e = document.getElementById('reg-email').value;
   const p = document.getElementById('reg-password').value;
   const err = document.getElementById('reg-error');
-  if (!u || !e || !p) { err.textContent = '請填寫所有欄位'; err.style.display = ''; return; }
+  if (!u || !e || !p) { err.textContent = '請填寫所有欄位'; err.style.display = 'block'; return; }
   try {
     const d = await api('/auth/register', { method: 'POST', body: { username: u, email: e, password: p, display_name: u } });
     setUser(d.user); closeModal(); updateAuthUI(); toast('註冊成功！');
