@@ -39,6 +39,7 @@ export async function switchTab(tab) {
   if (tab === 'prompts') import('./pages/prompts.js').then(m => m.refreshPromptSel());
   if (tab === 'camera') import('./pages/camera.js').then(m => m.loadCamera());
   if (tab === 'credits') import('./pages/credits.js').then(m => m.refreshCredits());
+  if (tab === 'video-story') import('./pages/video-story.js').then(() => {});
 }
 
 export function toggleTheme() {

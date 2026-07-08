@@ -15,6 +15,7 @@ import { refreshPromptSel, generatePrompts } from './pages/prompts.js';
 import { loadCamera, loadCameraTab } from './pages/camera.js';
 import { showRechargeModal, doRecharge } from './pages/credits.js';
 import { initGridControls, applyGridLayout, applyCardOrder } from './grid.js';
+import { generateVideoStory, doExportJSON, doExportMD, doExportPlatform, doCopyAll, doSaveVideoStory } from './pages/video-story.js';
 
 // ═══ Event Delegation ═══
 const actions = {
@@ -40,6 +41,12 @@ const actions = {
   loadCameraTab: (el) => loadCameraTab(el.dataset.camTab),
   showRechargeModal, doRecharge,
   logout: () => { location.reload(); },
+  generateVideoStory,
+  exportScriptJSON: doExportJSON,
+  exportScriptMD: doExportMD,
+  exportScriptPlatform: doExportPlatform,
+  copyAllPrompts: doCopyAll,
+  saveVideoStory: doSaveVideoStory,
 };
 
 // Click delegation
@@ -78,7 +85,7 @@ document.addEventListener('input', (e) => {
 // Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
   if (e.target.matches('input, textarea, select')) return;
-  const tabs = ['home', 'workshop', 'library', 'prompts', 'camera', 'credits'];
+  const tabs = ['home', 'workshop', 'library', 'prompts', 'camera', 'credits', 'video-story'];
   const num = parseInt(e.key);
   if (num >= 1 && num <= tabs.length) { e.preventDefault(); switchTab(tabs[num - 1]); }
   if (e.key === 'Escape') closeModal();

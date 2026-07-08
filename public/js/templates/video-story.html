@@ -1,0 +1,92 @@
+<div class="container">
+  <div class="section-title">🎬 自動影片故事生成</div>
+
+  <!-- Input Panel -->
+  <div class="vs-input-panel">
+    <div class="vs-input-header">
+      <h3 style="font-size:1rem;font-weight:700;margin-bottom:.3rem">故事設定</h3>
+      <p style="font-size:.78rem;color:var(--text-dim)">輸入主題，AI 自動生成完整分鏡腳本</p>
+    </div>
+    <div class="form-group"><label class="form-label">影片主題 / 故事大綱</label>
+      <textarea class="form-textarea" id="vs-topic" rows="3" placeholder="描述你想拍的影片主題...&#10;例如：一個在未來城市中尋找記憶的機器人，最終發現自己其實是人類"></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">類型</label>
+        <select class="form-select" id="vs-genre">
+          <option value="scifi">🚀 科幻</option><option value="fantasy">🗡️ 奇幻</option>
+          <option value="romance">💕 愛情</option><option value="mystery">🔍 懸疑</option>
+          <option value="horror">👻 恐怖</option><option value="wuxia">⚔️ 武俠</option>
+          <option value="cyberpunk">🌃 賽博朋克</option><option value="historical">📜 歷史</option>
+        </select></div>
+      <div class="form-group"><label class="form-label">場景數</label>
+        <select class="form-select" id="vs-scene-count">
+          <option value="4">4 場景（短片 ~30s）</option>
+          <option value="6" selected>6 場景（標準 ~60s）</option>
+          <option value="8">8 場景（完整 ~90s）</option>
+          <option value="12">12 場景（長片 ~180s）</option>
+        </select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">視覺風格</label>
+        <select class="form-select" id="vs-style">
+          <option value="cinematic">🎬 電影感</option>
+          <option value="documentary">📹 紀錄片</option>
+          <option value="anime">🎌 動漫風</option>
+          <option value="noir">🖤 黑色電影</option>
+          <option value="music-video">🎵 MV 風格</option>
+          <option value="commercial">📺 廣告質感</option>
+        </select></div>
+      <div class="form-group"><label class="form-label">目標平台</label>
+        <select class="form-select" id="vs-platform">
+          <option value="sora">Sora</option>
+          <option value="runway">Runway Gen-3</option>
+          <option value="kling">Kling</option>
+          <option value="pika">Pika</option>
+          <option value="veo">Veo</option>
+          <option value="generic">通用格式</option>
+        </select></div>
+    </div>
+    <div class="form-group"><label class="form-label">主角描述</label>
+      <input class="form-input" id="vs-character" placeholder="例如：年輕女性，短髮，穿銀色外套，眼神堅定"></div>
+    <div style="display:flex;gap:.5rem;margin-top:1rem">
+      <button class="btn btn-primary" data-action="generateVideoStory" id="btn-vs-generate" style="flex:1">✦ 自動生成影片故事</button>
+    </div>
+  </div>
+
+  <!-- Result: Storyboard Timeline -->
+  <div id="vs-result" style="display:none">
+    <div class="vs-result-header">
+      <div>
+        <h3 id="vs-result-title" style="font-size:1.1rem;font-weight:700"></h3>
+        <p id="vs-result-meta" style="font-size:.78rem;color:var(--text-dim);margin-top:.2rem"></p>
+      </div>
+      <div class="vs-export-actions">
+        <button class="btn btn-secondary btn-sm" data-action="exportScriptJSON">📄 JSON</button>
+        <button class="btn btn-secondary btn-sm" data-action="exportScriptMD">📝 Markdown</button>
+        <button class="btn btn-secondary btn-sm" data-action="exportScriptPlatform">🎯 平台腳本</button>
+        <button class="btn btn-ghost btn-sm" data-action="copyAllPrompts">📋 複製全部</button>
+        <button class="btn btn-ghost btn-sm" data-action="saveVideoStory">💾 保存</button>
+      </div>
+    </div>
+
+    <!-- Storyboard Cards -->
+    <div class="vs-storyboard" id="vs-storyboard"></div>
+
+    <!-- Full Script View -->
+    <div class="vs-script-panel">
+      <div class="vs-script-tabs">
+        <button class="vs-script-tab active" data-vtab="timeline">🎬 時間軸</button>
+        <button class="vs-script-tab" data-vtab="narration">🎙️ 旁白腳本</button>
+        <button class="vs-script-tab" data-vtab="prompts">📝 提示詞列表</button>
+        <button class="vs-script-tab" data-vtab="script">📜 完整腳本</button>
+      </div>
+      <div class="vs-script-content">
+        <div class="vs-tab-content active" id="vtab-timeline"></div>
+        <div class="vs-tab-content" id="vtab-narration"></div>
+        <div class="vs-tab-content" id="vtab-prompts"></div>
+        <div class="vs-tab-content" id="vtab-script"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty" id="vs-empty"><div class="icon">🎬</div><p>輸入主題，自動生成完整影片故事與分鏡腳本</p></div>
+</div>
