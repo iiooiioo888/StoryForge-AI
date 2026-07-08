@@ -189,7 +189,8 @@ export function viewStory(id) {
     <!-- Actions -->
     <div class="story-detail-actions">
       <button class="btn btn-primary btn-sm" data-action="editStory" data-story-id="${id}">✏️ 編輯</button>
-      <button class="btn btn-secondary btn-sm" data-action="sendToPrompts" data-story-id="${id}">🎬 生成提示詞</button>
+      <button class="btn btn-secondary btn-sm" data-action="sendToPrompts" data-story-id="${id}">📝 提示詞</button>
+      <button class="btn btn-secondary btn-sm" data-action="generateVideoFromLibrary" data-story-id="${id}">🎬 影片腳本</button>
       <button class="btn btn-ghost btn-sm" data-action="duplicateStory" data-story-id="${id}">📋 複製</button>
       <button class="btn btn-ghost btn-sm" data-action="exportSingleStory" data-story-id="${id}">📤 匯出</button>
       <button class="btn btn-ghost btn-sm" data-action="deleteStory" data-story-id="${id}" style="margin-left:auto;color:var(--danger)">🗑 刪除</button>

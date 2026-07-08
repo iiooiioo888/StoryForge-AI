@@ -1,4 +1,4 @@
-// ═══ StoryForge AI — App Entry ═══
+// ═══ StoryForge AI — App Entry (Unified Pipeline) ═══
 import { api, DB } from './api.js';
 import { toast } from './utils.js';
 import { checkAuth, updateAuthUI, showAuthModal, closeModal, showLoginForm, showRegisterForm, fillDemo, doLogin, doRegister } from './auth.js';
@@ -15,16 +15,29 @@ import { refreshPromptSel, generatePrompts } from './pages/prompts.js';
 import { loadCamera, loadCameraTab } from './pages/camera.js';
 import { showRechargeModal, doRecharge } from './pages/credits.js';
 import { initGridControls, applyGridLayout, applyCardOrder } from './grid.js';
-import { generateVideoStory, doExportJSON, doExportMD, doExportPlatform, doCopyAll, doSaveVideoStory } from './pages/video-story.js';
+import {
+  generateVideoStory, doExportJSON, doExportMD, doExportPlatform, doCopyAll, doSaveVideoStory
+} from './pages/video-story.js';
+import {
+  initPipeline, startPipeline, endPipeline, jumpToStep,
+  sendToVideoScript, generateVideoFromLibrary, quickGenerate
+} from './pipeline.js';
 
 // ═══ Event Delegation ═══
 const actions = {
+  // Navigation
   switchTab: (el) => switchTab(el.dataset.tab || 'home'),
   toggleTheme,
+
+  // Auth
   showAuthModal, closeModal, showLoginForm, showRegisterForm,
   fillDemo: (el) => fillDemo(el.dataset.username, el.dataset.password),
   doLogin, doRegister,
+
+  // Workshop
   generateStory, saveStory, exportStory, aiAutoFill,
+
+  // Library
   viewStory: (el) => viewStory(el.dataset.storyId),
   editStory: (el) => { closeModal(); setTimeout(() => editStory(el.dataset.storyId), 100); },
   saveEdit: (el) => saveEdit(el.dataset.storyId),
@@ -37,16 +50,49 @@ const actions = {
   exportSingleStory: (el) => exportSingleStory(el.dataset.storyId),
   exportAllStories, batchExport, importStories,
   toggleSelectMode, selectAll, deselectAll, batchDelete,
+
+  // Prompts
   generatePrompts,
   loadCameraTab: (el) => loadCameraTab(el.dataset.camTab),
+
+  // Credits
   showRechargeModal, doRecharge,
-  logout: () => { location.reload(); },
+
+  // Video Story
   generateVideoStory,
   exportScriptJSON: doExportJSON,
   exportScriptMD: doExportMD,
   exportScriptPlatform: doExportPlatform,
   copyAllPrompts: doCopyAll,
   saveVideoStory: doSaveVideoStory,
+
+  // Pipeline
+  startPipeline: () => startPipeline(),
+  quickGenerate,
+  endPipeline,
+  jumpToStep: (el) => jumpToStep(el.dataset.step),
+
+  // Cross-page: Workshop → Video Story
+  sendToVideoScript: (el) => {
+    closeModal();
+    setTimeout(() => sendToVideoScript(el.dataset.storyId), 100);
+  },
+
+  // Cross-page: Library → Video Story
+  generateVideoFromLibrary: (el) => {
+    closeModal();
+    setTimeout(() => generateVideoFromLibrary(el.dataset.storyId), 100);
+  },
+
+  // Cross-page: Workshop → Prompts (with pipeline)
+  sendToPromptsWithPipeline: (el) => {
+    closeModal();
+    const storyId = el.dataset.storyId;
+    import('./pipeline.js').then(m => m.advancePipeline('prompts', { storyId }));
+    setTimeout(() => sendToPrompts(storyId), 100);
+  },
+
+  logout: () => { location.reload(); },
 };
 
 // Click delegation
@@ -171,6 +217,7 @@ async function init() {
     await checkAuth();
     updateAuthUI();
     initGridControls();
+    initPipeline();
     refreshHome();
     console.log('StoryForge AI initialized');
   } catch (err) {
