@@ -49,6 +49,7 @@ export async function generateStory() {
         renderStory(content);
         renderOutline(outline);
         renderCharacters(chars);
+        renderScenesFromContent(content);
         toast('故事生成完成！ (' + (result.model || 'AI') + ')', 'success');
         if (result.credits !== undefined) toast('剩餘積分: ' + result.credits, 'info');
         return;
@@ -75,6 +76,7 @@ export async function generateStory() {
     renderStory(content);
     renderOutline(outline);
     renderCharacters(charCards);
+    renderScenesFromContent(content);
     toast('故事已生成（本地引擎）', 'success');
 
   } catch (e) {
@@ -93,6 +95,9 @@ function renderStory(content) {
     el.innerHTML = '';
     el.appendChild(div);
   }
+  // Update word count display
+  const wc = document.getElementById('w-word-count');
+  if (wc) wc.textContent = `📊 ${content.length} 字 · ${content.split(/[\n。！？]/).filter(s => s.trim()).length} 段`;
 }
 
 function renderOutline(outline) {
@@ -134,6 +139,39 @@ function renderCharacters(chars) {
     (c.personality ? '<p style="font-size:.8rem;color:var(--text-dim)">性格: ' + esc(c.personality) + '</p>' : '') +
     (c.backstory ? '<p style="font-size:.8rem;color:var(--text-dim)">背景: ' + esc(c.backstory) + '</p>' : '') +
     (c.traits ? '<p style="font-size:.8rem;color:var(--text-dim)">特質: ' + esc(c.traits) + '</p>' : '') +
+    '</div>'
+  ).join('');
+}
+
+function renderScenesFromContent(content) {
+  const el = document.getElementById('scenes-content');
+  if (!el) return;
+  // Split content into scenes by common scene markers
+  const sceneMarkers = content.split(/(?:第[一二三四五六七八九十\d]+[章幕場景]|·\s*·\s*·|---|\n\n\n)/g)
+    .filter(s => s.trim().length > 20);
+  if (sceneMarkers.length <= 1) {
+    // Fallback: split by paragraphs
+    const paragraphs = content.split(/\n\n+/).filter(s => s.trim().length > 20);
+    if (paragraphs.length <= 1) {
+      el.innerHTML = '<div class="empty"><div class="icon">🎬</div><p>內容較短，無法自動拆分場景</p></div>';
+      return;
+    }
+    el.innerHTML = paragraphs.slice(0, 8).map((p, i) =>
+      '<div class="card" style="margin-bottom:.8rem;padding:1rem;cursor:default">' +
+      '<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem">' +
+      '<span class="tag" style="background:var(--accent);color:#fff;font-size:.65rem">場景 ' + (i + 1) + '</span>' +
+      '</div>' +
+      '<p style="line-height:1.8;font-size:.9rem;white-space:pre-wrap">' + esc(p.trim().substring(0, 200)) + (p.length > 200 ? '...' : '') + '</p>' +
+      '</div>'
+    ).join('');
+    return;
+  }
+  el.innerHTML = sceneMarkers.map((s, i) =>
+    '<div class="card" style="margin-bottom:.8rem;padding:1rem;cursor:default">' +
+    '<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem">' +
+    '<span class="tag" style="background:var(--accent);color:#fff;font-size:.65rem">場景 ' + (i + 1) + '</span>' +
+    '</div>' +
+    '<p style="line-height:1.8;font-size:.9rem;white-space:pre-wrap">' + esc(s.trim().substring(0, 300)) + (s.length > 300 ? '...' : '') + '</p>' +
     '</div>'
   ).join('');
 }

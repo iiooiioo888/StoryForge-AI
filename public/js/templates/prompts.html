@@ -1,9 +1,35 @@
 <div class="container">
   <div class="section-title">影片提示詞生成</div>
-  <div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-bottom:1.5rem">
-    <select class="form-select" id="prompt-story-select" style="flex:1;min-width:200px"><option value="">選擇故事...</option></select>
-    <select class="form-select" id="prompt-platform" style="width:120px"><option value="sora">Sora</option><option value="runway">Runway</option><option value="kling">Kling</option><option value="general">通用</option></select>
-    <button class="btn btn-primary" data-action="generatePrompts">✦ 生成</button>
+  <div class="prompts-controls">
+    <div class="prompts-controls-row">
+      <select class="form-select" id="prompt-story-select" style="flex:1;min-width:200px"><option value="">選擇故事...</option></select>
+      <select class="form-select" id="prompt-platform" style="width:130px">
+        <option value="sora">Sora</option>
+        <option value="runway">Runway</option>
+        <option value="kling">Kling</option>
+        <option value="pika">Pika</option>
+        <option value="general">通用</option>
+      </select>
+      <button class="btn btn-primary" data-action="generatePrompts">✦ 生成</button>
+    </div>
+    <div class="prompts-controls-row" style="margin-top:.6rem">
+      <select class="form-select" id="prompt-style" style="flex:1">
+        <option value="cinematic">🎬 電影感</option>
+        <option value="documentary">📹 紀錄片</option>
+        <option value="anime">🎌 動漫風</option>
+        <option value="noir">🖤 黑色電影</option>
+        <option value="dreamy">✨ 夢幻</option>
+        <option value="realistic">📷 寫實</option>
+      </select>
+      <select class="form-select" id="prompt-mood" style="flex:1">
+        <option value="dramatic">🎭 戲劇性</option>
+        <option value="peaceful">🕊️ 平靜</option>
+        <option value="intense">🔥 緊張</option>
+        <option value="melancholy">🌧️ 憂鬱</option>
+        <option value="mysterious">🌀 神秘</option>
+        <option value="joyful">☀️ 歡快</option>
+      </select>
+    </div>
   </div>
   <div id="prompts-result"></div>
   <div class="empty" id="prompts-empty"><div class="icon">🎬</div><p>選擇故事並生成影片提示詞</p></div>

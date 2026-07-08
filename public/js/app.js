@@ -84,6 +84,49 @@ document.addEventListener('click', (e) => {
   }
 });
 
+// Password toggle
+document.addEventListener('click', (e) => {
+  const toggle = e.target.closest('.password-toggle');
+  if (!toggle) return;
+  const input = document.getElementById(toggle.dataset.target);
+  if (!input) return;
+  const isPassword = input.type === 'password';
+  input.type = isPassword ? 'text' : 'password';
+  toggle.textContent = isPassword ? '🙈' : '👁';
+});
+
+// Library view toggle
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.view-btn');
+  if (!btn) return;
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const grid = document.getElementById('library-grid');
+  if (grid) {
+    grid.classList.toggle('list-view', btn.dataset.view === 'list');
+  }
+});
+
+// Library genre filter
+document.addEventListener('change', (e) => {
+  if (e.target.id === 'lib-filter-genre' || e.target.id === 'lib-sort') {
+    import('./pages/library.js').then(m => m.refreshLibrary());
+  }
+});
+
+// Camera search
+document.addEventListener('input', (e) => {
+  if (e.target.id === 'cam-search') {
+    const q = e.target.value.toLowerCase();
+    document.querySelectorAll('#cam-grid .card').forEach(card => {
+      card.style.display = card.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+    const empty = document.getElementById('cam-empty');
+    const visible = document.querySelectorAll('#cam-grid .card:not([style*="display: none"])').length;
+    if (empty) empty.style.display = visible === 0 ? '' : 'none';
+  }
+});
+
 // ═══ Init ═══
 async function init() {
   try {

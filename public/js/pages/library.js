@@ -5,10 +5,26 @@ import { state, switchTab } from '../router.js';
 import { renderStoryCard } from '../components.js';
 
 export function refreshLibrary() {
-  const stories = DB.getAll();
+  let stories = DB.getAll();
   const grid = document.getElementById('library-grid');
   const empty = document.getElementById('library-empty');
   const count = document.getElementById('lib-count');
+
+  // Apply genre filter
+  const genreFilter = document.getElementById('lib-filter-genre')?.value;
+  if (genreFilter) stories = stories.filter(s => s.genre === genreFilter);
+
+  // Apply sort
+  const sortBy = document.getElementById('lib-sort')?.value || 'newest';
+  stories.sort((a, b) => {
+    switch (sortBy) {
+      case 'oldest': return (a.createdAt || 0) - (b.createdAt || 0);
+      case 'title': return (a.title || '').localeCompare(b.title || '');
+      case 'words': return (b.wordCount || 0) - (a.wordCount || 0);
+      default: return (b.createdAt || 0) - (a.createdAt || 0); // newest
+    }
+  });
+
   if (count) count.textContent = `${stories.length} 篇`;
   if (!grid) return;
   if (!stories.length) { grid.innerHTML = ''; if (empty) empty.style.display = ''; return; }

@@ -1,10 +1,14 @@
 <div class="container">
   <div class="section-title">鏡頭語言百科</div>
-  <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem">
-    <button class="btn btn-primary btn-sm" data-action="loadCameraTab" data-cam-tab="movements">🎥 運鏡</button>
-    <button class="btn btn-ghost btn-sm" data-action="loadCameraTab" data-cam-tab="lighting">💡 燈光</button>
-    <button class="btn btn-ghost btn-sm" data-action="loadCameraTab" data-cam-tab="visual-styles">🎨 風格</button>
-    <button class="btn btn-ghost btn-sm" data-action="loadCameraTab" data-cam-tab="color-palettes">🎨 調色</button>
+  <div class="camera-toolbar">
+    <div class="camera-tabs">
+      <button class="btn btn-primary btn-sm" data-action="loadCameraTab" data-cam-tab="movements">🎥 運鏡</button>
+      <button class="btn btn-ghost btn-sm" data-action="loadCameraTab" data-cam-tab="lighting">💡 燈光</button>
+      <button class="btn btn-ghost btn-sm" data-action="loadCameraTab" data-cam-tab="visual-styles">🎨 風格</button>
+      <button class="btn btn-ghost btn-sm" data-action="loadCameraTab" data-cam-tab="color-palettes">🎨 調色</button>
+    </div>
+    <input class="form-input" id="cam-search" placeholder="搜尋鏡頭語言..." style="max-width:250px">
   </div>
   <div class="grid" id="cam-grid"></div>
+  <div class="empty" id="cam-empty" style="display:none"><div class="icon">🎥</div><p>找不到符合的項目</p></div>
 </div>

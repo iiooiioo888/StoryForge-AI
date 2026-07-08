@@ -4,25 +4,68 @@
       <div class="section-title">故事設定</div>
       <button class="btn btn-primary btn-block" data-action="aiAutoFill" id="btn-ai-autofill">✦ AI 全權生成</button>
       <div style="height:1rem"></div>
-      <div class="form-group"><label class="form-label">標題</label><input class="form-input" id="w-title" placeholder="故事標題..."></div>
+      <div class="form-group"><label class="form-label">標題</label><input class="form-input" id="w-title" placeholder="故事標題..." autocomplete="off"></div>
       <div class="form-row">
         <div class="form-group"><label class="form-label">類型</label>
           <select class="form-select" id="w-genre"><option value="">選擇...</option>
-            <option value="scifi">科幻</option><option value="fantasy">奇幻</option>
-            <option value="romance">愛情</option><option value="mystery">懸疑</option>
-            <option value="horror">恐怖</option><option value="wuxia">武俠</option>
+            <option value="scifi">🚀 科幻</option><option value="fantasy">🗡️ 奇幻</option>
+            <option value="romance">💕 愛情</option><option value="mystery">🔍 懸疑</option>
+            <option value="horror">👻 恐怖</option><option value="wuxia">⚔️ 武俠</option>
+            <option value="cyberpunk">🌃 賽博朋克</option><option value="historical">📜 歷史</option>
           </select></div>
         <div class="form-group"><label class="form-label">子類型</label><select class="form-select" id="w-subgenre"><option value="">選擇...</option></select></div>
       </div>
       <div class="form-group"><label class="form-label">核心主題</label><input class="form-input" id="w-theme" placeholder="例如：時間旅行的代價"></div>
-      <div class="form-group"><label class="form-label">世界觀</label><textarea class="form-textarea" id="w-setting" rows="2" placeholder="描述環境..."></textarea></div>
-      <div class="form-group"><label class="form-label">角色（每行一個）</label><textarea class="form-textarea" id="w-characters" rows="3" placeholder="名字 - 身份 - 特徵"></textarea></div>
+      <div class="form-group">
+        <label class="form-label">世界觀</label>
+        <textarea class="form-textarea" id="w-setting" rows="2" placeholder="描述故事發生的環境與背景..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">角色 <span style="font-weight:400;color:var(--text-dim)">(每行一個)</span></label>
+        <textarea class="form-textarea" id="w-characters" rows="3" placeholder="名字 - 身份 - 特徵&#10;例如：艾莉 - 天才科學家 - 冷靜理性但內心孤獨"></textarea>
+      </div>
       <div class="form-row">
         <div class="form-group"><label class="form-label">視角</label>
-          <select class="form-select" id="w-pov"><option value="third-limited">第三人稱</option><option value="first">第一人稱</option></select></div>
+          <select class="form-select" id="w-pov">
+            <option value="third-limited">第三人稱有限</option>
+            <option value="first">第一人稱</option>
+            <option value="third-omniscient">第三人稱全知</option>
+            <option value="second">第二人稱</option>
+          </select></div>
         <div class="form-group"><label class="form-label">語調</label>
-          <select class="form-select" id="w-tone"><option value="literary">文學性</option><option value="suspense">懸疑</option><option value="epic">史詩</option></select></div>
+          <select class="form-select" id="w-tone">
+            <option value="literary">文學性</option>
+            <option value="suspense">懸疑緊張</option>
+            <option value="epic">史詩磅礴</option>
+            <option value="humorous">幽默輕鬆</option>
+            <option value="dark">黑暗沉重</option>
+            <option value="romantic">浪漫細膩</option>
+          </select></div>
       </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">時代</label>
+          <select class="form-select" id="w-era">
+            <option value="present">現代</option>
+            <option value="near-future">近未來</option>
+            <option value="far-future">遠未來</option>
+            <option value="past">過去</option>
+            <option value="ancient">古代</option>
+            <option value="timeless">跨時代</option>
+          </select></div>
+        <div class="form-group"><label class="form-label">篇幅</label>
+          <select class="form-select" id="w-length">
+            <option value="short">短篇 (~500字)</option>
+            <option value="medium" selected>中篇 (~1500字)</option>
+            <option value="long">長篇 (~3000字)</option>
+          </select></div>
+      </div>
+      <div class="form-group"><label class="form-label">結構</label>
+        <select class="form-select" id="w-structure">
+          <option value="three-act">三幕式</option>
+          <option value="heros-journey">英雄旅程</option>
+          <option value="kishotenketsu">起承轉合</option>
+          <option value="nonlinear">非線性</option>
+        </select></div>
       <div style="height:1rem"></div>
       <button class="btn btn-primary btn-block" data-action="generateStory" id="btn-generate">✦ AI 生成故事</button>
       <div style="height:.5rem"></div>
@@ -30,19 +73,28 @@
         <button class="btn btn-secondary" data-action="saveStory" style="flex:1">💾 保存</button>
         <button class="btn btn-ghost" data-action="exportStory" style="flex:1">📤 匯出</button>
       </div>
+      <div id="w-word-count" style="margin-top:.8rem;font-size:.75rem;color:var(--text-dim);text-align:center"></div>
     </div>
     <div class="workshop-main">
       <div class="workshop-tabs">
-        <button class="workshop-tab active" data-wtab="preview">預覽</button>
-        <button class="workshop-tab" data-wtab="outline">大綱</button>
-        <button class="workshop-tab" data-wtab="characters">角色</button>
+        <button class="workshop-tab active" data-wtab="preview">📝 預覽</button>
+        <button class="workshop-tab" data-wtab="outline">📋 大綱</button>
+        <button class="workshop-tab" data-wtab="characters">👤 角色</button>
+        <button class="workshop-tab" data-wtab="scenes">🎬 場景</button>
       </div>
       <div class="workshop-content">
         <div class="workshop-tab-content active" id="wtab-preview">
           <div id="story-output"><div class="empty"><div class="icon">✦</div><p>填寫左側設定，點擊「AI 生成故事」</p></div></div>
         </div>
-        <div class="workshop-tab-content" id="wtab-outline"><div id="outline-content"><div class="empty"><div class="icon">📋</div><p>生成故事後自動產生</p></div></div></div>
-        <div class="workshop-tab-content" id="wtab-characters"><div id="characters-content"><div class="empty"><div class="icon">👤</div><p>生成故事後自動產生</p></div></div></div>
+        <div class="workshop-tab-content" id="wtab-outline">
+          <div id="outline-content"><div class="empty"><div class="icon">📋</div><p>生成故事後自動產生大綱</p></div></div>
+        </div>
+        <div class="workshop-tab-content" id="wtab-characters">
+          <div id="characters-content"><div class="empty"><div class="icon">👤</div><p>生成故事後自動產生角色卡</p></div></div>
+        </div>
+        <div class="workshop-tab-content" id="wtab-scenes">
+          <div id="scenes-content"><div class="empty"><div class="icon">🎬</div><p>生成故事後自動拆分場景</p></div></div>
+        </div>
       </div>
     </div>
   </div>
