@@ -3,6 +3,7 @@ import { DB } from '../api.js';
 import { toast, esc } from '../utils.js';
 import { state, switchTab } from '../router.js';
 import { renderStoryCard } from '../components.js';
+import { applyGridLayout, applyCardOrder } from '../grid.js';
 
 const GENRE_NAMES = {
   scifi: '科幻', fantasy: '奇幻', romance: '愛情', mystery: '懸疑',
@@ -74,6 +75,10 @@ export function refreshLibrary() {
   if (empty) empty.style.display = 'none';
 
   grid.innerHTML = stories.map((s, i) => renderLibraryCard(s, i)).join('');
+
+  // Apply grid layout and saved card order
+  applyGridLayout();
+  applyCardOrder();
 
   // Restore select state
   if (selectMode) {

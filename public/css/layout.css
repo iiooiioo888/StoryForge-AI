@@ -310,7 +310,95 @@
 /* Edit Form */
 .edit-form .form-group { margin-bottom: .7rem; }
 
-/* Library list view */
+/* ═══ Grid Controls ═══ */
+.grid-controls {
+  display: flex; gap: .5rem; align-items: center;
+}
+.grid-control-group {
+  display: flex; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
+}
+.grid-ctrl-btn {
+  background: var(--surface); border: none; color: var(--text-dim); padding: .4rem .55rem;
+  cursor: pointer; font: 700 .68rem var(--mono); transition: var(--transition);
+  min-width: 28px; text-align: center;
+}
+.grid-ctrl-btn + .grid-ctrl-btn { border-left: 1px solid var(--border); }
+.grid-ctrl-btn.active { background: var(--accent-glow); color: var(--accent); }
+.grid-ctrl-btn:hover:not(.active) { background: rgba(255,255,255,.04); color: var(--text-muted); }
+
+/* ═══ Grid Card Sizes ═══ */
+.grid.grid-small { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: .7rem; }
+.grid.grid-small .card { padding: .9rem; }
+.grid.grid-small .card > div:first-child { height: 70px !important; font-size: 1.4rem !important; }
+.grid.grid-small .card h3 { font-size: .88rem; }
+.grid.grid-small .card p { font-size: .78rem; -webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
+
+.grid.grid-medium { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+
+.grid.grid-large { grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 1.2rem; }
+.grid.grid-large .card { padding: 1.5rem; }
+.grid.grid-large .card > div:first-child { height: 120px !important; font-size: 2.2rem !important; }
+.grid.grid-large .card h3 { font-size: 1.1rem; }
+.grid.grid-large .card p { font-size: .88rem; -webkit-line-clamp: 3; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* ═══ Masonry Layout ═══ */
+.grid.grid-masonry {
+  display: block;
+  columns: 3;
+  column-gap: 1rem;
+}
+.grid.grid-masonry.grid-small { columns: 4; }
+.grid.grid-masonry.grid-large { columns: 2; }
+.grid.grid-masonry .card {
+  break-inside: avoid;
+  margin-bottom: 1rem;
+  display: inline-block;
+  width: 100%;
+}
+.grid.grid-masonry .card > div:first-child {
+  height: auto !important;
+  min-height: 70px;
+  aspect-ratio: 16/10;
+}
+
+/* ═══ Drag & Drop ═══ */
+.card.dragging {
+  opacity: .3;
+}
+.drag-ghost-card {
+  position: fixed; z-index: 10000; pointer-events: none;
+  opacity: .85; transform: rotate(2deg) scale(1.03);
+  box-shadow: 0 16px 48px rgba(0,0,0,.5), 0 0 0 2px var(--accent);
+  border-radius: var(--radius-lg);
+  transition: none;
+}
+.drag-placeholder {
+  border: 2px dashed rgba(99,102,241,.4);
+  border-radius: var(--radius-lg);
+  background: rgba(99,102,241,.05);
+  animation: placeholder-pulse 1s ease-in-out infinite;
+}
+@keyframes placeholder-pulse {
+  0%, 100% { border-color: rgba(99,102,241,.3); }
+  50% { border-color: rgba(99,102,241,.6); }
+}
+.grid[data-draggable="true"] .card {
+  cursor: grab;
+  user-select: none;
+}
+.grid[data-draggable="true"] .card:active {
+  cursor: grabbing;
+}
+
+/* ═══ Grid Transition Animations ═══ */
+.grid {
+  transition: gap .3s ease;
+}
+.grid .card {
+  transition: transform .3s cubic-bezier(.4,0,.2,1), opacity .3s ease, box-shadow .3s ease;
+}
+
+/* ═══ Library list view ═══ */
 .grid.list-view {
   grid-template-columns: 1fr;
 }
@@ -344,4 +432,11 @@
   .library-subtoolbar { flex-direction: column; align-items: flex-start; }
   .story-meta-grid { grid-template-columns: 1fr; }
   .batch-bar { flex-wrap: wrap; }
+  .grid-controls { flex-wrap: wrap; }
+  .grid.grid-masonry { columns: 2; }
+  .grid.grid-masonry.grid-small { columns: 2; }
+  .grid.grid-masonry.grid-large { columns: 1; }
+}
+@media (max-width: 480px) {
+  .grid.grid-masonry { columns: 1; }
 }

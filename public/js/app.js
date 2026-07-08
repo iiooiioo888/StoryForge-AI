@@ -14,6 +14,7 @@ import {
 import { refreshPromptSel, generatePrompts } from './pages/prompts.js';
 import { loadCamera, loadCameraTab } from './pages/camera.js';
 import { showRechargeModal, doRecharge } from './pages/credits.js';
+import { initGridControls, applyGridLayout, applyCardOrder } from './grid.js';
 
 // ═══ Event Delegation ═══
 const actions = {
@@ -162,6 +163,7 @@ async function init() {
     }
     await checkAuth();
     updateAuthUI();
+    initGridControls();
     refreshHome();
     console.log('StoryForge AI initialized');
   } catch (err) {
