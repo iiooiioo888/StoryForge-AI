@@ -1,7 +1,27 @@
 <div class="container">
-  <div class="section-title">故事資料庫 <span id="lib-count" style="margin-left:auto;font-weight:400;color:var(--text-dim)"></span></div>
+  <!-- Stats Banner -->
+  <div class="lib-stats-banner" id="lib-stats-banner">
+    <div class="lib-stat-item">
+      <div class="lib-stat-num" id="lib-stat-total">0</div>
+      <div class="lib-stat-label">總故事</div>
+    </div>
+    <div class="lib-stat-item">
+      <div class="lib-stat-num" id="lib-stat-words">0</div>
+      <div class="lib-stat-label">總字數</div>
+    </div>
+    <div class="lib-stat-item">
+      <div class="lib-stat-num" id="lib-stat-ai">0</div>
+      <div class="lib-stat-label">AI 生成</div>
+    </div>
+    <div class="lib-stat-item">
+      <div class="lib-stat-num" id="lib-stat-fav">0</div>
+      <div class="lib-stat-label">收藏</div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
   <div class="library-toolbar">
-    <input class="form-input" id="search-input" placeholder="搜尋故事..." style="flex:1">
+    <input class="form-input" id="search-input" placeholder="搜尋故事標題、內容、標籤..." style="flex:1">
     <select class="form-select" id="lib-filter-genre" style="width:130px">
       <option value="">全部類型</option>
       <option value="scifi">🚀 科幻</option>
@@ -10,6 +30,8 @@
       <option value="mystery">🔍 懸疑</option>
       <option value="horror">👻 恐怖</option>
       <option value="wuxia">⚔️ 武俠</option>
+      <option value="cyberpunk">🌃 賽博朋克</option>
+      <option value="historical">📜 歷史</option>
     </select>
     <select class="form-select" id="lib-sort" style="width:130px">
       <option value="newest">最新優先</option>
@@ -22,10 +44,42 @@
       <button class="view-btn" data-view="list" title="列表視圖">☰</button>
     </div>
   </div>
+
+  <!-- Sub-toolbar: filter chips + batch actions -->
+  <div class="library-subtoolbar">
+    <div class="filter-chips">
+      <button class="filter-chip active" data-filter="all">全部</button>
+      <button class="filter-chip" data-filter="favorites">⭐ 收藏</button>
+      <button class="filter-chip" data-filter="ai">🤖 AI 生成</button>
+      <button class="filter-chip" data-filter="manual">✍️ 手動</button>
+    </div>
+    <div class="library-actions">
+      <button class="btn btn-ghost btn-sm" data-action="importStories" title="匯入故事">📥 匯入</button>
+      <button class="btn btn-ghost btn-sm" data-action="exportAllStories" title="匯出全部">📤 匯出全部</button>
+      <button class="btn btn-ghost btn-sm" data-action="toggleSelectMode" id="btn-select-mode" title="多選模式">☑️ 多選</button>
+    </div>
+  </div>
+
+  <!-- Batch action bar (shown when select mode active) -->
+  <div class="batch-bar" id="batch-bar" style="display:none">
+    <span class="batch-count" id="batch-count">0 已選</span>
+    <button class="btn btn-ghost btn-sm" data-action="selectAll">全選</button>
+    <button class="btn btn-ghost btn-sm" data-action="deselectAll">取消全選</button>
+    <button class="btn btn-ghost btn-sm" data-action="batchExport" style="margin-left:auto">📤 匯出</button>
+    <button class="btn btn-ghost btn-sm" data-action="batchDelete" style="color:var(--danger)">🗑 刪除</button>
+    <button class="btn btn-ghost btn-sm" data-action="toggleSelectMode">✕ 退出</button>
+  </div>
+
+  <!-- Grid -->
   <div class="grid" id="library-grid"></div>
+
+  <!-- Empty state -->
   <div class="empty" id="library-empty" style="display:none">
     <div class="icon">📖</div>
     <p>還沒有故事</p>
     <button class="btn btn-primary" data-action="switchTab" data-tab="workshop">開始創作</button>
   </div>
+
+  <!-- Hidden file input for import -->
+  <input type="file" id="import-file-input" accept=".json,.txt" style="display:none" multiple>
 </div>

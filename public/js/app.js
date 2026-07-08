@@ -5,7 +5,12 @@ import { checkAuth, updateAuthUI, showAuthModal, closeModal, showLoginForm, show
 import { switchTab, toggleTheme, loadTheme, loadTemplate } from './router.js';
 import { refreshHome } from './pages/home.js';
 import { generateStory, saveStory, exportStory, aiAutoFill } from './pages/workshop.js';
-import { refreshLibrary, viewStory, editStory, deleteStory, sendToPrompts } from './pages/library.js';
+import {
+  refreshLibrary, viewStory, editStory, saveEdit, deleteStory, sendToPrompts,
+  duplicateStory, toggleFavorite, addTag, removeTag,
+  exportSingleStory, exportAllStories, batchExport, importStories,
+  toggleSelectMode, selectAll, deselectAll, batchDelete
+} from './pages/library.js';
 import { refreshPromptSel, generatePrompts } from './pages/prompts.js';
 import { loadCamera, loadCameraTab } from './pages/camera.js';
 import { showRechargeModal, doRecharge } from './pages/credits.js';
@@ -20,8 +25,16 @@ const actions = {
   generateStory, saveStory, exportStory, aiAutoFill,
   viewStory: (el) => viewStory(el.dataset.storyId),
   editStory: (el) => { closeModal(); setTimeout(() => editStory(el.dataset.storyId), 100); },
+  saveEdit: (el) => saveEdit(el.dataset.storyId),
   deleteStory: (el) => deleteStory(el.dataset.storyId),
+  duplicateStory: (el) => { duplicateStory(el.dataset.storyId); },
+  toggleFavorite: (el) => { toggleFavorite(el.dataset.storyId); },
+  addTag: (el) => addTag(el.dataset.storyId),
+  removeTag: (el) => removeTag(el.dataset.storyId, el.dataset.tag),
   sendToPrompts: (el) => { closeModal(); setTimeout(() => sendToPrompts(el.dataset.storyId), 100); },
+  exportSingleStory: (el) => exportSingleStory(el.dataset.storyId),
+  exportAllStories, batchExport, importStories,
+  toggleSelectMode, selectAll, deselectAll, batchDelete,
   generatePrompts,
   loadCameraTab: (el) => loadCameraTab(el.dataset.camTab),
   showRechargeModal, doRecharge,
@@ -50,13 +63,14 @@ document.addEventListener('click', (e) => {
   if (content) content.classList.add('active');
 });
 
-// Search library
+// Library search (debounced)
+let searchTimer;
 document.addEventListener('input', (e) => {
   if (e.target.id === 'search-input') {
-    const q = e.target.value.toLowerCase();
-    document.querySelectorAll('#library-grid .card').forEach(card => {
-      card.style.display = card.textContent.toLowerCase().includes(q) ? '' : 'none';
-    });
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      import('./pages/library.js').then(m => m.refreshLibrary());
+    }, 200);
   }
 });
 
@@ -107,7 +121,7 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// Library genre filter
+// Library genre filter & sort
 document.addEventListener('change', (e) => {
   if (e.target.id === 'lib-filter-genre' || e.target.id === 'lib-sort') {
     import('./pages/library.js').then(m => m.refreshLibrary());
